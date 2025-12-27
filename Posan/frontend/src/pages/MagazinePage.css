@@ -1,0 +1,103 @@
+.magazine-page {
+    padding: 3rem 0;
+    min-height: calc(100vh - 300px);
+}
+
+.page-title {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    margin-bottom: 3rem;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 1rem;
+}
+
+.magazines-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.magazine-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.magazine-cover {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    margin: calc(-1 * var(--spacing-md));
+    margin-bottom: var(--spacing-md);
+}
+
+.magazine-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.magazine-info h3 {
+    color: var(--secondary-color);
+    margin-bottom: 0.5rem;
+}
+
+.magazine-description {
+    color: var(--text-secondary);
+    flex: 1;
+    margin-bottom: 1rem;
+}
+
+.magazine-meta {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.age-badge,
+.issue-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.age-badge {
+    background: var(--accent-purple);
+    color: white;
+}
+
+.issue-badge {
+    background: var(--accent-yellow);
+    color: var(--text-primary);
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 0;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+    .magazines-grid {
+        grid-template-columns: 1fr;
+    }
+}

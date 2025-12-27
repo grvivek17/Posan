@@ -1,0 +1,119 @@
+.puzzle-page {
+    padding: 3rem 0;
+    min-height: calc(100vh - 300px);
+}
+
+.puzzle-filters {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 3rem;
+}
+
+.filter-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--secondary-color);
+    background: white;
+    color: var(--secondary-color);
+    font-weight: 600;
+    font-family: var(--font-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.puzzles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.puzzle-card {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.puzzle-icon-large {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+.puzzle-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.puzzle-description {
+    color: var(--text-secondary);
+    flex: 1;
+    margin-bottom: 1rem;
+}
+
+.puzzle-meta {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.difficulty-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.difficulty-easy {
+    background: var(--accent-green);
+    color: white;
+}
+
+.difficulty-medium {
+    background: var(--accent-yellow);
+    color: var(--text-primary);
+}
+
+.difficulty-hard {
+    background: var(--accent-orange);
+    color: white;
+}
+
+.points-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    background: var(--accent-purple);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.daily-badge {
+    background: linear-gradient(135deg, #FFD93D 0%, #FF9F1C 100%);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    margin-bottom: 1rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@media (max-width: 768px) {
+    .puzzles-grid {
+        grid-template-columns: 1fr;
+    }
+}

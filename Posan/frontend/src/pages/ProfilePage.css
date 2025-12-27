@@ -1,0 +1,9 @@
+.profile-page {
+    padding: 3rem 0;
+    min-height: calc(100vh - 300px);
+}
+
+.profile-content {
+    text-align: center;
+    padding: 4rem 0;
+}
