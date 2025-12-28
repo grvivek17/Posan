@@ -8,11 +8,13 @@ if database_url.startswith("postgresql://"):
     database_url = database_url.replace("postgresql://", "postgresql+psycopg://", 1)
 
 # Create database engine
+# Optimized for serverless (Vercel) - smaller pool sizes
 engine = create_engine(
     database_url,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20
+    pool_pre_ping=True,  # Verify connections before using
+    pool_size=1,         # Small pool for serverless
+    max_overflow=2,      # Limited overflow for serverless
+    pool_recycle=300     # Recycle connections every 5 minutes
 )
 
 # Create SessionLocal class
