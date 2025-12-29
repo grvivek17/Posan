@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: posan-backend
+    runtime: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 30
+      - key: DEBUG
+        value: False
+      - key: APP_NAME
+        value: POSAN API
+      - key: API_V1_PREFIX
+        value: /api/v1
+      - key: HUGGINGFACE_API_KEY
+        sync: false
+
+databases:
+  - name: posan-db
+    databaseName: posan
+    user: posan
