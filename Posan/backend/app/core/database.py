@@ -2,10 +2,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from app.core.config import settings
 
-# Ensure the database URL uses the correct dialect for psycopg3
+# Ensure the database URL uses the correct dialect for psycopg2
 database_url = settings.DATABASE_URL
 if database_url.startswith("postgresql://"):
-    database_url = database_url.replace("postgresql://", "postgresql+psycopg://", 1)
+    database_url = database_url.replace("postgresql://", "postgresql+psycopg2://", 1)
 
 # Create database engine
 # Optimized for serverless (Vercel) - smaller pool sizes
