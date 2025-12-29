@@ -28,12 +28,14 @@ function Header({ isAuthenticated, setIsAuthenticated }) {
                                 <Link to="/puzzles" className="nav-link">🧩 Puzzles</Link>
                                 <Link to="/ai-content" className="nav-link">🤖 AI Creator</Link>
                                 <Link to="/profile" className="nav-link">👤 Profile</Link>
+                                <Link to="/about" className="nav-link">ℹ️ About</Link>
                                 <button onClick={handleLogout} className="btn btn-secondary">
                                     Logout
                                 </button>
                             </>
                         ) : (
                             <>
+                                <Link to="/about" className="nav-link">ℹ️ About</Link>
                                 <Link to="/login" className="btn btn-primary">Login</Link>
                                 <Link to="/register" className="btn btn-secondary">Sign Up</Link>
                             </>

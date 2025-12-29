@@ -5,6 +5,7 @@ import './styles/animations.css';
 
 // Pages
 import Home from './pages/Home';
+import About from './pages/About';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import MagazinePage from './pages/MagazinePage';
@@ -33,6 +34,7 @@ function App() {
                 <main className="main-content">
                     <Routes>
                         <Route path="/" element={<Home />} />
+                        <Route path="/about" element={<About />} />
                         <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
                         <Route path="/register" element={<Register setIsAuthenticated={setIsAuthenticated} />} />
                         <Route
