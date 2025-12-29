@@ -2,6 +2,7 @@
     "name": "posan-fullstack",
     "version": "1.0.0",
     "scripts": {
+        "vercel-build": "cd frontend && npm install && npm run build && cd .. && mkdir -p .vercel_build_output && cp -r frontend/dist/* .vercel_build_output/",
         "build": "cd frontend && npm install && npm run build"
     }
 }
