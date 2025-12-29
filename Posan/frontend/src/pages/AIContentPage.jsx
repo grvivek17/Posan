@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AIContentPage.css';
 
-const API_BASE = 'http://localhost:8000/api/v1';
+// Use environment variable or fallback to localhost for development
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 const AIContentPage = () => {
     const navigate = useNavigate();
