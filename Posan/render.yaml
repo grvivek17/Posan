@@ -22,7 +22,7 @@ services:
         value: POSAN API
       - key: API_V1_PREFIX
         value: /api/v1
-      - key: HUGGINGFACE_API_KEY
+      - key: HUGGINGFACE_TOKEN
         sync: false
 
 databases:
