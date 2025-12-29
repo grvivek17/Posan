@@ -2,7 +2,7 @@ services:
   - type: web
     name: posan-backend
     runtime: python
-    buildCommand: pip install -r backend/requirements.txt
+    buildCommand: export CARGO_HOME=/opt/render/project/.cargo && pip install -r backend/requirements.txt
     startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: CARGO_HOME
