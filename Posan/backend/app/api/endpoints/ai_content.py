@@ -211,6 +211,63 @@ async def api_generate_riddle(
         raise HTTPException(status_code=500, detail=f"Error generating riddle: {str(e)}")
 
 
+class TestAnalysisRequest(BaseModel):
+    subject: str = Field(..., description="Subject of the test")
+    score: int = Field(..., ge=0, description="Score achieved")
+    total: int = Field(..., gt=0, description="Total possible score")
+    weak_areas: Optional[List[str]] = Field(default=None, description="Areas where student struggled")
+    strong_areas: Optional[List[str]] = Field(default=None, description="Areas where student excelled")
+    age_group: str = Field(default="6-8", description="Student age group")
+    student_name: str = Field(default="Student", description="Student name")
+
+
+class TestAnalysisResponse(BaseModel):
+    subject: str
+    score: int
+    total: int
+    percentage: float
+    performance_level: str
+    analysis: str
+    motivational_quote: str
+    weak_areas: List[str]
+    strong_areas: List[str]
+
+
+@router.post("/analyze/test", response_model=TestAnalysisResponse, summary="Analyze test results and get AI recommendations")
+async def api_analyze_test(request: TestAnalysisRequest):
+    """
+    Analyze student test results and provide personalized AI-powered recommendations.
+    
+    - **subject**: Subject of the test (Math, Science, English, etc.)
+    - **score**: Score achieved by the student
+    - **total**: Total possible score
+    - **weak_areas**: Optional list of topics where student struggled
+    - **strong_areas**: Optional list of topics where student excelled
+    - **age_group**: Student's age group for age-appropriate feedback
+    - **student_name**: Student's name for personalized feedback
+    
+    Returns detailed analysis, strengths, areas for growth, recommendations, and motivational quote.
+    """
+    try:
+        test_scores = {
+            "score": request.score,
+            "total": request.total,
+            "weak_areas": request.weak_areas or [],
+            "strong_areas": request.strong_areas or []
+        }
+        
+        result = content_generator.analyze_test_results(
+            subject=request.subject,
+            test_scores=test_scores,
+            age_group=request.age_group,
+            student_name=request.student_name
+        )
+        
+        return TestAnalysisResponse(**result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error analyzing test: {str(e)}")
+
+
 @router.get("/topics/suggestions", summary="Get suggested content topics")
 async def get_topic_suggestions(age_group: str = Query(default="6-8")):
     """Get suggested topics for content generation based on age group."""

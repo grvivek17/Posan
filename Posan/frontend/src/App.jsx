@@ -9,10 +9,13 @@ import About from './pages/About';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import MagazinePage from './pages/MagazinePage';
+import MagazineDetailPage from './pages/MagazineDetailPage';
 import PuzzlePage from './pages/PuzzlePage';
 import ProfilePage from './pages/ProfilePage';
 import ParentPortal from './pages/ParentPortal';
 import AIContentPage from './pages/AIContentPage';
+import PuzzleZone from './pages/PuzzleZone';
+import HomeworkPage from './pages/HomeworkPage';
 
 // Components
 import Header from './components/common/Header';
@@ -42,6 +45,10 @@ function App() {
                             element={isAuthenticated ? <MagazinePage /> : <Navigate to="/login" />}
                         />
                         <Route
+                            path="/magazines/:id"
+                            element={isAuthenticated ? <MagazineDetailPage /> : <Navigate to="/login" />}
+                        />
+                        <Route
                             path="/puzzles"
                             element={isAuthenticated ? <PuzzlePage /> : <Navigate to="/login" />}
                         />
@@ -56,6 +63,14 @@ function App() {
                         <Route
                             path="/ai-content"
                             element={isAuthenticated ? <AIContentPage /> : <Navigate to="/login" />}
+                        />
+                        <Route
+                            path="/puzzle-zone"
+                            element={isAuthenticated ? <PuzzleZone /> : <Navigate to="/login" />}
+                        />
+                        <Route
+                            path="/homework"
+                            element={isAuthenticated ? <HomeworkPage /> : <Navigate to="/login" />}
                         />
                     </Routes>
                 </main>

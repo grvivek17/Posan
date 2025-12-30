@@ -25,7 +25,8 @@ function Header({ isAuthenticated, setIsAuthenticated }) {
                         {isAuthenticated ? (
                             <>
                                 <Link to="/magazines" className="nav-link">📚 Magazines</Link>
-                                <Link to="/puzzles" className="nav-link">🧩 Puzzles</Link>
+                                <Link to="/puzzle-zone" className="nav-link">🧩 Puzzle Zone</Link>
+                                <Link to="/homework" className="nav-link">📝 Homework</Link>
                                 <Link to="/ai-content" className="nav-link">🤖 AI Creator</Link>
                                 <Link to="/profile" className="nav-link">👤 Profile</Link>
                                 <Link to="/about" className="nav-link">ℹ️ About</Link>

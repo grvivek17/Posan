@@ -25,7 +25,5 @@ services:
       - key: HUGGINGFACE_TOKEN
         sync: false
 
-databases:
-  - name: posan-db
-    databaseName: posan
-    user: posan
+# Database is hosted externally (Neon/Supabase/etc)
+# Set DATABASE_URL in Render dashboard environment variables

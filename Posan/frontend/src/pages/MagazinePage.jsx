@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { contentAPI } from '../services/api';
 import Card from '../components/common/Card';
 import './MagazinePage.css';
 
 function MagazinePage() {
+    const navigate = useNavigate();
     const [magazines, setMagazines] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -21,6 +23,10 @@ function MagazinePage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleReadMagazine = (magazineId) => {
+        navigate(`/magazines/${magazineId}`);
     };
 
     if (loading) {
@@ -64,7 +70,12 @@ function MagazinePage() {
                                             <span className="issue-badge">Issue #{magazine.issue_number}</span>
                                         )}
                                     </div>
-                                    <button className="btn btn-primary">Read Now 📖</button>
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={() => handleReadMagazine(magazine.id)}
+                                    >
+                                        Read Now 📖
+                                    </button>
                                 </div>
                             </Card>
                         ))

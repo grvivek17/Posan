@@ -1,0 +1,147 @@
+.crossword-puzzle {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.puzzle-title {
+    color: #2c3e50;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.crossword-layout {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.crossword-grid {
+    display: inline-block;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.crossword-row {
+    display: flex;
+}
+
+.crossword-cell {
+    width: 50px;
+    height: 50px;
+    border: 2px solid #2c3e50;
+    background: white;
+    position: relative;
+    margin: -1px;
+}
+
+.crossword-cell.blocked {
+    background: #2c3e50;
+}
+
+.cell-number {
+    position: absolute;
+    top: 2px;
+    left: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    color: #666;
+}
+
+.cell-input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background: transparent;
+}
+
+.cell-input:focus {
+    background: #fff3e0;
+}
+
+.clues-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    min-width: 250px;
+    max-width: 350px;
+}
+
+.clues-group {
+    margin-bottom: 20px;
+}
+
+.clues-group h4 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.clues-group ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.clues-group li {
+    padding: 8px;
+    margin: 5px 0;
+    background: white;
+    border-radius: 6px;
+    border-left: 4px solid #ff5722;
+    font-size: 0.9rem;
+}
+
+.clues-group li strong {
+    color: #ff5722;
+    margin-right: 5px;
+}
+
+.puzzle-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.action-btn {
+    padding: 12px 32px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.check-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.check-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+@media (max-width: 768px) {
+    .crossword-layout {
+        flex-direction: column;
+    }
+
+    .crossword-cell {
+        width: 40px;
+        height: 40px;
+    }
+
+    .cell-input {
+        font-size: 20px;
+    }
+}

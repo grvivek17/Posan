@@ -34,9 +34,11 @@ class Settings(BaseSettings):
         """Convert comma-separated origins to list."""
         return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = {
+        "env_file": ".env",
+        "case_sensitive": True,
+        "extra": "ignore"
+    }
 
 
 settings = Settings()

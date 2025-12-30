@@ -24,6 +24,12 @@ class ContentGenerator:
     
     def _generate_text(self, prompt: str, max_tokens: int = 500) -> str:
         """Generate text using Hugging Face Inference API with chat completion."""
+        print(f"\n{'='*60}")
+        print(f"AI GENERATION REQUEST")
+        print(f"{'='*60}")
+        print(f"Prompt: {prompt[:200]}...")
+        print(f"Max tokens: {max_tokens}")
+        
         messages = [
             {"role": "system", "content": "You are a helpful assistant that creates kid-friendly, educational content. Always be positive, fun, and age-appropriate."},
             {"role": "user", "content": prompt}
@@ -31,7 +37,7 @@ class ContentGenerator:
         
         for model in self.models:
             try:
-                print(f"Trying model: {model}")
+                print(f"\nTrying model: {model}")
                 response = self.client.chat_completion(
                     messages=messages,
                     model=model,
@@ -40,14 +46,17 @@ class ContentGenerator:
                 )
                 content = response.choices[0].message.content
                 if content and len(content.strip()) > 10:
-                    print(f"Success with model: {model}")
+                    print(f"✅ Success with model: {model}")
+                    print(f"Response preview: {content[:150]}...")
+                    print(f"{'='*60}\n")
                     return content.strip()
             except Exception as e:
-                print(f"Model {model} failed: {e}")
+                print(f"❌ Model {model} failed: {e}")
                 continue
         
         # If all models fail, return fallback content
-        print("All models failed, using fallback")
+        print("⚠️  All models failed, using fallback content")
+        print(f"{'='*60}\n")
         return self._get_fallback_content(prompt)
     
     def _get_fallback_content(self, prompt: str) -> str:
@@ -349,6 +358,96 @@ Make it fun and not too hard!
                 riddle["answer"] = line[7:].strip()
         
         return riddle
+    
+    def analyze_test_results(
+        self,
+        subject: str,
+        test_scores: Dict[str, Any],
+        age_group: str = "6-8",
+        student_name: str = "Student"
+    ) -> Dict[str, Any]:
+        """
+        Analyze test results and provide personalized recommendations.
+        
+        Args:
+            subject: The subject of the test (e.g., Math, Science, English)
+            test_scores: Dictionary with score details (score, total, weak_areas, strong_areas)
+            age_group: Target age group
+            student_name: Name of the student
+        
+        Returns:
+            Dictionary with analysis, recommendations, and encouragement
+        """
+        score = test_scores.get('score', 0)
+        total = test_scores.get('total', 100)
+        percentage = (score / total * 100) if total > 0 else 0
+        weak_areas = test_scores.get('weak_areas', [])
+        strong_areas = test_scores.get('strong_areas', [])
+        
+        # Performance level
+        if percentage >= 90:
+            performance_level = "excellent"
+        elif percentage >= 75:
+            performance_level = "very good"
+        elif percentage >= 60:
+            performance_level = "good"
+        elif percentage >= 50:
+            performance_level = "satisfactory"
+        else:
+            performance_level = "needs improvement"
+        
+        weak_areas_text = f"Areas needing improvement: {', '.join(weak_areas)}" if weak_areas else "No specific weak areas identified"
+        strong_areas_text = f"Strong areas: {', '.join(strong_areas)}" if strong_areas else ""
+        
+        prompt = f"""Analyze this test performance for a {age_group} year old student and provide personalized, encouraging recommendations.
+
+Student: {student_name}
+Subject: {subject}
+Score: {score}/{total} ({percentage:.1f}%)
+Performance Level: {performance_level}
+{strong_areas_text}
+{weak_areas_text}
+
+Provide a warm, encouraging analysis in this format:
+
+**Performance Summary:**
+[Brief, positive summary of overall performance]
+
+**Strengths:**
+[List 2-3 specific strengths, even if small achievements]
+
+**Areas for Growth:**
+[List 2-3 specific areas to focus on, presented positively]
+
+**Personalized Recommendations:**
+1. [Specific, actionable study tip]
+2. [Fun activity or resource to help improve]
+3. [Motivation and encouragement]
+
+**Next Steps:**
+[Concrete action plan for improvement]
+
+Keep the tone positive, encouraging, and age-appropriate. Focus on growth mindset.
+"""
+        
+        analysis = self._generate_text(prompt, max_tokens=600)
+        
+        # Generate motivational quote
+        quote_prompt = f"Generate a short, inspiring quote about learning and growth for a {age_group} year old student. Just the quote, nothing else:"
+        motivational_quote = self._generate_text(quote_prompt, max_tokens=50)
+        
+        return {
+            "subject": subject,
+            "score": score,
+            "total": total,
+            "percentage": round(percentage, 1),
+            "performance_level": performance_level,
+            "analysis": analysis,
+            "motivational_quote": motivational_quote.strip('"'),
+            "weak_areas": weak_areas,
+            "strong_areas": strong_areas
+        }
+
 
 
 # Create a singleton instance

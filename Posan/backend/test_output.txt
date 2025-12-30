@@ -1,0 +1,16 @@
+﻿Testing Hugging Face AI Content Generation...
+==================================================
+
+1. Testing story generation...
+Trying model: meta-llama/Llama-3.2-3B-Instruct
+Success with model: meta-llama/Llama-3.2-3B-Instruct
+Trying model: meta-llama/Llama-3.2-3B-Instruct
+Success with model: meta-llama/Llama-3.2-3B-Instruct
+Title: "Blast Off to a Galaxy of Wonder!"
+Content preview: "Benny's Stellar Quest"
+
+Benny, a brave astronaut, blasted off into space with his friend, a robot named Zip. They visited a beautiful planet filled with sparkling stars and colorful flowers. As they ...
+Word count: 102
+
+==================================================
+Test complete!
