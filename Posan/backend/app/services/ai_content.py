@@ -49,28 +49,30 @@ class ContentGenerator:
     
     
     def _generate_text(self, prompt: str, max_tokens: int = 500) -> str:
-        """Generate text using Hugging Face Inference API with chat completion."""
+        """Generate text using Hugging Face Inference API with text generation."""
         print(f"\n{'='*60}")
         print(f"AI GENERATION REQUEST")
         print(f"{'='*60}")
         print(f"Prompt: {prompt[:200]}...")
         print(f"Max tokens: {max_tokens}")
         
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant that creates kid-friendly, educational content. Always be positive, fun, and age-appropriate."},
-            {"role": "user", "content": prompt}
-        ]
+        # Format prompt for text generation
+        formatted_prompt = f"You are a helpful assistant that creates kid-friendly, educational content. Always be positive, fun, and age-appropriate.\n\nUser: {prompt}\n\nAssistant:"
         
         for model in self.chat_models:
             try:
                 print(f"\nTrying model: {model}")
-                response = self.client.chat_completion(
-                    messages=messages,
+                response = self.client.text_generation(
+                    formatted_prompt,
                     model=model,
-                    max_tokens=max_tokens,
+                    max_new_tokens=max_tokens,
                     temperature=0.7,
+                    return_full_text=False
                 )
-                content = response.choices[0].message.content
+                
+                # Handle response - text_generation returns a string
+                content = response if isinstance(response, str) else str(response)
+                
                 if content and len(content.strip()) > 10:
                     print(f"✅ Success with model: {model}")
                     print(f"Response preview: {content[:150]}...")
