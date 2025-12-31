@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { contentAPI } from '../services/api';
+import SearchBar from '../components/magazine/SearchBar';
+import CategoryFilter from '../components/magazine/CategoryFilter';
 import Card from '../components/common/Card';
 import './MagazinePage.css';
 
@@ -9,6 +11,8 @@ function MagazinePage() {
     const [magazines, setMagazines] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [activeCategory, setActiveCategory] = useState('all');
 
     useEffect(() => {
         fetchMagazines();
@@ -29,6 +33,15 @@ function MagazinePage() {
         navigate(`/magazines/${magazineId}`);
     };
 
+    // Filter magazines based on search and category
+    const filteredMagazines = magazines.filter(magazine => {
+        const matchesSearch = magazine.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            magazine.description.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCategory = activeCategory === 'all' ||
+            magazine.title.toLowerCase().includes(activeCategory);
+        return matchesSearch && matchesCategory;
+    });
+
     if (loading) {
         return (
             <div className="loading-container">
@@ -41,46 +54,73 @@ function MagazinePage() {
     return (
         <div className="magazine-page">
             <div className="container">
-                <h1 className="page-title">📚 Digital Magazines</h1>
-                <p className="page-subtitle">Explore amazing stories, comics, and articles!</p>
+                <div className="page-header">
+                    <div className="header-content">
+                        <h1 className="page-title">📚 Library</h1>
+                        <p className="page-subtitle">Discover amazing stories and adventures!</p>
+                    </div>
+                </div>
+
+                <SearchBar
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder="Search magazines, stories..."
+                />
+
+                <CategoryFilter
+                    activeCategory={activeCategory}
+                    onCategoryChange={setActiveCategory}
+                />
 
                 {error && <div className="error-message">{error}</div>}
 
-                <div className="magazines-grid">
-                    {magazines.length === 0 ? (
-                        <div className="empty-state">
-                            <p>🎨 No magazines available yet. Check back soon!</p>
+                {filteredMagazines.length === 0 ? (
+                    <div className="empty-state">
+                        <p>🎨 No magazines found. Try a different search or category!</p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="section-header">
+                            <h2>Explore All</h2>
+                            <span className="result-count">{filteredMagazines.length} magazines</span>
                         </div>
-                    ) : (
-                        magazines.map((magazine) => (
-                            <Card key={magazine.id} className="magazine-card">
-                                {magazine.cover_image_url && (
-                                    <img
-                                        src={magazine.cover_image_url}
-                                        alt={magazine.title}
-                                        className="magazine-cover"
-                                    />
-                                )}
-                                <div className="magazine-info">
-                                    <h3>{magazine.title}</h3>
-                                    <p className="magazine-description">{magazine.description}</p>
-                                    <div className="magazine-meta">
-                                        <span className="age-badge">{magazine.age_group}</span>
-                                        {magazine.issue_number && (
-                                            <span className="issue-badge">Issue #{magazine.issue_number}</span>
-                                        )}
+
+                        <div className="magazines-grid">
+                            {filteredMagazines.map((magazine) => (
+                                <div key={magazine.id} className="magazine-card-wrapper">
+                                    <div className="magazine-card" onClick={() => handleReadMagazine(magazine.id)}>
+                                        <div className="card-image-container">
+                                            {magazine.cover_image_url ? (
+                                                <img
+                                                    src={magazine.cover_image_url}
+                                                    alt={magazine.title}
+                                                    className="magazine-cover"
+                                                />
+                                            ) : (
+                                                <div className="placeholder-cover">
+                                                    <span className="placeholder-icon">📖</span>
+                                                </div>
+                                            )}
+                                            {magazine.issue_number && (
+                                                <div className="card-badge">Issue #{magazine.issue_number}</div>
+                                            )}
+                                        </div>
+                                        <div className="card-content">
+                                            <h3 className="card-title">{magazine.title}</h3>
+                                            <p className="card-description">{magazine.description}</p>
+                                            <div className="card-footer">
+                                                <span className="age-badge">{magazine.age_group}</span>
+                                                <button className="read-btn">
+                                                    Read Now
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <button
-                                        className="btn btn-primary"
-                                        onClick={() => handleReadMagazine(magazine.id)}
-                                    >
-                                        Read Now 📖
-                                    </button>
                                 </div>
-                            </Card>
-                        ))
-                    )}
-                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );
