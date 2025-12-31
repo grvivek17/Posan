@@ -8,11 +8,13 @@
 }
 
 .header-content {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
+    gap: 2rem;
 }
 
+/* Logo Section - Left */
 .logo {
     text-decoration: none;
 }
@@ -29,40 +31,228 @@
     transform: scale(1.05);
 }
 
-.nav {
+/* Center Navigation */
+.nav-center {
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 1.5rem;
+    gap: 2rem;
 }
 
 .nav-link {
     color: var(--text-white);
     font-weight: 600;
     font-size: 1.1rem;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
     text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
 }
 
 .nav-link:hover {
+    background: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
+}
+
+/* Right Section - User Area */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.nav-link-secondary {
+    color: var(--text-white);
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-decoration: none;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+}
+
+.nav-link-secondary:hover {
+    opacity: 1;
+}
+
+/* Visual Divider */
+.divider {
+    width: 1px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.3);
+    margin: 0 0.5rem;
+}
+
+/* Profile Icon Link */
+.profile-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.profile-link:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: scale(1.1);
+}
+
+.profile-icon {
+    font-size: 1.3rem;
+}
+
+/* User Menu - Vertical Stack */
+.user-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+/* Username Label - Small text above profile */
+.username-label {
+    color: var(--text-white);
+    font-size: 0.75rem;
+    font-weight: 500;
+    opacity: 0.9;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+/* Profile Icon Link */
+.profile-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.profile-link:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: scale(1.1);
+}
+
+.profile-icon {
+    font-size: 1.4rem;
+}
+
+/* Username Display - Remove old styles */
+.username-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.username-display:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.user-name {
+    color: var(--text-white);
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-transform: capitalize;
+}
+
+/* Logout Button Styling */
+.btn-logout {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-white);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 0.4rem 1rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    cursor: pointer;
+    min-width: 90px;
+}
+
+.btn-logout:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 @media (max-width: 768px) {
     .header-content {
+        display: flex;
         flex-direction: column;
         gap: 1rem;
-    }
-
-    .nav {
-        flex-wrap: wrap;
-        justify-content: center;
     }
 
     .logo-text {
         font-size: 1.5rem;
     }
 
+    /* Center nav moves below logo */
+    .nav-center {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+        width: 100%;
+    }
+
     .nav-link {
-        font-size: 1rem;
+        font-size: 0.95rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    /* Right section stacks */
+    .nav-right {
+        flex-direction: column;
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    .nav-link-secondary {
+        font-size: 0.9rem;
+    }
+
+    .divider {
+        display: none;
+        /* Hide divider on mobile */
+    }
+
+    .user-menu {
+        width: 100%;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .username-label {
+        font-size: 0.7rem;
+    }
+
+    .profile-link {
+        width: 42px;
+        height: 42px;
+    }
+
+    .username-display {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-logout {
+        width: 100%;
+        font-size: 0.85rem;
     }
 }

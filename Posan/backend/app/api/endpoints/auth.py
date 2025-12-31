@@ -27,9 +27,12 @@ def get_age_group(age: int) -> AgeGroup:
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
 def register(user_data: UserCreate, db: Session = Depends(get_db)):
     """Register a new user."""
-    # Check if user already exists
+    # Convert username to lowercase for case-insensitive comparison
+    username_lower = user_data.username.lower()
+    
+    # Check if user already exists (case-insensitive)
     existing_user = db.query(User).filter(
-        (User.email == user_data.email) | (User.username == user_data.username)
+        (User.email == user_data.email) | (User.username == username_lower)
     ).first()
     
     if existing_user:
@@ -38,11 +41,11 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
             detail="Email or username already registered"
         )
     
-    # Create new user
+    # Create new user with lowercase username
     hashed_password = get_password_hash(user_data.password)
     new_user = User(
         email=user_data.email,
-        username=user_data.username,
+        username=username_lower,  # Store in lowercase
         hashed_password=hashed_password,
         role=user_data.role
     )
@@ -61,8 +64,11 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login", response_model=Token)
 def login(credentials: UserLogin, db: Session = Depends(get_db)):
     """Authenticate user and return tokens."""
-    # Find user by username
-    user = db.query(User).filter(User.username == credentials.username).first()
+    # Convert username to lowercase for case-insensitive comparison
+    username_lower = credentials.username.lower()
+    
+    # Find user by username (case-insensitive)
+    user = db.query(User).filter(User.username == username_lower).first()
     
     if not user or not verify_password(credentials.password, user.hashed_password):
         raise HTTPException(

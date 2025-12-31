@@ -30,9 +30,10 @@ function Register({ setIsAuthenticated }) {
             const response = await authAPI.register(formData);
             const { access_token, refresh_token } = response.data;
 
-            // Store tokens
+            // Store tokens and username
             localStorage.setItem('access_token', access_token);
             localStorage.setItem('refresh_token', refresh_token);
+            localStorage.setItem('username', formData.username);
 
             setIsAuthenticated(true);
             navigate('/magazines');

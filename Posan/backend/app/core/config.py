@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
-from typing import List
+from typing import List, Optional
+import os
 
 
 class Settings(BaseSettings):
@@ -26,8 +27,8 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE: int = 10485760  # 10MB
     UPLOAD_DIR: str = "uploads"
     
-    # HuggingFace AI
-    HUGGINGFACE_TOKEN: str = ""  # Set in .env file
+    # HuggingFace AI - Load from environment variable
+    HUGGINGFACE_TOKEN: str = ""
     
     @property
     def allowed_origins_list(self) -> List[str]:
@@ -36,9 +37,18 @@ class Settings(BaseSettings):
     
     model_config = {
         "env_file": ".env",
+        "env_file_encoding": "utf-8",
         "case_sensitive": True,
-        "extra": "ignore"
+        "extra": "ignore",
+        "validate_default": True
     }
 
 
+# Initialize settings - will load from system env vars first, then .env if exists
 settings = Settings()
+
+# Log if HuggingFace token is loaded (for debugging)
+if settings.HUGGINGFACE_TOKEN:
+    print(f"✅ HuggingFace token loaded: {settings.HUGGINGFACE_TOKEN[:10]}...")
+else:
+    print("⚠️  WARNING: HUGGINGFACE_TOKEN not set - AI features may not work")

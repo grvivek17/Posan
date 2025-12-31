@@ -1,27 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './WordSearchPuzzle.css';
+import { getRandomWordSearch } from '../../data/puzzleData';
 
-const WordSearchPuzzle = ({ words = [], grid = [], title = "Word Search" }) => {
+const WordSearchPuzzle = ({ words = [], grid = [], title = "" }) => {
     const [foundWords, setFoundWords] = useState([]);
     const [selectedCells, setSelectedCells] = useState([]);
     const [isSelecting, setIsSelecting] = useState(false);
+    const [currentPuzzle, setCurrentPuzzle] = useState(null);
 
-    // Sample grid if none provided
-    const defaultGrid = [
-        ['C', 'A', 'T', 'S', 'P', 'L', 'A', 'Y'],
-        ['O', 'D', 'O', 'G', 'M', 'O', 'V', 'E'],
-        ['L', 'I', 'R', 'U', 'N', 'S', 'W', 'R'],
-        ['O', 'S', 'K', 'I', 'P', 'E', 'I', 'B'],
-        ['R', 'H', 'O', 'P', 'G', 'A', 'M', 'E'],
-        ['S', 'J', 'U', 'M', 'P', 'L', 'E', 'A'],
-        ['F', 'U', 'N', 'B', 'A', 'L', 'L', 'P'],
-        ['D', 'A', 'N', 'C', 'E', 'T', 'O', 'Y']
-    ];
+    // Load a random puzzle on component mount
+    useEffect(() => {
+        const randomPuzzle = getRandomWordSearch();
+        setCurrentPuzzle(randomPuzzle);
+    }, []);
 
-    const defaultWords = ['CAT', 'DOG', 'RUN', 'JUMP', 'PLAY', 'FUN', 'GAME', 'TOY'];
+    // Use provided props or random puzzle data
+    const puzzleToUse = currentPuzzle || { grid: [[]], words: [], title: "Word Search" };
+    const currentGrid = grid.length > 0 ? grid : puzzleToUse.grid;
+    const currentWords = words.length > 0 ? words : puzzleToUse.words;
+    const puzzleTitle = title || puzzleToUse.title;
 
-    const currentGrid = grid.length > 0 ? grid : defaultGrid;
-    const currentWords = words.length > 0 ? words : defaultWords;
+    // Return loading state if puzzle not loaded
+    if (!currentPuzzle && grid.length === 0) {
+        return <div className="word-search-puzzle">Loading puzzle...</div>;
+    }
 
     const handleCellClick = (row, col) => {
         const cellKey = `${row}-${col}`;
@@ -42,7 +44,7 @@ const WordSearchPuzzle = ({ words = [], grid = [], title = "Word Search" }) => {
 
     return (
         <div className="word-search-puzzle">
-            <h3 className="puzzle-title">{title}</h3>
+            <h3 className="puzzle-title">{puzzleTitle}</h3>
 
             <div className="puzzle-layout">
                 <div className="word-grid">

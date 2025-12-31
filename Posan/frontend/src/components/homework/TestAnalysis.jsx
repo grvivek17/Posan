@@ -93,54 +93,57 @@ const TestAnalysis = () => {
         setAnalysis(null);
 
         try {
-            // In a real implementation, this would:
-            // 1. Upload the file to backend
-            // 2. Use OCR (Tesseract, EasyOCR, or Hugging Face vision models) to extract text
-            // 3. Parse the text to identify questions, answers, marks
-            // 4. Send to AI for analysis
+            // Create form data for file upload
+            const uploadFormData = new FormData();
+            uploadFormData.append('file', uploadedFile);
 
-            // For now, we'll simulate the analysis with a mock score
-            // In production, you'd integrate with OCR libraries
+            // Send to OCR + AI analysis endpoint
+            const response = await fetch(
+                `${API_BASE}/ai/analyze/test-upload?student_name=${encodeURIComponent(formData.studentName)}&subject=${encodeURIComponent(formData.subject)}&age_group=${encodeURIComponent(formData.ageGroup)}`,
+                {
+                    method: 'POST',
+                    body: uploadFormData
+                }
+            );
 
-            const mockAnalysis = {
-                subject: formData.subject,
-                score: 75,
-                total: 100,
-                percentage: 75,
-                performance_level: 'good',
-                analysis: `**Performance Summary:**
-Great work on this ${formData.subject} test, ${formData.studentName}! You scored 75 out of 100, showing solid understanding of the material.
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to analyze test paper');
+            }
 
-**Strengths:**
-- Clear handwriting and well-organized answers
-- Strong understanding of core concepts
-- Good attention to detail in calculations
+            const data = await response.json();
 
-**Areas for Growth:**
-- Some questions were left incomplete - work on time management
-- Review the sections where partial credit was given
-- Practice more word problems to improve problem-solving speed
+            // Check if score was detected
+            if (!data.score_detected) {
+                alert(`⚠️ OCR completed but could not detect score automatically.\n\n${data.message}\n\nExtracted ${data.questions_found} questions.\n\nPlease use manual entry mode to input the score.`);
+                setLoading(false);
+                return;
+            }
 
-**Personalized Recommendations:**
-1. Create a study schedule: Dedicate 30 minutes daily to review weak topics
-2. Use visual aids and diagrams to help understand complex concepts
-3. Practice similar problems from your textbook to build confidence
+            // Score was detected and AI analysis is complete
+            setAnalysis({
+                subject: data.subject,
+                score: data.score,
+                total: data.total,
+                percentage: data.percentage,
+                performance_level: data.performance_level,
+                analysis: data.analysis,
+                motivational_quote: data.motivational_quote,
+                weak_areas: data.weak_areas || [],
+                strong_areas: data.strong_areas || []
+            });
 
-**Next Steps:**
-Review the marked test paper carefully, identify patterns in mistakes, and create a list of topics to revise. Schedule a review session with your teacher for questions that were challenging.`,
-                motivational_quote: "Every mistake is a step towards learning. Keep growing!",
-                weak_areas: ['Time management', 'Complex word problems'],
-                strong_areas: ['Basic concepts', 'Calculations', 'Organization']
-            };
-
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 3000));
-
-            setAnalysis(mockAnalysis);
-
-            alert('✅ Test paper analyzed! Note: This is a demo analysis. Full OCR integration requires additional backend setup.');
+            alert(`✅ Test paper analyzed successfully!\n\nOCR Confidence: ${data.ocr_confidence}\nQuestions Found: ${data.questions_found}\nScore Detected: ${data.score}/${data.total}`);
         } catch (err) {
-            alert('Error analyzing test. Please try again!');
+            let errorMessage = 'Error analyzing test. ';
+
+            if (err.message.includes('Tesseract')) {
+                errorMessage += 'OCR service is not properly configured. Please ensure Tesseract is installed on the server.';
+            } else {
+                errorMessage += err.message || 'Please try again!';
+            }
+
+            alert(errorMessage);
             console.error(err);
         } finally {
             setLoading(false);

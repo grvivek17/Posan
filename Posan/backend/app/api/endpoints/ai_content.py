@@ -2,9 +2,12 @@
 AI Content Generation API Endpoints.
 Provides endpoints for generating kid-friendly content using Hugging Face models.
 """
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File
 from pydantic import BaseModel, Field
 from typing import Optional, List
+import tempfile
+import os
+from pathlib import Path
 from app.services.ai_content import (
     content_generator,
     generate_story,
@@ -13,6 +16,7 @@ from app.services.ai_content import (
     generate_word_search,
     generate_crossword
 )
+from app.services.ocr_service import ocr_service
 
 router = APIRouter()
 
@@ -266,6 +270,165 @@ async def api_analyze_test(request: TestAnalysisRequest):
         return TestAnalysisResponse(**result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error analyzing test: {str(e)}")
+
+
+@router.post("/analyze/test-upload", summary="Upload and analyze test paper with OCR")
+async def api_analyze_test_upload(
+    file: UploadFile = File(..., description="Test paper image or PDF"),
+    student_name: str = Query(..., description="Student's name"),
+    subject: str = Query(..., description="Subject of the test"),
+    age_group: str = Query(default="6-8", description="Student age group")
+):
+    """
+    Upload a test paper (image or PDF) and analyze it using OCR + AI.
+    
+    This endpoint:
+    1. Accepts JPG, PNG, or PDF files
+    2. Uses Tesseract OCR to extract text from the test paper
+    3. Parses the text to identify scores and marks
+    4. Sends the results to AI for personalized analysis
+    
+    - **file**: Test paper file (JPG, PNG, PDF, max 10MB)
+    - **student_name**: Student's name for personalized feedback
+    - **subject**: Subject of the test
+    - **age_group**: Student age group for age-appropriate analysis
+    
+    Returns OCR extraction results and AI-powered recommendations.
+    """
+    # Validate file type
+    allowed_extensions = ['.jpg', '.jpeg', '.png', '.pdf']
+    file_extension = Path(file.filename).suffix.lower()
+    
+    if file_extension not in allowed_extensions:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Invalid file type. Allowed: {', '.join(allowed_extensions)}"
+        )
+    
+    # Validate file size (max 10MB)
+    max_size = 10 * 1024 * 1024  # 10MB in bytes
+    
+    # Save uploaded file temporarily
+    temp_file = None
+    try:
+        # Create temporary file
+        with tempfile.NamedTemporaryFile(
+            delete=False, 
+            suffix=file_extension
+        ) as temp_file:
+            # Read and save file content
+            content = await file.read()
+            
+            if len(content) > max_size:
+                raise HTTPException(
+                    status_code=400,
+                    detail="File size exceeds 10MB limit"
+                )
+            
+            temp_file.write(content)
+            temp_file_path = temp_file.name
+        
+        # Process with OCR service
+        ocr_result = ocr_service.analyze_test_paper(
+            file_path=temp_file_path,
+            file_extension=file_extension,
+            student_name=student_name,
+            subject=subject
+        )
+        
+        if not ocr_result.get("success"):
+            raise HTTPException(
+                status_code=500,
+                detail=f"OCR processing failed: {ocr_result.get('error', 'Unknown error')}"
+            )
+        
+        # Get question-answer pairs for content analysis
+        question_answers = ocr_result.get("question_answers", [])
+        extracted_text = ocr_result.get("extracted_text", "")
+        
+        # Use new content-based analysis if we have question-answer pairs
+        if question_answers and len(question_answers) > 0:
+            # Perform deep content analysis based on actual answers
+            ai_result = content_generator.analyze_test_paper_content(
+                subject=subject,
+                question_answers=question_answers,
+                extracted_text=extracted_text,
+                age_group=age_group,
+                student_name=student_name
+            )
+            
+            # Combine OCR and AI results
+            return {
+                "ocr_success": True,
+                "analysis_type": "content_based",
+                "message": f"Analyzed {len(question_answers)} questions with detailed answer evaluation",
+                "ocr_confidence": ocr_result.get("confidence", "medium"),
+                "extracted_text_preview": extracted_text[:200] if extracted_text else "",
+                **ai_result
+            }
+        
+        # Fallback: If no questions extracted but score found, use score-based analysis
+        elif ocr_result.get("score") is not None:
+            score = ocr_result.get("score")
+            total = ocr_result.get("total", 100)
+            
+            test_scores = {
+                "score": score,
+                "total": total,
+                "weak_areas": [],
+                "strong_areas": []
+            }
+            
+            # Get AI analysis based on score only
+            ai_result = content_generator.analyze_test_results(
+                subject=subject,
+                test_scores=test_scores,
+                age_group=age_group,
+                student_name=student_name
+            )
+            
+            # Combine OCR and AI results
+            return {
+                "ocr_success": True,
+                "analysis_type": "score_based",
+                "message": "Score detected. For better analysis, ensure questions and answers are clearly visible.",
+                "ocr_confidence": ocr_result.get("confidence", "medium"),
+                "extracted_text_preview": extracted_text[:200] if extracted_text else "",
+                **ai_result
+            }
+        
+        # No score or questions found
+        else:
+            return {
+                "ocr_success": True,
+                "score_detected": False,
+                "analysis_type": "none",
+                "message": "Could not extract questions/answers or score from test paper. The text was extracted but needs manual review. Please ensure the test paper is clear and properly formatted.",
+                "extracted_text_preview": extracted_text[:500] if extracted_text else "",
+                "confidence": ocr_result.get("confidence", "low"),
+                "questions_found": 0,
+                "correct_count": ocr_result.get("correct_count", 0),
+                "incorrect_count": ocr_result.get("incorrect_count", 0),
+                "suggested_subject": ocr_result.get("subject", subject)
+            }
+        
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error processing test paper: {str(e)}"
+        )
+    finally:
+        # Clean up temporary file
+        if temp_file and os.path.exists(temp_file_path):
+            try:
+                os.unlink(temp_file_path)
+            except Exception as e:
+                # Log but don't fail if cleanup fails
+                print(f"Warning: Could not delete temp file: {e}")
+
 
 
 @router.get("/topics/suggestions", summary="Get suggested content topics")
