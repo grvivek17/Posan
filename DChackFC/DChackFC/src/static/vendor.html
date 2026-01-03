@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Dashboard | Smart Food Court</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Vendor Dashboard</h1>
+                <p class="subtitle">Manage orders and track performance</p>
+            </div>
+            <button onclick="logout()"
+                style="padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; cursor: pointer;">Logout</button>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="card" style="grid-column: span 2;">
+                <h2>Live Orders</h2>
+                <div id="orders-list" class="metric-container">
+                    <div class="loading">Loading orders...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Quick Stats</h2>
+                <div class="metric-container">
+                    <div class="metric-item">
+                        <span class="metric-label">Total Orders Today</span>
+                        <span class="metric-value" id="total-orders">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Revenue</span>
+                        <span class="metric-value" id="total-revenue">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="grid-column: span 3;">
+                <h2>Menu Management</h2>
+                <div style="margin-bottom: 1rem; display: flex; gap: 1rem;">
+                    <input type="text" id="new-item-name" placeholder="Item Name"
+                        style="padding: 0.5rem; border-radius: 0.25rem; border: none; background: rgba(255,255,255,0.1); color: white;">
+                    <input type="number" id="new-item-price" placeholder="Price"
+                        style="padding: 0.5rem; border-radius: 0.25rem; border: none; background: rgba(255,255,255,0.1); color: white;">
+                    <select id="new-item-category"
+                        style="padding: 0.5rem; border-radius: 0.25rem; border: none; background: rgba(255,255,255,0.1); color: white;">
+                        <option value="Main">Main</option>
+                        <option value="Side">Side</option>
+                        <option value="Drink">Drink</option>
+                    </select>
+                    <button onclick="addMenuItem()"
+                        style="padding: 0.5rem 1rem; border-radius: 0.25rem; border: none; background: var(--success-color); color: black; font-weight: 600; cursor: pointer;">Add
+                        Item</button>
+                </div>
+                <div id="menu-list" class="metric-container">
+                    <div class="loading">Loading menu...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/script.js"></script>
+    <script>
+        // Check auth
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user || user.role !== 'vendor') {
+            window.location.href = '/static/login.html';
+        }
+
+        // Load orders periodically
+        loadVendorOrders();
+        setInterval(loadVendorOrders, 5000);
+
+        // Load menu
+        loadVendorMenu();
+    </script>
+</body>
+
+</html>

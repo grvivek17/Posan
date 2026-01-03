@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Food | Smart Food Court</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Place Order</h1>
+                <p class="subtitle">Select items from the menu</p>
+            </div>
+            <button onclick="logout()"
+                style="padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; cursor: pointer;">Logout</button>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2>Menu</h2>
+                <div class="metric-container">
+                    <div class="metric-item" onclick="addToCart('Burger', 10.99)">
+                        <div>
+                            <div class="metric-value">Classic Burger</div>
+                            <div class="metric-label">$10.99</div>
+                        </div>
+                        <button
+                            style="padding: 0.25rem 0.75rem; border-radius: 0.25rem; border: none; background: var(--accent-color); color: white; cursor: pointer;">Add</button>
+                    </div>
+                    <div class="metric-item" onclick="addToCart('Pizza', 15.99)">
+                        <div>
+                            <div class="metric-value">Pepperoni Pizza</div>
+                            <div class="metric-label">$15.99</div>
+                        </div>
+                        <button
+                            style="padding: 0.25rem 0.75rem; border-radius: 0.25rem; border: none; background: var(--accent-color); color: white; cursor: pointer;">Add</button>
+                    </div>
+                    <div class="metric-item" onclick="addToCart('Salad', 8.99)">
+                        <div>
+                            <div class="metric-value">Caesar Salad</div>
+                            <div class="metric-label">$8.99</div>
+                        </div>
+                        <button
+                            style="padding: 0.25rem 0.75rem; border-radius: 0.25rem; border: none; background: var(--accent-color); color: white; cursor: pointer;">Add</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Your Cart</h2>
+                <div id="cart-items" class="metric-container" style="min-height: 100px;">
+                    <div class="loading" style="padding: 1rem;">Cart is empty</div>
+                </div>
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span>Total</span>
+                        <span id="cart-total" style="font-weight: 800;">$0.00</span>
+                    </div>
+                    <button onclick="placeOrder()"
+                        style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: none; background: linear-gradient(to right, #38bdf8, #818cf8); color: white; font-weight: 600; cursor: pointer;">Place
+                        Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/script.js"></script>
+    <script>
+        // Check auth
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) {
+            window.location.href = '/static/login.html';
+        }
+    </script>
+</body>
+
+</html>

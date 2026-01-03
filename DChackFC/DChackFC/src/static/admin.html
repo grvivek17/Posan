@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal | Smart Food Court</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Admin Portal</h1>
+                <p class="subtitle">Platform Overview & Management</p>
+            </div>
+            <button onclick="logout()"
+                style="padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; cursor: pointer;">Logout</button>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2>Platform Stats</h2>
+                <div class="metric-container">
+                    <div class="metric-item">
+                        <span class="metric-label">Total Vendors</span>
+                        <span class="metric-value" id="total-vendors">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Active Vendors</span>
+                        <span class="metric-value" id="active-vendors">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Total Orders</span>
+                        <span class="metric-value" id="total-orders">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Total Revenue</span>
+                        <span class="metric-value" id="total-revenue">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="grid-column: span 2;">
+                <h2>Registered Vendors</h2>
+                <div id="vendors-list" class="metric-container">
+                    <div class="loading">Loading vendors...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/script.js"></script>
+    <script>
+        // Check auth
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user || user.role !== 'admin') {
+            window.location.href = '/static/login.html';
+        }
+        loadAdminDashboard();
+    </script>
+</body>
+
+</html>

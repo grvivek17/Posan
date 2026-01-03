@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preorder | Smart Food Court</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Smart Preorder</h1>
+                <p class="subtitle">Schedule your meal in advance</p>
+            </div>
+            <button onclick="logout()"
+                style="padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; cursor: pointer;">Logout</button>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2>Select Vendor</h2>
+                <select id="vendor-select" onchange="loadVendorMenu()"
+                    style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;">
+                    <option value="1">Burger King</option>
+                    <option value="2">Pizza Hut</option>
+                </select>
+            </div>
+
+            <div class="card" style="grid-column: span 2;">
+                <h2>Menu</h2>
+                <div id="menu-items" class="metric-container">
+                    <div class="loading">Loading menu...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Your Cart</h2>
+                <div id="cart-items" class="metric-container" style="min-height: 100px;">
+                    <div class="loading" style="padding: 1rem;">Cart is empty</div>
+                </div>
+
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary);">Schedule
+                            Pickup</label>
+                        <input type="datetime-local" id="schedule-time"
+                            style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;">
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label
+                            style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary);">Customization
+                            Notes (optional)</label>
+                        <textarea id="customization-notes" placeholder="e.g., no onion, extra cheese"
+                            style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; min-height: 60px;"></textarea>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span>Total</span>
+                        <span id="cart-total" style="font-weight: 800;">$0.00</span>
+                    </div>
+                    <button onclick="placePreorder()"
+                        style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: none; background: linear-gradient(to right, #38bdf8, #818cf8); color: white; font-weight: 600; cursor: pointer;">Place
+                        Preorder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/script.js"></script>
+    <script>
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) {
+            window.location.href = '/static/login.html';
+        }
+
+        // Set minimum datetime to now
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('schedule-time').min = now.toISOString().slice(0, 16);
+
+        loadVendorMenuForPreorder();
+    </script>
+</body>
+
+</html>

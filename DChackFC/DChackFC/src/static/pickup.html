@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pickup | Smart Food Court</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header style="text-align: center;">
+            <h1>Your Preorder</h1>
+            <p class="subtitle">Show this at pickup</p>
+        </header>
+
+        <div class="dashboard-grid" style="justify-content: center;">
+            <div class="card" style="max-width: 500px; text-align: center;">
+                <h2 id="order-number" style="justify-content: center; color: var(--success-color);">Loading...</h2>
+
+                <div style="margin: 2rem 0;">
+                    <img id="qr-code" src="" alt="QR Code" style="max-width: 300px; width: 100%; border-radius: 1rem;">
+                </div>
+
+                <div
+                    style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Pickup OTP
+                    </div>
+                    <div id="otp-display"
+                        style="font-size: 2rem; font-weight: 800; letter-spacing: 0.5rem; color: var(--accent-color);">
+                        ------</div>
+                </div>
+
+                <div class="metric-container">
+                    <div class="metric-item">
+                        <span class="metric-label">Scheduled For</span>
+                        <span class="metric-value" id="scheduled-time">--</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Estimated Ready By</span>
+                        <span class="metric-value" id="eta-time" style="color: var(--success-color);">--</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Total Amount</span>
+                        <span class="metric-value" id="total-amount">$0.00</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Status</span>
+                        <span class="metric-value" id="order-status">Pending</span>
+                    </div>
+                </div>
+
+                <div id="customization-section"
+                    style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; display: none;">
+                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Customization
+                        Request</div>
+                    <div id="customization-notes" style="margin-bottom: 0.5rem;"></div>
+                    <div id="customization-response"></div>
+                </div>
+
+                <button onclick="window.location.href='/static/preorder.html'"
+                    style="margin-top: 2rem; width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; cursor: pointer;">Place
+                    Another Order</button>
+            </div>
+        </div>
+    </div>
+    <script src="/static/script.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const preorderId = urlParams.get('id');
+
+        if (!preorderId) {
+            window.location.href = '/static/preorder.html';
+        } else {
+            loadPreorderDetails(preorderId);
+            // Refresh every 30 seconds
+            setInterval(() => loadPreorderDetails(preorderId), 30000);
+        }
+    </script>
+</body>
+
+</html>

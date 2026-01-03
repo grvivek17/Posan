@@ -1,0 +1,9 @@
+{
+    "servers": {
+        "huggingface-mcp": {
+            "type": "stdio",
+            "command": "python",
+            "args": ["server.py"]
+        }
+    }
+}
