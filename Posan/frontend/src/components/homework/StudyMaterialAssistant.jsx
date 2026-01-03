@@ -11,7 +11,12 @@ const StudyMaterialAssistant = () => {
     const [practiceData, setPracticeData] = useState(null);
     const [answers, setAnswers] = useState({});
     const [evaluationData, setEvaluationData] = useState(null);
-    const [ageGroup, setAgeGroup] = useState('9-11');
+
+    // NEW: Multi-agent system fields
+    const [subject, setSubject] = useState('Mathematics');
+    const [grade, setGrade] = useState(5);
+    const [materialId, setMaterialId] = useState(null);
+    const [indexName, setIndexName] = useState(null);
 
     const handleFileSelect = (e) => {
         if (e.target.files.length > 0) {
@@ -19,6 +24,7 @@ const StudyMaterialAssistant = () => {
         }
     };
 
+    // NEW: Use integrated multi-agent workflow
     const handleFileUpload = async () => {
         if (!uploadedFile) return;
 
@@ -27,26 +33,64 @@ const StudyMaterialAssistant = () => {
         formData.append('file', uploadedFile);
 
         try {
-            const response = await homeworkAPI.uploadStudyMaterial(formData, ageGroup);
-            setStudyData(response.data);
+            // Use the integrated workflow: Upload → Process → Generate Questions
+            const response = await homeworkAPI.uploadAndGeneratePractice(
+                formData,
+                subject,
+                grade,
+                10 // Generate 10 questions
+            );
+
+            const data = response.data;
+
+            // Store material info
+            setMaterialId(data.material_id);
+            setIndexName(data.index_name);
+
+            // Format study data for display
+            setStudyData({
+                summary: `Processed ${data.chunks_created} sections from your study material.`,
+                topics: data.topics || [],
+                chunks_created: data.chunks_created,
+                filename: data.metadata?.filename
+            });
+
+            // Format questions for practice
+            const questions = data.questions || [];
+            const mcqs = questions.filter(q => q.type === 'mcq');
+            const shortAnswers = questions.filter(q => q.type === 'short_answer');
+
+            setPracticeData({
+                mcqs: mcqs.map(q => ({
+                    question: q.question,
+                    options: q.options || {},
+                    correct: q.correct_answer,
+                    hint: q.hint,
+                    id: q.id
+                })),
+                short_answers: shortAnswers.map(q => ({
+                    question: q.question,
+                    expected_answer: q.expected_answer,
+                    hint: q.hint,
+                    id: q.id
+                })),
+                raw_questions: questions // Keep original for grading
+            });
+
             setStep('results');
         } catch (error) {
-            console.error('Error uploading study material:', error);
+            console.error('Error in multi-agent workflow:', error);
 
             let errorMsg = 'Unknown error occurred';
 
             if (error.response) {
-                // The request was made and the server responded with a status code
-                // that falls out of the range of 2xx
                 const data = error.response.data;
                 errorMsg = (typeof data === 'string') ? data : (data.detail || data.message || JSON.stringify(data));
                 console.log('Server Error Data:', data);
             } else if (error.request) {
-                // The request was made but no response was received
                 errorMsg = 'No response from server. The PDF might be too large or the connection timed out.';
                 console.log('No Response Error:', error.request);
             } else {
-                // Something happened in setting up the request that triggered an Error
                 errorMsg = error.message;
             }
 
@@ -56,16 +100,41 @@ const StudyMaterialAssistant = () => {
         }
     };
 
+    // Keep practice generation for when user wants more questions
     const generatePractice = async () => {
         setLoading(true);
         try {
-            const response = await homeworkAPI.generatePracticeQuestions({
-                text: studyData.summary,
-                num_mcq: 3,
-                num_short: 2,
-                age_group: ageGroup
+            // Generate more questions from the indexed material
+            const response = await homeworkAPI.generateQuestionsFromMaterial(
+                indexName,
+                studyData.topics[0] || 'general',
+                subject,
+                grade,
+                10
+            );
+
+            const data = response.data;
+            const questions = data.questions || [];
+            const mcqs = questions.filter(q => q.type === 'mcq');
+            const shortAnswers = questions.filter(q => q.type === 'short_answer');
+
+            setPracticeData({
+                mcqs: mcqs.map(q => ({
+                    question: q.question,
+                    options: q.options || {},
+                    correct: q.correct_answer,
+                    hint: q.hint,
+                    id: q.id
+                })),
+                short_answers: shortAnswers.map(q => ({
+                    question: q.question,
+                    expected_answer: q.expected_answer,
+                    hint: q.hint,
+                    id: q.id
+                })),
+                raw_questions: questions
             });
-            setPracticeData(response.data);
+
             setStep('practice');
         } catch (error) {
             console.error('Error generating questions:', error);
@@ -92,38 +161,64 @@ const StudyMaterialAssistant = () => {
     const submitPractice = async () => {
         setLoading(true);
         try {
-            const evaluations = [];
+            // NEW: Use multi-agent auto-grading
+            const questionsForGrading = [];
 
-            // Eval MCQs
+            // Add MCQ answers
             practiceData.mcqs.forEach((q, idx) => {
-                const selected = answers[`mcq_${idx}`];
-                const isCorrect = selected === q.correct;
-                evaluations.push({
+                questionsForGrading.push({
+                    type: 'mcq',
                     question: q.question,
-                    student_answer: selected || 'No answer',
-                    expected_answer: q.correct,
-                    score: isCorrect ? 100 : 0,
-                    is_correct: isCorrect ? 'yes' : 'no',
-                    feedback: isCorrect ? 'Correct! Well done.' : `Oops! The correct answer was ${q.correct}.`
+                    options: q.options,
+                    correct_answer: q.correct,
+                    student_answer: answers[`mcq_${idx}`] || '',
+                    hint: q.hint,
+                    id: q.id
                 });
             });
 
-            // Eval Short Answers with AI
-            for (let i = 0; i < practiceData.short_answers.length; i++) {
-                const q = practiceData.short_answers[i];
-                const studentAns = answers[`short_${i}`] || '';
-
-                const response = await homeworkAPI.evaluateAnswer({
+            // Add short answer responses
+            practiceData.short_answers.forEach((q, idx) => {
+                questionsForGrading.push({
+                    type: 'short_answer',
                     question: q.question,
-                    student_answer: studentAns,
-                    expected_answer: q.expected_answer
+                    expected_answer: q.expected_answer,
+                    student_answer: answers[`short_${idx}`] || '',
+                    hint: q.hint,
+                    id: q.id
                 });
-                evaluations.push(response.data);
-            }
+            });
 
-            // Get performance analysis
-            const perfResponse = await homeworkAPI.analyzePerformance(evaluations);
-            setEvaluationData(perfResponse.data);
+            // Grade all questions at once with the exam analysis agent
+            const response = await homeworkAPI.gradeExam(
+                questionsForGrading,
+                localStorage.getItem('user_id') || 'guest',
+                null // exam_id
+            );
+
+            const gradingResult = response.data;
+
+            // Format evaluation data for display
+            setEvaluationData({
+                evaluations: gradingResult.graded_questions.map(q => ({
+                    question: q.question,
+                    student_answer: q.student_answer,
+                    expected_answer: q.correct_answer || q.expected_answer,
+                    score: q.score * 100, // Convert to percentage
+                    is_correct: q.is_correct ? 'yes' : 'no',
+                    feedback: q.feedback
+                })),
+                total_score: gradingResult.total_score,
+                max_score: gradingResult.max_score,
+                percentage: gradingResult.percentage,
+                grade: gradingResult.grade,
+                overall_feedback: gradingResult.feedback,
+                knowledge_gaps: gradingResult.knowledge_gaps || [],
+                recommendations: gradingResult.recommendations || [],
+                correct_count: gradingResult.metadata?.correct_count || 0,
+                question_count: gradingResult.metadata?.question_count || 0
+            });
+
             setStep('evaluation');
         } catch (error) {
             console.error('Error submitting practice:', error);
@@ -143,11 +238,27 @@ const StudyMaterialAssistant = () => {
             {step === 'upload' && (
                 <div className="upload-section">
                     <div className="age-group-simple">
-                        <label>Your Age Group:</label>
-                        <select value={ageGroup} onChange={(e) => setAgeGroup(e.target.value)}>
-                            <option value="6-8">6-8 years</option>
-                            <option value="9-11">9-11 years</option>
-                            <option value="12-14">12-14 years</option>
+                        <label>Subject:</label>
+                        <select value={subject} onChange={(e) => setSubject(e.target.value)}>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Science">Science</option>
+                            <option value="English">English</option>
+                            <option value="Social Studies">Social Studies</option>
+                            <option value="General">General</option>
+                        </select>
+                    </div>
+
+                    <div className="age-group-simple">
+                        <label>Grade Level:</label>
+                        <select value={grade} onChange={(e) => setGrade(parseInt(e.target.value))}>
+                            <option value="1">Grade 1</option>
+                            <option value="2">Grade 2</option>
+                            <option value="3">Grade 3</option>
+                            <option value="4">Grade 4</option>
+                            <option value="5">Grade 5</option>
+                            <option value="6">Grade 6</option>
+                            <option value="7">Grade 7</option>
+                            <option value="8">Grade 8</option>
                         </select>
                     </div>
 

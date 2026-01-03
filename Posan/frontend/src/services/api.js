@@ -81,13 +81,101 @@ export const gamificationAPI = {
     getUserStats: (userId) => api.get(`/gamification/stats/${userId}`),
 };
 
-// Homework / AI Study API
+// Homework / AI Study API - Multi-Agent System
 export const homeworkAPI = {
-    uploadStudyMaterial: (formData, ageGroup) => api.post(`/ai/study-material/upload?age_group=${ageGroup}`, formData),
-    generatePracticeQuestions: (params) => api.post('/ai/study-material/generate-questions', null, { params }),
-    evaluateAnswer: (data) => api.post('/ai/study-material/evaluate-answer', data),
-    analyzePerformance: (answers) => api.post('/ai/study-material/analyze-performance', answers),
-    generateStudyPlan: (data) => api.post('/ai/study-material/generate-plan', data),
+    // NEW: Multi-Agent Workflow (One-click: Upload → Questions → Grading)
+    uploadAndGeneratePractice: (formData, subject, grade, questionCount = 10) => {
+        formData.append('subject', subject);
+        formData.append('grade', grade);
+        formData.append('question_count', questionCount);
+        formData.append('question_types', 'mcq,short_answer');
+        formData.append('difficulty', 'medium');
+        formData.append('user_id', localStorage.getItem('user_id') || 'guest');
+        return api.post('/homework-agents/workflow/material-to-practice', formData);
+    },
+
+    // NEW: Upload and process material (Phase 1: Ingestion)
+    uploadStudyMaterial: (formData, subject, grade, topic = '') => {
+        formData.append('subject', subject);
+        formData.append('grade', grade);
+        if (topic) formData.append('topic', topic);
+        formData.append('user_id', localStorage.getItem('user_id') || 'guest');
+        return api.post('/homework-agents/materials/upload-v2', formData);
+    },
+
+    // NEW: Generate questions from context (Phase 3: Question Generator)
+    generatePracticeQuestions: (context, subject, grade, count = 5, difficulty = 'medium') => {
+        const formData = new FormData();
+        formData.append('context', context);
+        formData.append('subject', subject);
+        formData.append('grade', grade);
+        formData.append('question_types', 'mcq,short_answer');
+        formData.append('count', count);
+        formData.append('difficulty', difficulty);
+        return api.post('/homework-agents/questions/generate', formData);
+    },
+
+    // NEW: Generate questions from indexed material (Phase 2 + 3)
+    generateQuestionsFromMaterial: (indexName, topic, subject, grade, count = 5) => {
+        const formData = new FormData();
+        formData.append('index_name', indexName);
+        formData.append('topic', topic);
+        formData.append('subject', subject);
+        formData.append('grade', grade);
+        formData.append('question_types', 'mcq,short_answer');
+        formData.append('count', count);
+        formData.append('difficulty', 'medium');
+        return api.post('/homework-agents/questions/from-material', formData);
+    },
+
+    // NEW: Auto-grade exam (Phase 4: Exam Analysis)
+    gradeExam: (questions, studentId = null, examId = null) => {
+        const formData = new FormData();
+        formData.append('questions', JSON.stringify(questions));
+        if (studentId) formData.append('student_id', studentId);
+        if (examId) formData.append('exam_id', examId);
+        return api.post('/homework-agents/exams/grade', formData);
+    },
+
+    // NEW: Quick grade single question
+    quickGradeQuestion: (questionType, question, studentAnswer, correctAnswer, options = null, expectedAnswer = null) => {
+        const formData = new FormData();
+        formData.append('question_type', questionType);
+        formData.append('question', question);
+        formData.append('student_answer', studentAnswer);
+        formData.append('correct_answer', correctAnswer);
+        if (options) formData.append('options', JSON.stringify(options));
+        if (expectedAnswer) formData.append('expected_answer', expectedAnswer);
+        return api.post('/homework-agents/exams/quick-grade', formData);
+    },
+
+    // NEW: Get available question types
+    getQuestionTypes: () => api.get('/homework-agents/questions/types'),
+
+    // NEW: Get grading information
+    getGradingInfo: () => api.get('/homework-agents/exams/grading-info'),
+
+    // NEW: Semantic search in materials
+    searchMaterial: (indexName, query, topK = 5) => {
+        const formData = new FormData();
+        formData.append('index_name', indexName);
+        formData.append('query', query);
+        formData.append('top_k', topK);
+        formData.append('min_score', '0.0');
+        return api.post('/homework-agents/search/query', formData);
+    },
+
+    // NEW: List all search indices
+    listIndices: () => api.get('/homework-agents/search/indices'),
+
+    // NEW: Get agent status
+    getAgentStatus: (agentName, limit = 10) =>
+        api.get(`/homework-agents/agents/status/${agentName}?limit=${limit}`),
+
+    // NEW: List all agents
+    listAgents: () => api.get('/homework-agents/agents/list'),
+
+    // LEGACY: Keep old endpoints for backward compatibility
     analyzeTestUpload: (formData, params) => api.post('/ai/analyze/test-upload', formData, { params }),
 };
 
