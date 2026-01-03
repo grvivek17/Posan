@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.api.endpoints import auth, users, magazines, puzzles, gamification, ai_content
+from app.api.endpoints import auth, users, magazines, puzzles, gamification, ai_content, homework_agents
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -31,6 +31,7 @@ app.include_router(magazines.router, prefix=f"{settings.API_V1_PREFIX}/content",
 app.include_router(puzzles.router, prefix=f"{settings.API_V1_PREFIX}/puzzles", tags=["Puzzles"])
 app.include_router(gamification.router, prefix=f"{settings.API_V1_PREFIX}/gamification", tags=["Gamification"])
 app.include_router(ai_content.router, prefix=f"{settings.API_V1_PREFIX}/ai", tags=["AI Content Generation"])
+app.include_router(homework_agents.router, prefix=f"{settings.API_V1_PREFIX}/homework-agents", tags=["Homework Agents (Multi-Agent System)"])
 
 
 @app.get("/")
