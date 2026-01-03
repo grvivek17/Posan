@@ -362,7 +362,7 @@ class CoordinatorAgent(AgentBase):
         """
         Resolve variable references in input data.
         
-        Variables are referenced as ${variable_name}.
+        Variables are referenced as ${variable_name} or ${variable_name}[key].
         
         Args:
             input_data: Input data with potential variable references
@@ -371,13 +371,33 @@ class CoordinatorAgent(AgentBase):
         Returns:
             Resolved input data
         """
+        import re
+        
         resolved = {}
         
         for key, value in input_data.items():
-            if isinstance(value, str) and value.startswith("${") and value.endswith("}"):
-                # Variable reference
-                var_name = value[2:-1]
-                resolved[key] = context.get(var_name)
+            if isinstance(value, str) and "${" in value:
+                # Check for nested path like ${var}[key]
+                pattern = r'\$\{([^}]+)\}(?:\[([^\]]+)\])?'
+                match = re.match(pattern, value)
+                
+                if match:
+                    var_name = match.group(1)
+                    nested_key = match.group(2)
+                    
+                    # Get base value
+                    base_value = context.get(var_name)
+                    
+                    # Access nested key if specified
+                    if nested_key and base_value:
+                        if isinstance(base_value, dict):
+                            resolved[key] = base_value.get(nested_key)
+                        else:
+                            resolved[key] = base_value
+                    else:
+                        resolved[key] = base_value
+                else:
+                    resolved[key] = value
             else:
                 resolved[key] = value
         

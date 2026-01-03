@@ -15,6 +15,7 @@ from pathlib import Path
 from app.agents.ingestion_agent import ingestion_agent
 from app.agents.retrieval_agent import retrieval_agent
 from app.agents.question_generator_agent import question_generator_agent
+from app.agents.exam_analysis_agent import exam_analysis_agent
 from app.agents import coordinator
 
 router = APIRouter()
@@ -887,8 +888,201 @@ async def material_to_practice_workflow(
                 print(f"Warning: Could not delete temp file: {e}")
 
 
+# ============= EXAM GRADING ENDPOINTS (Phase 4) =============
+
+@router.post("/exams/grade")
+async def grade_exam(
+    questions: str = Form(..., description="JSON array of questions with student answers"),
+    student_id: Optional[str] = Form(None, description="Student ID"),
+    exam_id: Optional[str] = Form(None, description="Exam ID")
+):
+    """
+    Auto-grade an exam with student answers.
+    
+    **Question Format:**
+    ```json
+    [
+      {
+        "type": "mcq",
+        "question": "What is 2+2?",
+        "options": {"A": "3", "B": "4", "C": "5", "D": "6"},
+        "correct_answer": "B",
+        "student_answer": "B"
+      },
+      {
+        "type": "short_answer",
+        "question": "Explain photosynthesis",
+        "expected_answer": "Process by which plants make food...",
+        "student_answer": "Plants use sunlight to make food..."
+      }
+    ]
+    ```
+    
+    **Returns:**
+    - Graded questions with scores and feedback
+    - Total score and percentage
+    - Letter grade (A-F)
+    - Knowledge gaps identified
+    - Personalized recommendations
+    """
+    import json
+    
+    try:
+        # Parse questions JSON
+        questions_list = json.loads(questions)
+        
+        # Execute exam analysis agent
+        output = exam_analysis_agent.execute(
+            input_data={
+                "operation": "grade_exam",
+                "questions": questions_list,
+                "student_id": student_id,
+                "exam_id": exam_id
+            },
+            user_id=student_id,
+            related_entity="exams",
+            related_id=exam_id
+        )
+        
+        if output.status != "success":
+            raise HTTPException(
+                status_code=500,
+                detail=f"Grading failed: {output.error}"
+            )
+        
+        return {
+            "success": True,
+            "task_id": output.task_id,
+            "processing_time_ms": output.execution_time_ms,
+            **output.result
+        }
+        
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid JSON: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error grading exam: {str(e)}")
+
+
+@router.post("/exams/quick-grade")
+async def quick_grade_question(
+    question_type: str = Form(..., description="Question type: mcq, short_answer, fill_blank"),
+    question: str = Form(..., description="Question text"),
+    student_answer: str = Form(..., description="Student's answer"),
+    correct_answer: str = Form(..., description="Correct answer"),
+    expected_answer: Optional[str] = Form(None, description="Expected answer (for short_answer)"),
+    options: Optional[str] = Form(None, description="JSON object of options (for mcq)")
+):
+    """
+    Quick grade a single question.
+    
+    **Perfect for:**
+    - Testing individual questions
+    - Real-time feedback during practice
+    - Quick validation
+    
+    **Example:**
+    ```
+    question_type: "mcq"
+    question: "What is 2+2?"
+    student_answer: "B"
+    correct_answer: "B"
+    options: '{"A":"3","B":"4","C":"5","D":"6"}'
+    ```
+    """
+    import json
+    
+    try:
+        # Build question object
+        question_obj = {
+            "type": question_type,
+            "question": question,
+            "student_answer": student_answer,
+            "correct_answer": correct_answer
+        }
+        
+        if question_type == "mcq" and options:
+            question_obj["options"] = json.loads(options)
+        
+        if question_type == "short_answer" and expected_answer:
+            question_obj["expected_answer"] = expected_answer
+        
+        # Grade single question
+        output = exam_analysis_agent.execute(
+            input_data={
+                "operation": "grade_exam",
+                "questions": [question_obj]
+            },
+            related_entity="quick_grade",
+            related_id="single"
+        )
+        
+        if output.status != "success":
+            raise HTTPException(
+                status_code=500,
+                detail=f"Grading failed: {output.error}"
+            )
+        
+        result = output.result
+        graded_question = result["graded_questions"][0] if result["graded_questions"] else {}
+        
+        return {
+            "success": True,
+            "score": graded_question.get("score", 0),
+            "max_score": graded_question.get("max_score", 1),
+            "is_correct": graded_question.get("is_correct", False),
+            "feedback": graded_question.get("feedback", "No feedback available"),
+            "processing_time_ms": output.execution_time_ms
+        }
+        
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid JSON in options: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error grading question: {str(e)}")
+
+
+@router.get("/exams/grading-info")
+async def get_grading_info():
+    """
+    Get information about grading methods and scoring.
+    """
+    return {
+        "grading_methods": {
+            "mcq": {
+                "method": "Exact match",
+                "scoring": "1 point for correct, 0 for incorrect",
+                "feedback": "Automatic with correct answer shown"
+            },
+            "fill_blank": {
+                "method": "Similarity matching",
+                "scoring": "1 point if >80% similar, 0.5 if >60% similar, 0 otherwise",
+                "feedback": "Shows similarity percentage and correct answer"
+            },
+            "short_answer": {
+                "method": "AI evaluation",
+                "scoring": "0.0 to 1.0 based on AI assessment",
+                "feedback": "Detailed AI-generated feedback"
+            }
+        },
+        "letter_grades": {
+            "A": "90-100%",
+            "B": "80-89%",
+            "C": "70-79%",
+            "D": "60-69%",
+            "F": "0-59%"
+        },
+        "features": [
+            "Auto-grading for all question types",
+            "Detailed feedback per question",
+            "Knowledge gap identification",
+            "Personalized recommendations",
+            "Performance metrics"
+        ]
+    }
+
+
 # Register agents with coordinator
 coordinator.register_agent(ingestion_agent)
 coordinator.register_agent(retrieval_agent)
 coordinator.register_agent(question_generator_agent)
+coordinator.register_agent(exam_analysis_agent)
 
