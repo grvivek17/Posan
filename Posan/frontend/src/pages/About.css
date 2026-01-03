@@ -122,6 +122,40 @@
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+.creator-photo-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0 30px;
+}
+
+.creator-photo {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid white;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    animation: photoGlow 3s ease-in-out infinite;
+}
+
+.creator-photo:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes photoGlow {
+
+    0%,
+    100% {
+        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 8px 35px rgba(255, 255, 255, 0.5);
+    }
+}
+
 .creator-info {
     background: rgba(255, 255, 255, 0.2);
     border-radius: 15px;
@@ -180,6 +214,205 @@
     font-size: 1rem;
     opacity: 0.9;
     line-height: 1.6;
+}
+
+/* Gallery Section */
+.gallery-section {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.gallery-section h2 {
+    color: white;
+}
+
+.gallery-intro {
+    text-align: center;
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    opacity: 0.95;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+/* Thumbnail Styles */
+.gallery-thumbnail {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.gallery-thumbnail:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+.thumbnail-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 100%;
+    overflow: hidden;
+    background: #f5f5f5;
+}
+
+.thumbnail-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.thumbnail-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(102, 126, 234, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.gallery-thumbnail:hover .thumbnail-overlay {
+    opacity: 1;
+}
+
+.gallery-thumbnail:hover .thumbnail-image {
+    transform: scale(1.1);
+}
+
+.view-icon {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.thumbnail-info {
+    padding: 15px;
+    text-align: center;
+}
+
+.thumbnail-info h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 5px;
+}
+
+.thumbnail-info p {
+    font-size: 0.9rem;
+    color: #764ba2;
+    font-style: italic;
+}
+
+/* Modal Styles */
+.gallery-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    max-width: 900px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: slideUp 0.3s ease;
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #f5576c;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-close:hover {
+    background: #e74c3c;
+    transform: rotate(90deg) scale(1.1);
+}
+
+.modal-image-container {
+    width: 100%;
+    max-height: 500px;
+    overflow: hidden;
+    background: #f5f5f5;
+}
+
+.modal-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.modal-info {
+    padding: 30px;
+}
+
+.modal-info h2 {
+    font-size: 2rem;
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.modal-artist {
+    font-size: 1.2rem;
+    color: #764ba2;
+    font-weight: 600;
+    font-style: italic;
+    margin-bottom: 10px;
+}
+
+.modal-date {
+    font-size: 1rem;
+    color: #888;
+    margin-bottom: 20px;
+}
+
+.modal-description {
+    font-size: 1.1rem;
+    color: #555;
+    line-height: 1.8;
 }
 
 /* Contact Section */
@@ -339,6 +572,11 @@
         font-size: 1.1rem;
     }
 
+    .creator-photo {
+        width: 150px;
+        height: 150px;
+    }
+
     .contact-email {
         font-size: 1.2rem;
         padding: 12px 30px;
@@ -346,6 +584,14 @@
 
     .features-grid {
         grid-template-columns: 1fr;
+    }
+
+    .gallery-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .gallery-item {
+        max-width: 100%;
     }
 }
 

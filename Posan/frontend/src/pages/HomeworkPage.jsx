@@ -1,309 +1,346 @@
 import { useState } from 'react';
 import TestAnalysis from '../components/homework/TestAnalysis';
+import StudyMaterialAssistant from '../components/homework/StudyMaterialAssistant';
 import './HomeworkPage.css';
+import './HomeworkPageSidebar.css';
 
 const HomeworkPage = () => {
-    const [activeTab, setActiveTab] = useState('upload'); // 'upload', 'assignments', 'analysis'
-    const [assignments, setAssignments] = useState([
-        // Sample data - in real app, this would come from backend
-        {
-            id: 1,
-            title: 'Math Worksheet',
-            subject: 'Mathematics',
-            file: 'math_homework.pdf',
-            uploadDate: '2024-12-28',
-            status: 'submitted'
-        }
-    ]);
-    const [isDragging, setIsDragging] = useState(false);
-    const [uploadForm, setUploadForm] = useState({
-        title: '',
-        subject: 'Mathematics',
-        description: '',
-        file: null
-    });
+    const [selectedGrade, setSelectedGrade] = useState('Grade 4');
+    const [activeTab, setActiveTab] = useState('study'); // 'study' or 'test'
+    const [quizAnswer, setQuizAnswer] = useState(null);
+    const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+
+    const grades = ['Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
 
     const subjects = [
-        { value: 'Mathematics', icon: '🔢', color: '#4caf50' },
-        { value: 'Science', icon: '🔬', color: '#2196f3' },
-        { value: 'English', icon: '📚', color: '#ff9800' },
-        { value: 'History', icon: '🏛️', color: '#9c27b0' },
-        { value: 'Art', icon: '🎨', color: '#e91e63' },
-        { value: 'Other', icon: '📝', color: '#607d8b' }
+        {
+            name: 'Math',
+            subtitle: 'Numbers & Shapes',
+            icon: '➗',
+            color: 'var(--primary-yellow)',
+            url: '/ai-content'
+        },
+        {
+            name: 'Science',
+            subtitle: 'World & Nature',
+            icon: '🔬',
+            color: '#A3E4F0',
+            url: '/ai-content'
+        },
+        {
+            name: 'History',
+            subtitle: 'Time Travel',
+            icon: '🏛️',
+            color: '#E5E7EB',
+            url: '/magazines'
+        },
+        {
+            name: 'English',
+            subtitle: 'Reading & Writing',
+            icon: '📖',
+            color: '#FFE4EF',
+            url: '/magazines'
+        }
     ];
 
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        setIsDragging(true);
-    };
-
-    const handleDragLeave = (e) => {
-        e.preventDefault();
-        setIsDragging(false);
-    };
-
-    const handleDrop = (e) => {
-        e.preventDefault();
-        setIsDragging(false);
-
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            setUploadForm({ ...uploadForm, file: files[0] });
+    const funResources = [
+        {
+            id: 1,
+            category: 'SCIENCE',
+            title: 'Why is the sky blue?',
+            time: '3 min read',
+            icon: '🌍',
+            color: '#4ECDC4'
+        },
+        {
+            id: 2,
+            category: 'MATH',
+            title: 'Fun with numbers',
+            time: '5 min read',
+            icon: '🎲',
+            color: '#FF9F1C'
         }
-    };
+    ];
 
-    const handleFileSelect = (e) => {
-        if (e.target.files.length > 0) {
-            setUploadForm({ ...uploadForm, file: e.target.files[0] });
-        }
-    };
-
-    const handleInputChange = (e) => {
-        setUploadForm({
-            ...uploadForm,
-            [e.target.name]: e.target.value
-        });
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        if (!uploadForm.file || !uploadForm.title) {
-            alert('Please provide a title and select a file!');
-            return;
-        }
-
-        // In real app, this would upload to backend
-        const newAssignment = {
-            id: assignments.length + 1,
-            title: uploadForm.title,
-            subject: uploadForm.subject,
-            file: uploadForm.file.name,
-            uploadDate: new Date().toISOString().split('T')[0],
-            status: 'submitted',
-            description: uploadForm.description
-        };
-
-        setAssignments([newAssignment, ...assignments]);
-
-        // Reset form
-        setUploadForm({
-            title: '',
-            subject: 'Mathematics',
-            description: '',
-            file: null
-        });
-
-        // Reset file input
-        document.getElementById('fileInput').value = '';
-
-        alert(`✅ "${uploadForm.title}" uploaded successfully!`);
-        setActiveTab('assignments'); // Switch to assignments tab
-    };
-
-    const handleDelete = (id) => {
-        if (window.confirm('Are you sure you want to delete this assignment?')) {
-            setAssignments(assignments.filter(a => a.id !== id));
-        }
-    };
-
-    const getSubjectInfo = (subject) => {
-        return subjects.find(s => s.value === subject) || subjects[subjects.length - 1];
+    const checkAnswer = (answer) => {
+        setQuizAnswer(answer);
+        setTimeout(() => setQuizAnswer(null), 2000);
     };
 
     return (
-        <div className="homework-page">
-            <div className="homework-header">
-                <h1 className="page-title">📚 My Homework</h1>
-                <p className="page-subtitle">Manage assignments and get AI-powered test analysis</p>
-            </div>
+        <div className="homework-page-new">
+            <div className="container">
+                {/* Header with Greeting */}
+                <div className="homework-header-new">
+                    <div className="user-greeting">
+                        <div className="user-avatar">👩</div>
+                        <div>
+                            <p className="greeting-text">Good Morning,</p>
+                            <h1 className="user-name">Alex!</h1>
+                        </div>
+                    </div>
+                    <button className="notification-btn">
+                        <span className="notification-icon">🔔</span>
+                    </button>
+                </div>
 
-            {/* Homework Tabs */}
-            <div className="homework-tabs">
-                <button
-                    className={`homework-tab ${activeTab === 'upload' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('upload')}
-                >
-                    📤 Upload Assignment
-                </button>
-                <button
-                    className={`homework-tab ${activeTab === 'assignments' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('assignments')}
-                >
-                    📋 My Assignments {assignments.length > 0 && <span className="tab-badge">{assignments.length}</span>}
-                </button>
-                <button
-                    className={`homework-tab ${activeTab === 'analysis' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('analysis')}
-                >
-                    🎯 Test Analysis
-                </button>
-            </div>
+                {/* Search Bar */}
+                <div className="search-bar-homework">
+                    <span className="search-icon">🔍</span>
+                    <input
+                        type="text"
+                        placeholder="Search for homework help..."
+                        className="search-input-homework"
+                    />
+                </div>
 
-            <div className="homework-content">
-                {/* Upload Tab */}
-                {activeTab === 'upload' && (
-                    <div className="upload-section">
-                        <h2 className="section-title">📤 Upload New Assignment</h2>
+                {/* Main Content with Sidebar Layout */}
+                <div className="homework-layout">
+                    {/* Main Content */}
+                    <div className="homework-main-content">
+                        {/* What are we learning today? */}
+                        <section className="learning-section">
+                            <h2 className="section-title-hw">
+                                What are we <span className="highlight-yellow">learning today?</span>
+                            </h2>
 
-                        <form onSubmit={handleSubmit} className="upload-form">
-                            <div className="form-group">
-                                <label htmlFor="title">Assignment Title *</label>
-                                <input
-                                    type="text"
-                                    id="title"
-                                    name="title"
-                                    value={uploadForm.title}
-                                    onChange={handleInputChange}
-                                    placeholder="e.g., Math Chapter 5 Exercises"
-                                    required
-                                />
+                            {/* Grade Selection */}
+                            <div className="grade-selector">
+                                {grades.map((grade) => (
+                                    <button
+                                        key={grade}
+                                        className={`grade-btn ${selectedGrade === grade ? 'active' : ''}`}
+                                        onClick={() => setSelectedGrade(grade)}
+                                    >
+                                        {grade.replace('Grade ', '')}
+                                    </button>
+                                ))}
                             </div>
 
-                            <div className="form-group">
-                                <label htmlFor="subject">Subject *</label>
-                                <select
-                                    id="subject"
-                                    name="subject"
-                                    value={uploadForm.subject}
-                                    onChange={handleInputChange}
-                                >
-                                    {subjects.map(subject => (
-                                        <option key={subject.value} value={subject.value}>
-                                            {subject.icon} {subject.value}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="description">Description (Optional)</label>
-                                <textarea
-                                    id="description"
-                                    name="description"
-                                    value={uploadForm.description}
-                                    onChange={handleInputChange}
-                                    placeholder="Add any notes about this assignment..."
-                                    rows="3"
-                                ></textarea>
-                            </div>
-
-                            <div
-                                className={`drop-zone ${isDragging ? 'dragging' : ''} ${uploadForm.file ? 'has-file' : ''}`}
-                                onDragOver={handleDragOver}
-                                onDragLeave={handleDragLeave}
-                                onDrop={handleDrop}
-                            >
-                                {uploadForm.file ? (
-                                    <div className="file-preview">
-                                        <div className="file-icon">📄</div>
-                                        <div className="file-info">
-                                            <p className="file-name">{uploadForm.file.name}</p>
-                                            <p className="file-size">
-                                                {(uploadForm.file.size / 1024).toFixed(2)} KB
-                                            </p>
+                            {/* Subject Cards */}
+                            <div className="subjects-grid">
+                                {subjects.map((subject) => (
+                                    <div
+                                        key={subject.name}
+                                        className="subject-card"
+                                        style={{ backgroundColor: subject.color }}
+                                        onClick={() => window.location.href = subject.url}
+                                    >
+                                        <div className="subject-icon-large">{subject.icon}</div>
+                                        <div className="subject-info">
+                                            <h3 className="subject-name">{subject.name}</h3>
+                                            <p className="subject-subtitle">{subject.subtitle}</p>
                                         </div>
-                                        <button
-                                            type="button"
-                                            className="remove-file-btn"
-                                            onClick={() => {
-                                                setUploadForm({ ...uploadForm, file: null });
-                                                document.getElementById('fileInput').value = '';
-                                            }}
-                                        >
-                                            ✕
-                                        </button>
                                     </div>
-                                ) : (
-                                    <>
-                                        <div className="drop-icon">📎</div>
-                                        <p className="drop-text">Drag & drop your file here</p>
-                                        <p className="drop-hint">or</p>
-                                        <label htmlFor="fileInput" className="browse-btn">
-                                            Browse Files
-                                        </label>
-                                    </>
+                                ))}
+                            </div>
+                        </section>
+
+                        {/* Daily Challenge */}
+                        <section className="daily-challenge">
+                            <div className="challenge-header">
+                                <div>
+                                    <span className="challenge-label">DAILY CHALLENGE</span>
+                                    <h3 className="challenge-title">Quiz Time!</h3>
+                                    <p className="challenge-subtitle">Solve this to earn a badge.</p>
+                                </div>
+                                <div className="trophy-icon">🏆</div>
+                            </div>
+
+                            <div className="quiz-box">
+                                <p className="quiz-question">What is 5 x 6?</p>
+                                <div className="quiz-answers">
+                                    <button
+                                        className={`quiz-answer ${quizAnswer === 25 ? 'incorrect' : ''}`}
+                                        onClick={() => checkAnswer(25)}
+                                    >
+                                        25
+                                    </button>
+                                    <button
+                                        className={`quiz-answer ${quizAnswer === 30 ? 'correct' : ''}`}
+                                        onClick={() => checkAnswer(30)}
+                                    >
+                                        30
+                                    </button>
+                                </div>
+                                {quizAnswer === 30 && (
+                                    <p className="quiz-feedback correct">✅ Correct! Great job!</p>
                                 )}
-                                <input
-                                    type="file"
-                                    id="fileInput"
-                                    onChange={handleFileSelect}
-                                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
-                                    style={{ display: 'none' }}
-                                />
+                                {quizAnswer === 25 && (
+                                    <p className="quiz-feedback incorrect">❌ Try again!</p>
+                                )}
+                            </div>
+                        </section>
+
+                        {/* Fun Resources */}
+                        <section className="fun-resources">
+                            <div className="section-header-hw">
+                                <h2 className="section-title-hw">Fun Resources</h2>
+                                <button className="view-all-btn">View all</button>
                             </div>
 
-                            <button type="submit" className="submit-btn">
-                                ✓ Upload Assignment
-                            </button>
-                        </form>
-                    </div>
-                )}
-
-                {/* Assignments Tab */}
-                {activeTab === 'assignments' && (
-                    <div className="assignments-section">
-                        <h2 className="section-title">📋 My Uploaded Assignments</h2>
-
-                        {assignments.length === 0 ? (
-                            <div className="empty-state">
-                                <div className="empty-icon">📭</div>
-                                <p>No assignments uploaded yet</p>
-                                <p className="empty-hint">Upload your first assignment above!</p>
-                            </div>
-                        ) : (
-                            <div className="assignments-grid">
-                                {assignments.map(assignment => {
-                                    const subjectInfo = getSubjectInfo(assignment.subject);
-                                    return (
-                                        <div key={assignment.id} className="assignment-card">
-                                            <div
-                                                className="assignment-header"
-                                                style={{ background: `linear-gradient(135deg, ${subjectInfo.color} 0%, ${subjectInfo.color}dd 100%)` }}
-                                            >
-                                                <div className="subject-badge">
-                                                    {subjectInfo.icon} {assignment.subject}
-                                                </div>
-                                                <div className="status-badge">
-                                                    ✓ {assignment.status}
-                                                </div>
-                                            </div>
-                                            <div className="assignment-body">
-                                                <h3 className="assignment-title">{assignment.title}</h3>
-                                                {assignment.description && (
-                                                    <p className="assignment-description">{assignment.description}</p>
-                                                )}
-                                                <div className="assignment-meta">
-                                                    <span className="file-name">📄 {assignment.file}</span>
-                                                    <span className="upload-date">📅 {assignment.uploadDate}</span>
-                                                </div>
-                                            </div>
-                                            <div className="assignment-actions">
-                                                <button className="action-btn view-btn">
-                                                    👁️ View
-                                                </button>
-                                                <button className="action-btn download-btn">
-                                                    ⬇️ Download
-                                                </button>
-                                                <button
-                                                    className="action-btn delete-btn"
-                                                    onClick={() => handleDelete(assignment.id)}
-                                                >
-                                                    🗑️ Delete
-                                                </button>
-                                            </div>
+                            <div className="resources-list">
+                                {funResources.map((resource) => (
+                                    <div key={resource.id} className="resource-item">
+                                        <div
+                                            className="resource-icon-circle"
+                                            style={{ backgroundColor: resource.color }}
+                                        >
+                                            {resource.icon}
                                         </div>
-                                    );
-                                })}
+                                        <div className="resource-info">
+                                            <span className="resource-category">{resource.category}</span>
+                                            <h4 className="resource-title">{resource.title}</h4>
+                                            <span className="resource-time">{resource.time}</span>
+                                        </div>
+                                        <button className="resource-arrow">→</button>
+                                    </div>
+                                ))}
                             </div>
-                        )}
-                    </div>
-                )}
+                        </section>
 
-                {/* Test Analysis Tab */}
-                {activeTab === 'analysis' && (
-                    <div className="test-analysis-container">
-                        <TestAnalysis />
+                        {/* Stuck on a problem? */}
+                        <div className="help-banner">
+                            <div className="help-content">
+                                <span className="help-icon">📸</span>
+                                <div>
+                                    <h3 className="help-title">Stuck on a problem?</h3>
+                                    <p className="help-subtitle">Snap a photo to get help!</p>
+                                </div>
+                            </div>
+                            <button className="help-arrow">→</button>
+                        </div>
+                    </div>
+
+                    {/* Right Sidebar */}
+                    <div className="homework-sidebar">
+                        {/* AI Study Tool Widget */}
+                        <div className="sidebar-widget ai-tool-widget">
+                            <div className="widget-header">
+                                <h3>🤖 AI Study Tool</h3>
+                            </div>
+                            <div className="widget-content">
+                                <p className="widget-description">
+                                    Get instant help with homework using AI assistance
+                                </p>
+                                <div className="quick-actions">
+                                    <button className="quick-action-btn open-ai-tool-btn" onClick={() => { setActiveTab('study'); setIsAIModalOpen(true); }}>
+                                        <span className="action-icon">📖</span>
+                                        <span>Study Help</span>
+                                    </button>
+                                    <button className="quick-action-btn open-ai-tool-btn" onClick={() => { setActiveTab('test'); setIsAIModalOpen(true); }}>
+                                        <span className="action-icon">🎯</span>
+                                        <span>Test Analysis</span>
+                                    </button>
+                                </div>
+                                <div className="ai-stats">
+                                    <div className="stat-item">
+                                        <span className="stat-number">24</span>
+                                        <span className="stat-label">Questions Answered</span>
+                                    </div>
+                                    <div className="stat-item">
+                                        <span className="stat-number">5</span>
+                                        <span className="stat-label">Tests Analyzed</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Assignment Tracker Widget */}
+                        <div className="sidebar-widget assignment-tracker-widget">
+                            <div className="widget-header">
+                                <h3>📋 Assignment Tracker</h3>
+                            </div>
+                            <div className="widget-content">
+                                <div className="upload-section">
+                                    <div className="upload-area">
+                                        <div className="upload-icon">📁</div>
+                                        <p className="upload-text">Upload Assignment</p>
+                                        <p className="upload-subtext">Drag & drop or click to upload</p>
+                                        <input
+                                            type="file"
+                                            className="file-input"
+                                            accept=".pdf,.doc,.docx,.jpg,.png"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="assignments-list">
+                                    <h4 className="assignments-title">Upcoming</h4>
+                                    <div className="assignment-item">
+                                        <div className="assignment-icon math">➗</div>
+                                        <div className="assignment-details">
+                                            <p className="assignment-name">Math Worksheet</p>
+                                            <p className="assignment-due">Due: Tomorrow</p>
+                                        </div>
+                                        <span className="assignment-status pending">⏳</span>
+                                    </div>
+                                    <div className="assignment-item">
+                                        <div className="assignment-icon science">🔬</div>
+                                        <div className="assignment-details">
+                                            <p className="assignment-name">Science Project</p>
+                                            <p className="assignment-due">Due: Friday</p>
+                                        </div>
+                                        <span className="assignment-status pending">⏳</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Progress Widget */}
+                        <div className="sidebar-widget progress-widget">
+                            <div className="widget-header">
+                                <h3>📊 Weekly Progress</h3>
+                            </div>
+                            <div className="widget-content">
+                                <div className="progress-stat">
+                                    <div className="progress-label">
+                                        <span>Study Time</span>
+                                        <span className="progress-value">12h 30m</span>
+                                    </div>
+                                    <div className="progress-bar">
+                                        <div className="progress-fill" style={{ width: '75%' }}></div>
+                                    </div>
+                                </div>
+                                <div className="progress-stat">
+                                    <div className="progress-label">
+                                        <span>Assignments</span>
+                                        <span className="progress-value">4/6</span>
+                                    </div>
+                                    <div className="progress-bar">
+                                        <div className="progress-fill" style={{ width: '66%' }}></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* AI Tools Modal */}
+                {isAIModalOpen && (
+                    <div className="ai-modal-overlay" onClick={() => setIsAIModalOpen(false)}>
+                        <div className="ai-modal-content" onClick={(e) => e.stopPropagation()}>
+                            <div className="ai-modal-header">
+                                <h2>🚀 AI Study Tools</h2>
+                                <button className="modal-close-btn" onClick={() => setIsAIModalOpen(false)}>✕</button>
+                            </div>
+                            <div className="ai-tabs">
+                                <button
+                                    className={`ai-tab-btn ${activeTab === 'study' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('study')}
+                                >
+                                    📖 Study Assistant
+                                </button>
+                                <button
+                                    className={`ai-tab-btn ${activeTab === 'test' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('test')}
+                                >
+                                    🎯 Test Analysis
+                                </button>
+                            </div>
+                            <div className="ai-tool-container">
+                                {activeTab === 'study' ? <StudyMaterialAssistant /> : <TestAnalysis />}
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

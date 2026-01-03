@@ -11,7 +11,6 @@ import cv2
 import numpy as np
 from PIL import Image
 import pytesseract
-from pdf2image import convert_from_path
 import logging
 
 logger = logging.getLogger(__name__)
@@ -109,38 +108,101 @@ class OCRService:
     def extract_text_from_pdf(self, pdf_path: str) -> str:
         """
         Extract text from a PDF file.
-        
-        Args:
-            pdf_path: Path to PDF file
-            
-        Returns:
-            Extracted text from all pages
+        Try pdfplumber first (best for digital PDFs), 
+        fall back to OCR if needed.
         """
+        all_text = []
         try:
-            # Convert PDF to images
-            images = convert_from_path(pdf_path, dpi=300)
+            import pdfplumber
+            with pdfplumber.open(pdf_path) as pdf:
+                # Limit to first 20 pages for performance, especially for study material
+                max_pages = min(len(pdf.pages), 20)
+                for i in range(max_pages):
+                    page = pdf.pages[i]
+                    text = page.extract_text()
+                    if text:
+                        all_text.append(text)
             
-            all_text = []
-            for i, image in enumerate(images):
-                logger.info(f"Processing page {i+1}/{len(images)}")
+            # If we got substantial text, return it
+            content = "\n\n".join(all_text)
+            if len(content.strip()) > 50:
+                logger.info(f"Successfully extracted {len(content)} chars from {max_pages} pages using pdfplumber")
+                return content
                 
-                # Convert PIL Image to numpy array
-                img_array = np.array(image)
-                
-                # Save temporarily or process directly
-                with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp:
-                    image.save(tmp.name)
-                    text = self.extract_text_from_image(tmp.name)
-                    all_text.append(text)
-                    os.unlink(tmp.name)
-            
-            combined_text = "\n\n--- PAGE BREAK ---\n\n".join(all_text)
-            logger.info(f"Extracted {len(combined_text)} characters from PDF")
-            return combined_text
-            
         except Exception as e:
-            logger.error(f"Error extracting text from PDF: {str(e)}")
-            raise
+            logger.warning(f"pdfplumber failed, trying pypdf: {e}")
+
+        # Try pypdf (another digital PDF reader)
+        try:
+            from pypdf import PdfReader
+            reader = PdfReader(pdf_path)
+            pypdf_text = []
+            max_pages = min(len(reader.pages), 20)
+            for i in range(max_pages):
+                page = reader.pages[i]
+                text = page.extract_text()
+                if text:
+                    pypdf_text.append(text)
+            
+            content = "\n\n".join(pypdf_text)
+            if len(content.strip()) > 50:
+                logger.info(f"Successfully extracted {len(content)} chars from {max_pages} pages using pypdf")
+                return content
+        except Exception as e:
+            logger.warning(f"pypdf failed: {e}")
+
+        # Try fitz (PyMuPDF - very fast and reliable)
+        try:
+            import fitz
+            doc = fitz.open(pdf_path)
+            fitz_text = []
+            max_pages = min(len(doc), 20)
+            for i in range(max_pages):
+                page = doc[i]
+                text = page.get_text()
+                if text:
+                    fitz_text.append(text)
+            
+            content = "\n\n".join(fitz_text)
+            if len(content.strip()) > 50:
+                logger.info(f"Successfully extracted {len(content)} chars from {max_pages} pages using fitz")
+                return content
+        except Exception as e:
+            logger.warning(f"fitz failed: {e}")
+
+        # Fallback to OCR (for scanned PDFs) - Using fitz for image conversion to avoid Poppler dependency
+        try:
+            import fitz
+            doc = fitz.open(pdf_path)
+            ocr_text = []
+            
+            for i in range(len(doc)):
+                page = doc.load_page(i)
+                # Render page to an image (pixmap)
+                pix = page.get_pixmap(matrix=fitz.Matrix(300/72, 300/72)) # 300 DPI
+                
+                # Convert pixmap to image bytes
+                img_data = pix.tobytes("png")
+                
+                # Convert to numpy array for our image processor
+                nparr = np.frombuffer(img_data, np.uint8)
+                img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                
+                if img is not None:
+                    processed_image = self.preprocess_image(img)
+                    pil_image = Image.fromarray(processed_image)
+                    text = pytesseract.image_to_string(pil_image, config=r'--oem 3 --psm 6')
+                    ocr_text.append(text)
+            
+            combined_text = "\n\n".join(ocr_text)
+            if len(combined_text.strip()) > 10:
+                logger.info(f"Extracted {len(combined_text)} characters from PDF using fitz+OCR fallback")
+                return combined_text
+        except Exception as e:
+            logger.error(f"OCR fallback failed: {e}")
+
+        # Final return
+        return "\n\n".join(all_text) if all_text else ""
     
     def extract_text(self, file_path: str, file_extension: str) -> str:
         """

@@ -70,6 +70,7 @@ export const puzzlesAPI = {
     submitPuzzle: (userId, data) => api.post(`/puzzles/puzzles/submit?user_id=${userId}`, data),
     getUserProgress: (userId) => api.get(`/puzzles/puzzles/progress/${userId}`),
     getPuzzleStats: (userId) => api.get(`/puzzles/puzzles/stats/${userId}`),
+    generateAIPuzzle: (params) => api.post('/puzzles/generate', null, { params }),
 };
 
 // Gamification API
@@ -78,6 +79,16 @@ export const gamificationAPI = {
     getUserAchievements: (userId) => api.get(`/gamification/achievements/${userId}`),
     getLeaderboard: (params) => api.get('/gamification/leaderboard', { params }),
     getUserStats: (userId) => api.get(`/gamification/stats/${userId}`),
+};
+
+// Homework / AI Study API
+export const homeworkAPI = {
+    uploadStudyMaterial: (formData, ageGroup) => api.post(`/ai/study-material/upload?age_group=${ageGroup}`, formData),
+    generatePracticeQuestions: (params) => api.post('/ai/study-material/generate-questions', null, { params }),
+    evaluateAnswer: (data) => api.post('/ai/study-material/evaluate-answer', data),
+    analyzePerformance: (answers) => api.post('/ai/study-material/analyze-performance', answers),
+    generateStudyPlan: (data) => api.post('/ai/study-material/generate-plan', data),
+    analyzeTestUpload: (formData, params) => api.post('/ai/analyze/test-upload', formData, { params }),
 };
 
 export default api;

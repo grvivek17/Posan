@@ -458,3 +458,226 @@ async def get_topic_suggestions(age_group: str = Query(default="6-8")):
     }
     
     return topics.get(age_group, topics["6-8"])
+
+
+# ============= STUDY MATERIAL ANALYSIS ENDPOINTS =============
+
+class StudyMaterialResponse(BaseModel):
+    summary: str
+    key_topics: List[str]
+    age_group: str
+    original_length: int
+
+
+class PracticeQuestionsResponse(BaseModel):
+    mcqs: List[dict]
+    short_answers: List[dict]
+    total_questions: int
+
+
+class AnswerEvaluationRequest(BaseModel):
+    question: str
+    student_answer: str
+    expected_answer: str
+
+
+class AnswerEvaluationResponse(BaseModel):
+    question: str
+    score: int
+    is_correct: str
+    feedback: str
+
+
+class StudyPlanRequest(BaseModel):
+    topics: List[str]
+    weak_areas: List[str] = []
+    days: int = 7
+    age_group: str = "9-11"
+
+
+@router.post("/study-material/upload", summary="Upload PDF study material for analysis")
+async def upload_study_material(
+    file: UploadFile = File(..., description="PDF study material"),
+    age_group: str = Query(default="9-11", description="Student age group")
+):
+    """
+    Upload a PDF study material for AI-powered analysis.
+    
+    This endpoint:
+    1. Extracts text from the PDF
+    2. Summarizes the content into a study plan
+    3. Identifies key topics and vocabulary
+    4. Returns a structured learning guide
+    
+    - **file**: PDF file (max 10MB)
+    - **age_group**: Student's age group for appropriate content
+    """
+    # Validate file type
+    if not file.filename.lower().endswith('.pdf'):
+        raise HTTPException(
+            status_code=400,
+            detail="Only PDF files are accepted for study material"
+        )
+    
+    temp_file_path = None
+    try:
+        # Save uploaded file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
+            content = await file.read()
+            if len(content) > 10 * 1024 * 1024:  # 10MB limit
+                raise HTTPException(status_code=400, detail="File too large (max 10MB)")
+            temp_file.write(content)
+            temp_file_path = temp_file.name
+        
+        # Extract text using OCR service
+        extracted_text = ocr_service.extract_text_from_pdf(temp_file_path)
+        
+        text_len = len(extracted_text.strip()) if extracted_text else 0
+        print(f"📄 PDF Extraction Result: {text_len} characters found")
+
+        if not extracted_text or text_len < 10:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Could not extract enough text from PDF (only {text_len} chars found). Please ensure the PDF contains readable text or high-quality images."
+            )
+        
+        # Summarize and analyze
+        result = content_generator.summarize_study_material(extracted_text, age_group)
+        
+        return {
+            "success": True,
+            "filename": file.filename,
+            "characters_extracted": len(extracted_text),
+            **result
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing PDF: {str(e)}")
+    finally:
+        if temp_file_path and os.path.exists(temp_file_path):
+            os.unlink(temp_file_path)
+
+
+@router.post("/study-material/generate-questions", summary="Generate practice questions from text")
+async def generate_practice_questions(
+    text: str = Query(..., description="Study material text (or summary)"),
+    num_mcq: int = Query(default=5, ge=1, le=10),
+    num_short: int = Query(default=3, ge=1, le=5),
+    age_group: str = Query(default="9-11")
+):
+    """
+    Generate practice questions from study material.
+    
+    - **text**: The study material text to generate questions from
+    - **num_mcq**: Number of multiple choice questions (1-10)
+    - **num_short**: Number of short answer questions (1-5)
+    - **age_group**: Student's age group
+    
+    Returns MCQs with options and correct answers, plus short answer questions.
+    """
+    try:
+        if len(text) < 100:
+            raise HTTPException(
+                status_code=400,
+                detail="Text too short. Need at least 100 characters."
+            )
+        
+        result = content_generator.generate_practice_questions(
+            text=text,
+            num_mcq=num_mcq,
+            num_short=num_short,
+            age_group=age_group
+        )
+        
+        return {"success": True, **result}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating questions: {str(e)}")
+
+
+@router.post("/study-material/evaluate-answer", summary="Evaluate a student's answer")
+async def evaluate_student_answer(request: AnswerEvaluationRequest):
+    """
+    Evaluate a student's answer using AI.
+    
+    - **question**: The question asked
+    - **student_answer**: Student's submitted answer
+    - **expected_answer**: The correct/expected answer
+    
+    Returns score (0-100), correctness, and constructive feedback.
+    """
+    try:
+        result = content_generator.evaluate_answer(
+            question=request.question,
+            student_answer=request.student_answer,
+            expected_answer=request.expected_answer
+        )
+        
+        return {"success": True, **result}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error evaluating answer: {str(e)}")
+
+
+@router.post("/study-material/analyze-performance", summary="Analyze weak topics from answers")
+async def analyze_performance(answers: List[AnswerEvaluationRequest]):
+    """
+    Analyze a batch of student answers to identify weak topics.
+    
+    - **answers**: List of evaluated answers with scores
+    
+    Returns weak topics, strengths, and personalized recommendations.
+    """
+    try:
+        # First evaluate all answers
+        evaluated = []
+        for answer in answers:
+            result = content_generator.evaluate_answer(
+                question=answer.question,
+                student_answer=answer.student_answer,
+                expected_answer=answer.expected_answer
+            )
+            evaluated.append(result)
+        
+        # Analyze weak topics
+        analysis = content_generator.analyze_weak_topics(evaluated)
+        
+        return {
+            "success": True,
+            "individual_results": evaluated,
+            **analysis
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error analyzing performance: {str(e)}")
+
+
+@router.post("/study-material/generate-plan", summary="Generate personalized study plan")
+async def generate_study_plan(request: StudyPlanRequest):
+    """
+    Generate a personalized study plan based on topics and weak areas.
+    
+    - **topics**: All topics from study material
+    - **weak_areas**: Topics the student struggles with
+    - **days**: Number of days to plan (1-14)
+    - **age_group**: Student's age group
+    
+    Returns a day-by-day study schedule with activities.
+    """
+    try:
+        result = content_generator.generate_study_plan(
+            topics=request.topics,
+            weak_areas=request.weak_areas,
+            days=request.days,
+            age_group=request.age_group
+        )
+        
+        return {"success": True, **result}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating study plan: {str(e)}")
+

@@ -1,0 +1,428 @@
+/* Homework Layout with Sidebar */
+.homework-layout {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.homework-main-content {
+    min-width: 0;
+    /* Prevent grid blowout */
+}
+
+/* Sidebar Styles */
+.homework-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.sidebar-widget {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+}
+
+.sidebar-widget:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.widget-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.25rem;
+}
+
+.widget-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.widget-content {
+    padding: 1.25rem;
+}
+
+.widget-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+/* AI Tool Widget */
+.quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.quick-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    background: var(--bg-light-gray);
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-primary);
+}
+
+.quick-action-btn:hover {
+    background: white;
+    border-color: #667eea;
+    transform: translateX(4px);
+}
+
+.action-icon {
+    font-size: 1.25rem;
+}
+
+.ai-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* Assignment Tracker Widget */
+.upload-section {
+    margin-bottom: 1.5rem;
+}
+
+.upload-area {
+    position: relative;
+    border: 2px dashed #d0d0d0;
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--bg-light-gray);
+}
+
+.upload-area:hover {
+    border-color: #764ba2;
+    background: white;
+}
+
+.upload-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.upload-text {
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0.5rem 0 0.25rem;
+}
+
+.upload-subtext {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.assignments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.assignments-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin: 0 0 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.assignment-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem;
+    background: var(--bg-light-gray);
+    border-radius: var(--radius-md);
+    transition: all 0.3s ease;
+}
+
+.assignment-item:hover {
+    background: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.assignment-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.assignment-icon.math {
+    background: #FFE500;
+}
+
+.assignment-icon.science {
+    background: #A3E4F0;
+}
+
+.assignment-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.assignment-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem;
+}
+
+.assignment-due {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.assignment-status {
+    font-size: 1.1rem;
+}
+
+/* Progress Widget */
+.progress-widget .widget-header {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.progress-stat {
+    margin-bottom: 1.25rem;
+}
+
+.progress-stat:last-child {
+    margin-bottom: 0;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.progress-label span:first-child {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.progress-value {
+    color: #667eea;
+    font-weight: 700;
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--bg-light-gray);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    transition: width 0.6s ease;
+}
+
+/* Responsive Sidebar */
+@media (max-width: 1024px) {
+    .homework-layout {
+        grid-template-columns: 1fr 300px;
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .homework-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .homework-sidebar {
+        order: -1;
+        /* Move sidebar to top on mobile */
+    }
+
+    .sidebar-widget {
+        margin-bottom: 1rem;
+    }
+
+    .ai-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* AI Tools Modal */
+.ai-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.ai-modal-content {
+    background: white;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: slideUp 0.3s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ai-modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ai-modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.modal-close-btn {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+.ai-modal-content .ai-tabs {
+    margin: 1.5rem 2rem 1rem;
+}
+
+.ai-modal-content .ai-tool-container {
+    padding: 0 2rem 2rem;
+}
+
+.open-ai-tool-btn {
+    font-weight: 700;
+}
+
+.open-ai-tool-btn:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: transparent;
+}
+
+/* Mobile responsive modal */
+@media (max-width: 768px) {
+    .ai-modal-content {
+        max-width: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    .ai-modal-header {
+        border-radius: 0;
+    }
+
+    .ai-modal-content .ai-tabs {
+        margin: 1rem;
+    }
+
+    .ai-modal-content .ai-tool-container {
+        padding: 0 1rem 1rem;
+    }
+}
