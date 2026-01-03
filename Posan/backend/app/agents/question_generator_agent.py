@@ -15,7 +15,7 @@ import random
 import re
 
 from app.agents import AgentBase
-from app.services.ai_content import AIContentGenerator
+from app.services.ai_content import ContentGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class QuestionGeneratorAgent(AgentBase):
     
     def __init__(self):
         super().__init__(name="question_generator", max_retries=2)
-        self.ai_generator = AIContentGenerator()
+        self.ai_generator = ContentGenerator()
     
     def _execute_task(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
