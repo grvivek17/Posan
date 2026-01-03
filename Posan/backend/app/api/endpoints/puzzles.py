@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 from app.core.database import get_db
 from app.models.puzzle import Puzzle, UserPuzzleProgress, PuzzleType, DifficultyLevel
@@ -199,3 +199,115 @@ def get_puzzle_stats(user_id: int, db: Session = Depends(get_db)):
         average_completion_time=float(avg_time) if avg_time else None,
         by_type=by_type
     )
+
+
+@router.post("/generate", status_code=status.HTTP_201_CREATED)
+def generate_ai_puzzle(
+    puzzle_type: Optional[str] = "word_search",
+    topic: Optional[str] = "animals",
+    difficulty: Optional[str] = "easy",
+    age_group: Optional[str] = "6-8",
+    save_to_db: bool = False,
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """
+    Generate a random puzzle using AI (Hugging Face models).
+    
+    Args:
+        puzzle_type: word_search, crossword, sudoku
+        topic: Theme for the puzzle (e.g., animals, space, ocean)
+        difficulty: easy, medium, hard
+        age_group: 3-5, 6-8, 9-11, 12-14
+        save_to_db: Whether to save the generated puzzle to database
+    
+    Returns:
+        Generated puzzle with all data
+    """
+    try:
+        from app.services.ai_content import generate_complete_puzzle
+        
+        # Generate puzzle using AI
+        puzzle_data = generate_complete_puzzle(
+            puzzle_type=puzzle_type,
+            topic=topic,
+            difficulty=difficulty,
+            age_group=age_group
+        )
+        
+        # Map difficulty string to enum
+        difficulty_map = {
+            "easy": DifficultyLevel.EASY,
+            "medium": DifficultyLevel.MEDIUM,
+            "hard": DifficultyLevel.HARD
+        }
+        
+        # Map puzzle type string to enum
+        type_map = {
+            "word_search": PuzzleType.WORD_SEARCH,
+            "crossword": PuzzleType.CROSSWORD,
+            "sudoku": PuzzleType.SUDOKU,
+            "jigsaw": PuzzleType.JIGSAW
+        }
+        
+        # Map age group string to enum
+        age_map = {
+            "3-5": AgeGroup.TODDLER,
+            "6-8": AgeGroup.EARLY,
+            "9-11": AgeGroup.MIDDLE,
+            "12-14": AgeGroup.PRETEEN
+        }
+        
+        # Points based on difficulty
+        points_map = {"easy": 50, "medium": 75, "hard": 100}
+        
+        if save_to_db:
+            # Create database record
+            puzzle = Puzzle(
+                title=puzzle_data.get("title", f"{topic.title()} Puzzle"),
+                description=puzzle_data.get("description", "AI-generated puzzle"),
+                puzzle_type=type_map.get(puzzle_type, PuzzleType.WORD_SEARCH),
+                difficulty=difficulty_map.get(difficulty, DifficultyLevel.EASY),
+                age_group=age_map.get(age_group, AgeGroup.AGE_6_8),
+                puzzle_data=puzzle_data.get("puzzle_data", {}),
+                solution_data=puzzle_data.get("solution_data", {}),
+                points_reward=points_map.get(difficulty, 50),
+                is_daily_challenge=False
+            )
+            
+            db.add(puzzle)
+            db.commit()
+            db.refresh(puzzle)
+            
+            # Convert to dict for response
+            return {
+                "id": puzzle.id,
+                "title": puzzle.title,
+                "description": puzzle.description,
+                "puzzle_type": puzzle_type,
+                "difficulty": difficulty,
+                "age_group": age_group,
+                "puzzle_data": puzzle.puzzle_data,
+                "solution_data": puzzle.solution_data,
+                "points_reward": puzzle.points_reward
+            }
+        else:
+            # Return generated puzzle data directly
+            return {
+                "id": 0,
+                "title": puzzle_data.get("title", f"{topic.title()} Puzzle"),
+                "description": puzzle_data.get("description", "AI-generated puzzle"),
+                "puzzle_type": puzzle_type,
+                "difficulty": difficulty,
+                "age_group": age_group,
+                "puzzle_data": puzzle_data.get("puzzle_data", {}),
+                "solution_data": puzzle_data.get("solution_data", {}),
+                "points_reward": points_map.get(difficulty, 50)
+            }
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate puzzle: {str(e)}"
+        )
+
+

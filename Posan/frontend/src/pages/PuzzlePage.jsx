@@ -8,6 +8,13 @@ function PuzzlePage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [filter, setFilter] = useState('all');
+    const [generating, setGenerating] = useState(false);
+    const [selectedTopic, setSelectedTopic] = useState('animals');
+
+    const topics = [
+        'animals', 'space', 'ocean', 'dinosaurs', 'sports',
+        'food', 'science', 'history', 'nature', 'vehicles'
+    ];
 
     useEffect(() => {
         fetchPuzzles();
@@ -22,6 +29,35 @@ function PuzzlePage() {
             setError('Failed to load puzzles');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const generateAIPuzzle = async () => {
+        if (!filter || filter === 'all') {
+            alert('Please select a puzzle type first!');
+            return;
+        }
+
+        setGenerating(true);
+        setError('');
+
+        try {
+            const response = await puzzlesAPI.generateAIPuzzle({
+                puzzle_type: filter,
+                topic: selectedTopic,
+                difficulty: 'medium',
+                age_group: '6-8',
+                save_to_db: false  // Don't save, just generate for instant play
+            });
+
+            // Add generated puzzle to the list
+            setPuzzles([response.data, ...puzzles]);
+            alert(`✨ Generated a new ${filter} puzzle about ${selectedTopic}!`);
+        } catch (err) {
+            setError('Failed to generate puzzle. Please try again.');
+            console.error('Puzzle generation error:', err);
+        } finally {
+            setGenerating(false);
         }
     };
 
@@ -49,6 +85,34 @@ function PuzzlePage() {
             <div className="container">
                 <h1 className="page-title">🧩 Puzzle Zone</h1>
                 <p className="page-subtitle">Challenge your brain with fun puzzles!</p>
+
+                {/* AI Puzzle Generator */}
+                <div className="ai-generator-section">
+                    <h3>🤖 Generate AI Puzzle</h3>
+                    <div className="generator-controls">
+                        <select
+                            value={selectedTopic}
+                            onChange={(e) => setSelectedTopic(e.target.value)}
+                            className="topic-selector"
+                        >
+                            {topics.map(topic => (
+                                <option key={topic} value={topic}>
+                                    {topic.charAt(0).toUpperCase() + topic.slice(1)}
+                                </option>
+                            ))}
+                        </select>
+                        <button
+                            onClick={generateAIPuzzle}
+                            disabled={generating || filter === 'all'}
+                            className="btn btn-primary generate-btn"
+                        >
+                            {generating ? '✨ Generating...' : '✨ Generate Random Puzzle'}
+                        </button>
+                    </div>
+                    {filter === 'all' && (
+                        <p className="hint-text">💡 Select a puzzle type above to generate!</p>
+                    )}
+                </div>
 
                 <div className="puzzle-filters">
                     <button

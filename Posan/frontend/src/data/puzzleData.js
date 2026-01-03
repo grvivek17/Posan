@@ -149,3 +149,43 @@ export const getRandomWordSearch = () => {
     const randomIndex = Math.floor(Math.random() * wordSearchPuzzles.length);
     return wordSearchPuzzles[randomIndex];
 };
+
+// Sample crossword puzzles
+export const crosswordPuzzles = [
+    {
+        title: "Animals Crossword",
+        clues: [
+            { clue: "A pet that says meow", answer: "CAT" },
+            { clue: "A pet that barks", answer: "DOG" },
+            { clue: "King of the jungle", answer: "LION" },
+            { clue: "Black and white bear", answer: "PANDA" },
+            { clue: "Tall animal with long neck", answer: "GIRAFFE" }
+        ]
+    },
+    {
+        title: "Food Crossword",
+        clues: [
+            { clue: "Round Italian dish with cheese", answer: "PIZZA" },
+            { clue: "Yellow fruit monkeys love", answer: "BANANA" },
+            { clue: "Red fruit, keeps doctor away", answer: "APPLE" },
+            { clue: "White drink from cows", answer: "MILK" },
+            { clue: "Sweet treat after dinner", answer: "CAKE" }
+        ]
+    },
+    {
+        title: "Nature Crossword",
+        clues: [
+            { clue: "Tall plant with leaves", answer: "TREE" },
+            { clue: "Yellow light in the sky", answer: "SUN" },
+            { clue: "Water falling from clouds", answer: "RAIN" },
+            { clue: "Pretty plant with petals", answer: "FLOWER" },
+            { clue: "Flying animal with feathers", answer: "BIRD" }
+        ]
+    }
+];
+
+// Helper function to get a random crossword
+export const getRandomCrossword = () => {
+    const randomIndex = Math.floor(Math.random() * crosswordPuzzles.length);
+    return crosswordPuzzles[randomIndex];
+};

@@ -917,9 +917,615 @@ Keep the tone warm, supportive, and focused on growth. Be specific about their a
             "ai_enhanced_analysis": enhanced_qa_analysis,  # NEW: AI-powered insights
             "uses_educational_ai": True  # Flag to indicate enhanced analysis
         }
+    
+    def generate_sudoku_puzzle(
+        self,
+        difficulty: str = "easy",
+        age_group: str = "9-11"
+    ) -> Dict[str, Any]:
+        """
+        Generate a Sudoku puzzle using AI.
+        
+        Args:
+            difficulty: easy, medium, or hard
+            age_group: Target age group
+        
+        Returns:
+            Dict with puzzle grid, solution, and hints
+        """
+        import random
+        
+        # Define grid sizes based on age group
+        grid_sizes = {
+            "6-8": 4,   # 4x4 Sudoku for younger kids
+            "9-11": 6,  # 6x6 Sudoku
+            "12-14": 9  # Classic 9x9 Sudoku
+        }
+        
+        grid_size = grid_sizes.get(age_group, 6)
+        
+        # Generate a simple valid Sudoku grid using backtracking
+        def generate_solved_grid(size):
+            grid = [[0 for _ in range(size)] for _ in range(size)]
+            
+            def is_valid(grid, row, col, num):
+                # Check row
+                if num in grid[row]:
+                    return False
+                
+                # Check column
+                if num in [grid[i][col] for i in range(size)]:
+                    return False
+                
+                # Check box
+                box_size = int(size ** 0.5)
+                box_row, box_col = row // box_size * box_size, col // box_size * box_size
+                for i in range(box_row, box_row + box_size):
+                    for j in range(box_col, box_col + box_size):
+                        if grid[i][j] == num:
+                            return False
+                
+                return True
+            
+            def solve(grid):
+                for row in range(size):
+                    for col in range(size):
+                        if grid[row][col] == 0:
+                            numbers = list(range(1, size + 1))
+                            random.shuffle(numbers)
+                            for num in numbers:
+                                if is_valid(grid, row, col, num):
+                                    grid[row][col] = num
+                                    if solve(grid):
+                                        return True
+                                    grid[row][col] = 0
+                            return False
+                return True
+            
+            solve(grid)
+            return grid
+        
+        # Generate solution
+        solution = generate_solved_grid(grid_size)
+        
+        # Create puzzle by removing numbers
+        puzzle = [row[:] for row in solution]  # Deep copy
+        
+        # Remove numbers based on difficulty
+        cells_to_remove = {
+            "easy": int(grid_size * grid_size * 0.3),
+            "medium": int(grid_size * grid_size * 0.5),
+            "hard": int(grid_size * grid_size * 0.7)
+        }.get(difficulty, int(grid_size * grid_size * 0.4))
+        
+        positions = [(i, j) for i in range(grid_size) for j in range(grid_size)]
+        random.shuffle(positions)
+        
+        for i, (row, col) in enumerate(positions):
+            if i >= cells_to_remove:
+                break
+            puzzle[row][col] = 0
+        
+        return {
+            "grid_size": grid_size,
+            "puzzle": puzzle,
+            "solution": solution,
+            "difficulty": difficulty,
+            "age_group": age_group,
+            "instructions": f"Fill in the {grid_size}x{grid_size} grid so that each row, column, and box contains all numbers from 1 to {grid_size}!"
+        }
+    
+    def generate_complete_word_search(
+        self,
+        topic: str,
+        grid_size: int = 12,
+        num_words: int = 10,
+        age_group: str = "6-8"
+    ) -> Dict[str, Any]:
+        """
+        Generate a complete word search puzzle with grid.
+        
+        Args:
+            topic: Theme for the words
+            grid_size: Size of the grid (NxN)
+            num_words: Number of words to hide
+            age_group: Target age group
+        
+        Returns:
+            Complete puzzle with grid, words, and solutions
+        """
+        import random
+        
+        # Get words from AI
+        words = self.generate_word_search_words(topic, num_words, age_group)
+        
+        # Create empty grid
+        grid = [[' ' for _ in range(grid_size)] for _ in range(grid_size)]
+        placed_words = []
+        
+        # Directions: right, down, diagonal-right-down
+        directions = [(0, 1), (1, 0), (1, 1)]
+        
+        # Place each word
+        for word in words:
+            placed = False
+            attempts = 0
+            max_attempts = 50
+            
+            while not placed and attempts < max_attempts:
+                attempts += 1
+                
+                # Random starting position
+                row = random.randint(0, grid_size - 1)
+                col = random.randint(0, grid_size - 1)
+                direction = random.choice(directions)
+                
+                # Check if word fits
+                end_row = row + direction[0] * len(word)
+                end_col = col + direction[1] * len(word)
+                
+                if end_row > grid_size or end_col > grid_size:
+                    continue
+                
+                # Check if cells are empty
+                cells_available = True
+                for i, char in enumerate(word):
+                    check_row = row + direction[0] * i
+                    check_col = col + direction[1] * i
+                    if grid[check_row][check_col] not in (' ', char):
+                        cells_available = False
+                        break
+                
+                if cells_available:
+                    # Place the word
+                    for i, char in enumerate(word):
+                        check_row = row + direction[0] * i
+                        check_col = col + direction[1] * i
+                        grid[check_row][check_col] = char
+                    
+                    placed_words.append({
+                        "word": word,
+                        "start": [row, col],
+                        "end": [row + direction[0] * (len(word) - 1), 
+                               col + direction[1] * (len(word) - 1)],
+                        "direction": direction
+                    })
+                    placed = True
+        
+        # Fill empty cells with random letters
+        for i in range(grid_size):
+            for j in range(grid_size):
+                if grid[i][j] == ' ':
+                    grid[i][j] = random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+        
+        return {
+            "topic": topic,
+            "grid": grid,
+            "words": [w["word"] for w in placed_words],
+            "word_locations": placed_words,
+            "grid_size": grid_size,
+            "age_group": age_group,
+            "instructions": f"Find all {len(placed_words)} words related to {topic}!"
+        }
+    
+    def generate_complete_puzzle(
+        self,
+        puzzle_type: str,
+        topic: str,
+        difficulty: str = "easy",
+        age_group: str = "6-8"
+    ) -> Dict[str, Any]:
+        """
+        Master method to generate any type of complete puzzle.
+        
+        Args:
+            puzzle_type: word_search, crossword, sudoku, or jigsaw
+            topic: Theme for the puzzle
+            difficulty: easy, medium, or hard
+            age_group: Target age group
+        
+        Returns:
+            Complete puzzle data ready to be saved or displayed
+        """
+        if puzzle_type == "word_search":
+            grid_sizes = {"3-5": 8, "6-8": 10, "9-11": 12, "12-14": 15}
+            grid_size = grid_sizes.get(age_group, 10)
+            num_words = {"easy": 6, "medium": 10, "hard": 15}.get(difficulty, 10)
+            
+            puzzle_data = self.generate_complete_word_search(
+                topic=topic,
+                grid_size=grid_size,
+                num_words=num_words,
+                age_group=age_group
+            )
+            
+            title = f"{topic.title()} Word Search"
+            return {
+                "title": title,
+                "description": f"Find words related to {topic}!",
+                "puzzle_type": "word_search",
+                "difficulty": difficulty,
+                "age_group": age_group,
+                "puzzle_data": puzzle_data,
+                "solution_data": {
+                    "word_locations": puzzle_data["word_locations"]
+                }
+            }
+        
+        elif puzzle_type == "crossword":
+            num_clues = {"easy": 5, "medium": 8, "hard": 12}.get(difficulty, 8)
+            clues = self.generate_crossword_clues(topic, num_clues, age_group)
+            
+            title = f"{topic.title()} Crossword"
+            return {
+                "title": title,
+                "description": f"Solve this crossword puzzle about {topic}!",
+                "puzzle_type": "crossword",
+                "difficulty": difficulty,
+                "age_group": age_group,
+                "puzzle_data": {
+                    "clues": clues,
+                    "topic": topic
+                },
+                "solution_data": {
+                    "answers": [(c["clue"], c["answer"]) for c in clues if "answer" in c]
+                }
+            }
+        
+        elif puzzle_type == "sudoku":
+            puzzle_data = self.generate_sudoku_puzzle(difficulty, age_group)
+            
+            return {
+                "title": f"Sudoku {difficulty.title()}",
+                "description": "Fill in the numbers to complete the puzzle!",
+                "puzzle_type": "sudoku",
+                "difficulty": difficulty,
+                "age_group": age_group,
+                "puzzle_data": puzzle_data,
+                "solution_data": {
+                    "solution": puzzle_data["solution"]
+                }
+            }
+        
+        else:  # fallback
+            return {
+                "title": f"{topic.title()} Puzzle",
+                "description": "Puzzle coming soon!",
+                "puzzle_type": puzzle_type,
+                "difficulty": difficulty,
+                "age_group": age_group,
+                "puzzle_data": {},
+                "solution_data": {}
+            }
+    def summarize_study_material(self, text: str, age_group: str = "9-11") -> Dict[str, Any]:
+        """
+        Summarize study material and create a study plan.
+        
+        Args:
+            text: Extracted text from PDF
+            age_group: Student's age group
+        
+        Returns:
+            Dict with summary, key topics, study plan
+        """
+        prompt = f"""Analyze this study material for a student aged {age_group} years:
 
+{text[:3000]}
 
+Provide:
+1. **Summary**: A clear, kid-friendly summary (3-4 paragraphs)
+2. **Key Topics**: List 5-7 main topics covered
+3. **Important Terms**: List 8-10 key vocabulary words with simple definitions
+4. **Study Plan**: A 5-day study schedule to master this material
+5. **Learning Objectives**: What the student should know after studying
 
+Format your response clearly with headers."""
+
+        response = self._generate_text(prompt, max_tokens=800)
+        
+        # Parse key topics from response
+        topics = []
+        lines = response.split('\n')
+        for line in lines:
+            line_clean = line.strip()
+            if line_clean.startswith(('-', '•', '*')) and len(line_clean) > 3:
+                topic = line_clean.lstrip('-•* ').strip()
+                if topic and len(topic) < 100:
+                    topics.append(topic)
+        
+        # Heuristic fallback if no topics were parsed
+        if not topics or len(response) < 100:
+            # Look for capitalized words or long words in the source text
+            words = re.findall(r'\b[A-Z][a-z]{4,}\b', text[:1000])
+            topics = list(set(words))[:5]
+            if not topics:
+                topics = ["General Knowledge", "Study Skills", "Critical Thinking"]
+
+        return {
+            "summary": response,
+            "key_topics": topics[:7],
+            "age_group": age_group,
+            "original_length": len(text),
+            "summarized": True
+        }
+    
+    def generate_practice_questions(
+        self, 
+        text: str, 
+        num_mcq: int = 5, 
+        num_short: int = 3,
+        age_group: str = "9-11"
+    ) -> Dict[str, Any]:
+        """
+        Generate practice questions from study material.
+        
+        Args:
+            text: Study material text
+            num_mcq: Number of MCQ questions
+            num_short: Number of short answer questions
+            age_group: Student's age group
+        
+        Returns:
+            Dict with MCQs and short answer questions
+        """
+        # Generate MCQs
+        mcq_prompt = f"""Based on this study material, create {num_mcq} multiple choice questions for students aged {age_group}:
+
+{text[:2500]}
+
+Format each question as:
+Q1: [Question]
+A) [Option A]
+B) [Option B]
+C) [Option C]
+D) [Option D]
+Correct: [Letter]
+
+Make questions clear and educational."""
+
+        mcq_response = self._generate_text(mcq_prompt, max_tokens=600)
+        
+        # Parse MCQs
+        mcqs = []
+        current_q = {}
+        for line in mcq_response.split('\n'):
+            line = line.strip()
+            if line.startswith(('Q', 'q')) and ':' in line:
+                if current_q:
+                    mcqs.append(current_q)
+                current_q = {"question": line.split(':', 1)[1].strip(), "options": []}
+            elif line.startswith(('A)', 'B)', 'C)', 'D)')):
+                current_q.setdefault("options", []).append(line[2:].strip())
+            elif 'correct' in line.lower():
+                answer = line.split(':')[-1].strip().upper()
+                if answer in ['A', 'B', 'C', 'D']:
+                    current_q["correct"] = answer
+        
+        if current_q and current_q.get("question"):
+            mcqs.append(current_q)
+        
+        # Generate short answer questions
+        short_prompt = f"""Create {num_short} short answer questions from this material for students aged {age_group}:
+
+{text[:2000]}
+
+Format:
+Q1: [Question]
+Answer: [Expected answer in 1-2 sentences]
+
+Make questions test understanding, not just memorization."""
+
+        short_response = self._generate_text(short_prompt, max_tokens=400)
+        
+        # Parse short answers
+        short_questions = []
+        current_sq = {}
+        for line in short_response.split('\n'):
+            line = line.strip()
+            if line.startswith(('Q', 'q')) and ':' in line:
+                if current_sq:
+                    short_questions.append(current_sq)
+                current_sq = {"question": line.split(':', 1)[1].strip()}
+            elif line.lower().startswith('answer:'):
+                current_sq["expected_answer"] = line.split(':', 1)[1].strip()
+        
+        if current_sq and current_sq.get("question"):
+            short_questions.append(current_sq)
+        
+        return {
+            "mcqs": mcqs[:num_mcq],
+            "short_answers": short_questions[:num_short],
+            "total_questions": len(mcqs) + len(short_questions),
+            "source_material_length": len(text)
+        }
+    
+    def evaluate_answer(
+        self, 
+        question: str, 
+        student_answer: str, 
+        expected_answer: str
+    ) -> Dict[str, Any]:
+        """
+        Evaluate a student's answer using AI.
+        
+        Args:
+            question: The question asked
+            student_answer: Student's answer
+            expected_answer: Expected/correct answer
+        
+        Returns:
+            Dict with evaluation result, score, feedback
+        """
+        # First, use QA model to check relevance
+        try:
+            qa_result = self.answer_question(
+                context=expected_answer,
+                question=f"Is this correct: {student_answer}?"
+            )
+        except:
+            qa_result = {"answer": ""}
+        
+        # Use text generation for detailed evaluation
+        eval_prompt = f"""Evaluate this student's answer:
+
+Question: {question}
+Student's Answer: {student_answer}
+Expected Answer: {expected_answer}
+
+Rate the answer:
+1. Score (0-100)
+2. Is it correct? (Yes/Partially/No)
+3. What's good about the answer?
+4. What could be improved?
+5. Brief encouraging feedback
+
+Be kind and constructive for a young student."""
+
+        response = self._generate_text(eval_prompt, max_tokens=250)
+        
+        # Extract score
+        score = 0
+        is_correct = "no"
+        
+        lines = response.lower()
+        if "100" in lines or "perfect" in lines or "excellent" in lines:
+            score = 100
+            is_correct = "yes"
+        elif "80" in lines or "good" in lines:
+            score = 80
+            is_correct = "yes"
+        elif "60" in lines or "partial" in lines:
+            score = 60
+            is_correct = "partially"
+        elif "40" in lines or "some" in lines:
+            score = 40
+            is_correct = "partially"
+        else:
+            score = 20
+            is_correct = "no"
+        
+        return {
+            "question": question,
+            "student_answer": student_answer,
+            "expected_answer": expected_answer,
+            "score": score,
+            "is_correct": is_correct,
+            "feedback": response,
+            "qa_similarity": qa_result.get("score", 0) if isinstance(qa_result, dict) else 0
+        }
+    
+    def analyze_weak_topics(
+        self, 
+        answers: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """
+        Analyze student answers to identify weak topics.
+        
+        Args:
+            answers: List of evaluated answers with scores
+        
+        Returns:
+            Dict with weak topics, strengths, and recommendations
+        """
+        if not answers:
+            return {"weak_topics": [], "strengths": [], "recommendations": []}
+        
+        # Calculate overall performance
+        total_score = sum(a.get("score", 0) for a in answers)
+        avg_score = total_score / len(answers) if answers else 0
+        
+        # Identify weak and strong areas
+        weak_answers = [a for a in answers if a.get("score", 0) < 60]
+        strong_answers = [a for a in answers if a.get("score", 0) >= 80]
+        
+        # Generate recommendations
+        reco_prompt = f"""Based on a student's performance:
+- Average score: {avg_score:.0f}%
+- Questions struggled with: {len(weak_answers)}
+- Questions done well: {len(strong_answers)}
+
+Weak areas (questions they got wrong):
+{chr(10).join([a.get('question', '')[:80] for a in weak_answers[:3]])}
+
+Provide:
+1. 3 topics they should review more
+2. 2 study strategies to improve
+3. An encouraging message
+
+Be positive and supportive."""
+
+        recommendations = self._generate_text(reco_prompt, max_tokens=300)
+        
+        return {
+            "total_questions": len(answers),
+            "average_score": round(avg_score, 1),
+            "weak_count": len(weak_answers),
+            "strong_count": len(strong_answers),
+            "weak_questions": [a.get("question", "") for a in weak_answers],
+            "strong_questions": [a.get("question", "") for a in strong_answers],
+            "recommendations": recommendations,
+            "performance_level": (
+                "Excellent!" if avg_score >= 80 else
+                "Good progress!" if avg_score >= 60 else
+                "Keep practicing!" if avg_score >= 40 else
+                "Let's review together!"
+            )
+        }
+    
+    def generate_study_plan(
+        self, 
+        topics: List[str], 
+        weak_areas: List[str],
+        days: int = 7,
+        age_group: str = "9-11"
+    ) -> Dict[str, Any]:
+        """
+        Generate a personalized study plan.
+        
+        Args:
+            topics: All topics from study material
+            weak_areas: Topics student struggles with
+            days: Number of days to plan
+            age_group: Student's age group
+        
+        Returns:
+            Dict with day-by-day study plan
+        """
+        prompt = f"""Create a {days}-day study plan for a {age_group} year old student.
+
+Topics to cover: {', '.join(topics[:5])}
+Weak areas to focus on: {', '.join(weak_areas[:3])}
+
+For each day provide:
+- Main topic to study (30 min)
+- Practice activity (15 min)
+- Fun learning tip
+
+Make it engaging and not overwhelming. Include short breaks."""
+
+        response = self._generate_text(prompt, max_tokens=500)
+        
+        # Parse into days
+        plan = []
+        current_day = {}
+        for line in response.split('\n'):
+            line = line.strip()
+            if 'day 1' in line.lower() or 'day 2' in line.lower() or any(f"day {i}" in line.lower() for i in range(1, 8)):
+                if current_day:
+                    plan.append(current_day)
+                current_day = {"day": len(plan) + 1, "activities": line}
+            elif line and current_day:
+                current_day["activities"] = current_day.get("activities", "") + "\n" + line
+        
+        if current_day:
+            plan.append(current_day)
+        
+        return {
+            "duration_days": days,
+            "daily_plan": plan[:days],
+            "focus_topics": weak_areas[:3] if weak_areas else topics[:3],
+            "full_response": response
+        }
 
 
 
@@ -946,3 +1552,8 @@ def generate_word_search(topic: str, num_words: int = 10, age_group: str = "6-8"
 
 def generate_crossword(topic: str, num_clues: int = 8, age_group: str = "6-8") -> List[Dict]:
     return content_generator.generate_crossword_clues(topic, num_clues, age_group)
+
+
+def generate_complete_puzzle(puzzle_type: str, topic: str, difficulty: str = "easy", age_group: str = "6-8") -> Dict[str, Any]:
+    """Generate a complete puzzle of any type using AI."""
+    return content_generator.generate_complete_puzzle(puzzle_type, topic, difficulty, age_group)

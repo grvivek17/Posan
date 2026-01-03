@@ -1,0 +1,93 @@
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--text-primary);
+    padding: 0.75rem 0;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: none;
+}
+
+.bottom-nav-container {
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 1rem;
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+}
+
+.bottom-nav-item.active {
+    color: var(--text-white);
+}
+
+.bottom-nav-item.highlight .nav-icon-wrapper {
+    background: var(--primary-yellow);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -28px;
+    box-shadow: var(--shadow-lg);
+}
+
+.bottom-nav-item.highlight .nav-icon {
+    font-size: 1.75rem;
+}
+
+.nav-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-icon {
+    font-size: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.bottom-nav-item.active .nav-icon {
+    transform: scale(1.1);
+}
+
+.nav-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: var(--font-secondary);
+}
+
+.bottom-nav-item.highlight .nav-label {
+    color: var(--text-white);
+    margin-top: 0.25rem;
+}
+
+/* Show on mobile */
+@media (max-width: 768px) {
+    .bottom-nav {
+        display: block;
+    }
+
+    /* Add padding to pages for bottom nav */
+    .home,
+    .magazine-page,
+    .homework-page-new,
+    .profile-page-new {
+        padding-bottom: 80px;
+    }
+}

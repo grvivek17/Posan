@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { puzzlesAPI } from '../services/api';
 import WordSearchPuzzle from '../components/puzzles/WordSearchPuzzle';
 import CrosswordPuzzle from '../components/puzzles/CrosswordPuzzle';
 import JigsawPuzzle from '../components/puzzles/JigsawPuzzle';
@@ -7,6 +8,14 @@ import './PuzzleZone.css';
 
 const PuzzleZone = () => {
     const [activePuzzle, setActivePuzzle] = useState('word-search');
+    const [generating, setGenerating] = useState(false);
+    const [selectedTopic, setSelectedTopic] = useState('animals');
+    const [aiPuzzleData, setAiPuzzleData] = useState(null);
+
+    const topics = [
+        'animals', 'space', 'ocean', 'dinosaurs', 'sports',
+        'food', 'science', 'history', 'nature', 'vehicles'
+    ];
 
     const puzzles = [
         { id: 'word-search', name: 'Word Search', icon: '🔍', component: WordSearchPuzzle },
@@ -14,6 +23,48 @@ const PuzzleZone = () => {
         { id: 'jigsaw', name: 'Jigsaw', icon: '🧩', component: JigsawPuzzle },
         { id: 'sudoku', name: 'Sudoku', icon: '🔢', component: SudokuPuzzle }
     ];
+
+    const generateAIPuzzle = useCallback(async () => {
+        setGenerating(true);
+        try {
+            const puzzleTypeMap = {
+                'word-search': 'word_search',
+                'crossword': 'crossword',
+                'sudoku': 'sudoku',
+                'jigsaw': 'jigsaw'
+            };
+
+            const response = await puzzlesAPI.generateAIPuzzle({
+                puzzle_type: puzzleTypeMap[activePuzzle],
+                topic: selectedTopic,
+                difficulty: 'medium',
+                age_group: '6-8',
+                save_to_db: false
+            });
+
+            setAiPuzzleData(response.data);
+            // Puzzle will automatically display in the container
+        } catch (err) {
+            console.error('Puzzle generation error:', err);
+            alert('Failed to generate puzzle. Please try again.');
+        } finally {
+            setGenerating(false);
+        }
+    }, [activePuzzle, selectedTopic]);
+
+    // Auto-generate puzzle on page load and when puzzle type or topic changes
+    useEffect(() => {
+        generateAIPuzzle();
+    }, [generateAIPuzzle]); // Auto-regenerates when puzzle type or topic changes
+
+    const clearAIPuzzle = () => {
+        setAiPuzzleData(null);
+    };
+
+    const handleTabClick = (puzzleId) => {
+        setActivePuzzle(puzzleId);
+        setAiPuzzleData(null); // Clear AI puzzle when switching tabs
+    };
 
     const ActiveComponent = puzzles.find(p => p.id === activePuzzle)?.component;
 
@@ -24,12 +75,47 @@ const PuzzleZone = () => {
                 <p className="subtitle">Challenge your brain with fun interactive puzzles!</p>
             </div>
 
+            {/* AI Puzzle Generator - Auto Mode */}
+            <div className="ai-generator-section">
+                <h3>🤖 AI Puzzle Generator</h3>
+                <div className="generator-controls">
+                    <select
+                        value={selectedTopic}
+                        onChange={(e) => setSelectedTopic(e.target.value)}
+                        className="topic-selector"
+                        disabled={generating}
+                    >
+                        {topics.map(topic => (
+                            <option key={topic} value={topic}>
+                                {topic.charAt(0).toUpperCase() + topic.slice(1)}
+                            </option>
+                        ))}
+                    </select>
+                    <button
+                        onClick={generateAIPuzzle}
+                        disabled={generating}
+                        className="btn btn-secondary generate-btn"
+                    >
+                        {generating ? '✨ Generating...' : '🔄 Regenerate Puzzle'}
+                    </button>
+                </div>
+                <p className="hint-text">
+                    {generating ? '⏳ Creating your puzzle...' : '💡 Puzzle auto-generates! Switch tabs or topics for new puzzles.'}
+                </p>
+                {aiPuzzleData && (
+                    <div className="ai-puzzle-status">
+                        <span>✨ AI Puzzle: {aiPuzzleData.title}</span>
+                        <button onClick={clearAIPuzzle} className="clear-btn">✕ Clear</button>
+                    </div>
+                )}
+            </div>
+
             <div className="puzzle-tabs">
                 {puzzles.map(puzzle => (
                     <button
                         key={puzzle.id}
                         className={`puzzle-tab ${activePuzzle === puzzle.id ? 'active' : ''}`}
-                        onClick={() => setActivePuzzle(puzzle.id)}
+                        onClick={() => handleTabClick(puzzle.id)}
                     >
                         <span className="tab-icon">{puzzle.icon}</span>
                         <span className="tab-name">{puzzle.name}</span>
@@ -38,7 +124,29 @@ const PuzzleZone = () => {
             </div>
 
             <div className="puzzle-container">
-                {ActiveComponent && <ActiveComponent />}
+                {aiPuzzleData && activePuzzle === 'word-search' && (
+                    <WordSearchPuzzle
+                        words={aiPuzzleData.puzzle_data?.words || []}
+                        grid={aiPuzzleData.puzzle_data?.grid || []}
+                        title={aiPuzzleData.title || 'AI Word Search'}
+                    />
+                )}
+                {aiPuzzleData && activePuzzle === 'crossword' && (
+                    <CrosswordPuzzle
+                        clues={aiPuzzleData.puzzle_data?.clues || []}
+                        title={aiPuzzleData.title || 'AI Crossword'}
+                    />
+                )}
+                {aiPuzzleData && activePuzzle === 'sudoku' && (
+                    <SudokuPuzzle
+                        puzzle={aiPuzzleData.puzzle_data?.puzzle || null}
+                        solution={aiPuzzleData.puzzle_data?.solution || null}
+                    />
+                )}
+                {aiPuzzleData && activePuzzle === 'jigsaw' && (
+                    <JigsawPuzzle />
+                )}
+                {!aiPuzzleData && ActiveComponent && <ActiveComponent />}
             </div>
 
             <div className="puzzle-zone-footer">

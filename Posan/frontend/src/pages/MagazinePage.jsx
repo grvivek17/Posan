@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { contentAPI } from '../services/api';
 import SearchBar from '../components/magazine/SearchBar';
 import CategoryFilter from '../components/magazine/CategoryFilter';
-import Card from '../components/common/Card';
 import './MagazinePage.css';
 
 function MagazinePage() {
@@ -12,7 +11,7 @@ function MagazinePage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeCategory, setActiveCategory] = useState('all');
+    const [activeCategory, setActiveCategory] = useState('All');
 
     useEffect(() => {
         fetchMagazines();
@@ -37,10 +36,15 @@ function MagazinePage() {
     const filteredMagazines = magazines.filter(magazine => {
         const matchesSearch = magazine.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             magazine.description.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = activeCategory === 'all' ||
-            magazine.title.toLowerCase().includes(activeCategory);
+        const matchesCategory = activeCategory === 'All' ||
+            magazine.title.toLowerCase().includes(activeCategory.toLowerCase());
         return matchesSearch && matchesCategory;
     });
+
+    // Featured magazine (first one or with special flag)
+    const featuredMagazine = magazines[0];
+    const newArrivals = filteredMagazines.slice(0, 3);
+    const exploreAll = filteredMagazines.slice(3);
 
     if (loading) {
         return (
@@ -54,19 +58,20 @@ function MagazinePage() {
     return (
         <div className="magazine-page">
             <div className="container">
-                <div className="page-header">
-                    <div className="header-content">
-                        <h1 className="page-title">📚 Library</h1>
-                        <p className="page-subtitle">Discover amazing stories and adventures!</p>
-                    </div>
+                {/* Header */}
+                <div className="page-header-lib">
+                    <div className="header-icon">📚</div>
+                    <h1 className="page-title-lib">Library</h1>
                 </div>
 
+                {/* Search Bar */}
                 <SearchBar
                     value={searchQuery}
                     onChange={setSearchQuery}
-                    placeholder="Search magazines, stories..."
+                    placeholder="Search stories, games..."
                 />
 
+                {/* Category Filter */}
                 <CategoryFilter
                     activeCategory={activeCategory}
                     onCategoryChange={setActiveCategory}
@@ -74,52 +79,105 @@ function MagazinePage() {
 
                 {error && <div className="error-message">{error}</div>}
 
-                {filteredMagazines.length === 0 ? (
-                    <div className="empty-state">
-                        <p>🎨 No magazines found. Try a different search or category!</p>
-                    </div>
-                ) : (
-                    <>
-                        <div className="section-header">
-                            <h2>Explore All</h2>
-                            <span className="result-count">{filteredMagazines.length} magazines</span>
+                {/* Issue of the Month */}
+                {featuredMagazine && (
+                    <section className="featured-section-lib">
+                        <div
+                            className="featured-card-lib"
+                            onClick={() => handleReadMagazine(featuredMagazine.id)}
+                        >
+                            <div className="featured-badge">ISSUE OF THE MONTH</div>
+                            <div className="featured-content-lib">
+                                <h3 className="featured-title">{featuredMagazine.title}</h3>
+                                <p className="featured-subtitle">{featuredMagazine.description}</p>
+                                <div className="featured-footer">
+                                    <span className="reading-time">🕐 15 min read</span>
+                                    <button className="read-now-btn">Read Now</button>
+                                </div>
+                            </div>
                         </div>
+                    </section>
+                )}
 
-                        <div className="magazines-grid">
-                            {filteredMagazines.map((magazine) => (
-                                <div key={magazine.id} className="magazine-card-wrapper">
-                                    <div className="magazine-card" onClick={() => handleReadMagazine(magazine.id)}>
-                                        <div className="card-image-container">
-                                            {magazine.cover_image_url ? (
-                                                <img
-                                                    src={magazine.cover_image_url}
-                                                    alt={magazine.title}
-                                                    className="magazine-cover"
-                                                />
-                                            ) : (
-                                                <div className="placeholder-cover">
-                                                    <span className="placeholder-icon">📖</span>
-                                                </div>
-                                            )}
-                                            {magazine.issue_number && (
-                                                <div className="card-badge">Issue #{magazine.issue_number}</div>
-                                            )}
-                                        </div>
-                                        <div className="card-content">
-                                            <h3 className="card-title">{magazine.title}</h3>
-                                            <p className="card-description">{magazine.description}</p>
-                                            <div className="card-footer">
-                                                <span className="age-badge">{magazine.age_group}</span>
-                                                <button className="read-btn">
-                                                    Read Now
-                                                </button>
+                {/* New Arrivals */}
+                {newArrivals.length > 0 && (
+                    <section className="arrivals-section">
+                        <div className="section-header-lib">
+                            <h2>New Arrivals</h2>
+                            <button className="view-all-link" onClick={() => setActiveCategory('All')}>
+                                View All
+                            </button>
+                        </div>
+                        <div className="arrivals-grid">
+                            {newArrivals.map((magazine, index) => (
+                                <div
+                                    key={magazine.id}
+                                    className="arrival-card"
+                                    onClick={() => handleReadMagazine(magazine.id)}
+                                >
+                                    {index < 2 && <span className="new-tag">NEW</span>}
+                                    <div className="arrival-image">
+                                        {magazine.cover_image_url ? (
+                                            <img
+                                                src={magazine.cover_image_url}
+                                                alt={magazine.title}
+                                            />
+                                        ) : (
+                                            <div className="placeholder-icon-lib">
+                                                {index === 0 ? '🤖' : index === 1 ? '🦒' : '🎨'}
                                             </div>
+                                        )}
+                                    </div>
+                                    <div className="arrival-info">
+                                        <h3>{magazine.title}</h3>
+                                        <p>Vol. {magazine.issue_number || (index + 1)} · 12 min</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {/* Explore All */}
+                {filteredMagazines.length > 0 && (
+                    <section className="explore-section">
+                        <h2 className="section-title-lib">Explore All</h2>
+                        <div className="explore-grid">
+                            {filteredMagazines.map((magazine, index) => (
+                                <div
+                                    key={magazine.id}
+                                    className="explore-card"
+                                    onClick={() => handleReadMagazine(magazine.id)}
+                                >
+                                    <div className="explore-image">
+                                        {magazine.cover_image_url ? (
+                                            <img
+                                                src={magazine.cover_image_url}
+                                                alt={magazine.title}
+                                            />
+                                        ) : (
+                                            <div className="explore-placeholder">
+                                                {['📖', '🌍', '🐸', '⚽', '🎭', '🔬'][index % 6]}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="explore-info">
+                                        <h3>{magazine.title}</h3>
+                                        <div className="explore-footer">
+                                            <span className="issue-number">#{magazine.issue_number || (index + 1)}</span>
+                                            <span className="star-rating">⭐</span>
                                         </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                    </>
+                    </section>
+                )}
+
+                {filteredMagazines.length === 0 && (
+                    <div className="empty-state">
+                        <p>🎨 No magazines found. Try a different search or category!</p>
+                    </div>
                 )}
             </div>
         </div>

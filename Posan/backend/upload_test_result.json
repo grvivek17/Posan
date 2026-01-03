@@ -1,0 +1,28 @@
+{
+  "status_code": 200,
+  "headers": {
+    "date": "Sat, 03 Jan 2026 08:07:09 GMT",
+    "server": "uvicorn",
+    "content-length": "3592",
+    "content-type": "application/json"
+  },
+  "text": "{\"success\":true,\"filename\":\"GR3MATHPA4SRM.pdf\",\"characters_extracted\":2478,\"summary\":\"**Summary**\\n\\nWelcome to your new study material! This is a fun and interactive way to learn about time-telling and clock hands. Imagine you're a detective trying to solve a mystery, and the clock is your clue. Your task is to figure out the correct time based on the clock hands and the given clues.\\n\\nLet's start with the basics. The clock has two hands: the short hour hand and the long minute hand. The short hour hand moves slowly around the clock, while the long minute hand moves quickly. You need to use the clues to figure out how many hours and minutes it is.\\n\\nAs you study, you'll learn how to tell time on an analog clock. You'll also practice solving problems and becoming a clock-telling master!\\n\\n**Key Topics**\\n\\n1. **Clock Hands**: Understanding the basics of the short hour hand and the long minute hand.\\n2. **Time-Telling**: Learning how to read time on an analog clock.\\n3. **Clues**: So",
+  "json": {
+    "success": true,
+    "filename": "GR3MATHPA4SRM.pdf",
+    "characters_extracted": 2478,
+    "summary": "**Summary**\n\nWelcome to your new study material! This is a fun and interactive way to learn about time-telling and clock hands. Imagine you're a detective trying to solve a mystery, and the clock is your clue. Your task is to figure out the correct time based on the clock hands and the given clues.\n\nLet's start with the basics. The clock has two hands: the short hour hand and the long minute hand. The short hour hand moves slowly around the clock, while the long minute hand moves quickly. You need to use the clues to figure out how many hours and minutes it is.\n\nAs you study, you'll learn how to tell time on an analog clock. You'll also practice solving problems and becoming a clock-telling master!\n\n**Key Topics**\n\n1. **Clock Hands**: Understanding the basics of the short hour hand and the long minute hand.\n2. **Time-Telling**: Learning how to read time on an analog clock.\n3. **Clues**: Solving problems using the given clues to figure out the correct time.\n4. **Clock Workshop**: Practicing time-telling on different clock settings.\n5. **Mystery Solving**: Using your time-telling skills to solve a mystery.\n\n**Important Terms**\n\n1. **Hour Hand**: The short, hour-marked hand on the clock.\n2. **Minute Hand**: The long, minute-marked hand on the clock.\n3. **12 O'Clock**: The topmost hour mark on the clock, usually marked with a big \"12\" or a clock face.\n4. **12**: A number on the clock face, representing a quarter of an hour.\n5. **Equal**: When two things are the same or have the same quantity.\n6. **Measure**: A way to show or describe a quantity.\n7. **Draw**: Creating a picture or design to help learn something.\n8. **Clock Face**: The flat surface of the clock with numbers and hands.\n\n**Study Plan**\n\nDay 1: **Clock Hands Basics**\n\n* Study the short hour hand and the long minute hand\n* Watch a video on clock hands (10 minutes)\n* Practice drawing the clock hands (10 minutes)\n\nDay 2: **Time-Telling Basics**\n\n* Learn the basics of time-telling on an analog clock\n* Practice telling time on an analog clock (10 minutes)\n* Watch a video on time-telling (10 minutes)\n\nDay 3: **Clues and Problem-Solving**\n\n* Learn how to solve problems using the given clues\n* Practice solving time-telling problems (10 minutes)\n* Watch a video on clue-solving (10 minutes)\n\nDay 4: **Clock Workshop**\n\n* Practice time-telling on different clock settings\n* Watch a video on clock workshop (10 minutes)\n* Practice drawing the clock face (10 minutes)\n\nDay 5: **Mystery Solving**\n\n* Practice solving a mystery using time-telling skills\n* Watch a video on mystery solving (10 minutes)\n* Practice drawing the clock face (10 minutes)\n\n**Learning Objectives**\n\nAfter studying this material, you should be able to:\n\n1. Understand the basics of the short hour hand and the long minute hand.\n2. Tell time on an analog clock using the hour and minute hands.\n3. Solve problems using the given clues to figure out the correct time.\n4. Practice time-telling on different clock settings.\n5. Draw the clock face and understand its importance in time-telling.\n\nRemember, practice makes perfect! Keep practicing, and you'll become a clock-telling master in no time!",
+    "key_topics": [
+      "Summary**",
+      "Key Topics**",
+      "Important Terms**",
+      "Study Plan**",
+      "Study the short hour hand and the long minute hand",
+      "Watch a video on clock hands (10 minutes)",
+      "Practice drawing the clock hands (10 minutes)"
+    ],
+    "age_group": "9-11",
+    "original_length": 2478,
+    "summarized": true
+  }
+}

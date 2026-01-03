@@ -21,6 +21,7 @@ import HomeworkPage from './pages/HomeworkPage';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
 import ScrollToTop from './components/common/ScrollToTop';
+import BottomNav from './components/common/BottomNav';
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = React.useState(false);
@@ -77,6 +78,7 @@ function App() {
                     </Routes>
                 </main>
                 <Footer />
+                {isAuthenticated && <BottomNav />}
             </div>
         </Router>
     );

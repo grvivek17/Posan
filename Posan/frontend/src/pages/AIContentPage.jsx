@@ -187,171 +187,173 @@ const AIContentPage = () => {
                 <p>Create amazing content for kids using AI magic!</p>
             </div>
 
-            <div className="ai-tabs">
-                <button
-                    className={`tab ${activeTab === 'story' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('story')}
-                >
-                    📖 Story
-                </button>
-                <button
-                    className={`tab ${activeTab === 'article' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('article')}
-                >
-                    📰 Article
-                </button>
-                <button
-                    className={`tab ${activeTab === 'quiz' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('quiz')}
-                >
-                    🧠 Quiz
-                </button>
-                <button
-                    className={`tab ${activeTab === 'fun' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('fun')}
-                >
-                    🎉 Fun Stuff
-                </button>
-            </div>
-
-            <div className="ai-form-container">
-                <div className="form-group">
-                    <label htmlFor="topic">✨ What topic do you want to explore?</label>
-                    <input
-                        type="text"
-                        id="topic"
-                        placeholder="e.g., dinosaurs, space, ocean animals, friendship..."
-                        value={topic}
-                        onChange={(e) => setTopic(e.target.value)}
-                        className="topic-input"
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label htmlFor="ageGroup">👶 Age Group</label>
-                    <select
-                        id="ageGroup"
-                        value={ageGroup}
-                        onChange={(e) => setAgeGroup(e.target.value)}
-                        className="select-input"
+            <div className="ai-content-wrapper">
+                <div className="ai-tabs">
+                    <button
+                        className={`tab ${activeTab === 'story' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('story')}
                     >
-                        {ageGroups.map(ag => (
-                            <option key={ag.value} value={ag.value}>{ag.label}</option>
-                        ))}
-                    </select>
+                        📖 Story
+                    </button>
+                    <button
+                        className={`tab ${activeTab === 'article' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('article')}
+                    >
+                        📰 Article
+                    </button>
+                    <button
+                        className={`tab ${activeTab === 'quiz' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('quiz')}
+                    >
+                        🧠 Quiz
+                    </button>
+                    <button
+                        className={`tab ${activeTab === 'fun' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('fun')}
+                    >
+                        🎉 Fun Stuff
+                    </button>
                 </div>
 
-                {activeTab === 'story' && (
-                    <>
-                        <div className="form-group">
-                            <label htmlFor="wordCount">📏 Story Length</label>
-                            <input
-                                type="range"
-                                id="wordCount"
-                                min="100"
-                                max="500"
-                                value={wordCount}
-                                onChange={(e) => setWordCount(Number(e.target.value))}
-                            />
-                            <span className="range-value">{wordCount} words</span>
-                        </div>
-                        <button
-                            className="generate-btn"
-                            onClick={() => generateContent('story')}
-                            disabled={loading}
-                        >
-                            {loading ? '✨ Creating Story...' : '📖 Generate Story'}
-                        </button>
-                    </>
-                )}
+                <div className="ai-form-container">
+                    <div className="form-group">
+                        <label htmlFor="topic">✨ What topic do you want to explore?</label>
+                        <input
+                            type="text"
+                            id="topic"
+                            placeholder="e.g., dinosaurs, space, ocean animals, friendship..."
+                            value={topic}
+                            onChange={(e) => setTopic(e.target.value)}
+                            className="topic-input"
+                        />
+                    </div>
 
-                {activeTab === 'article' && (
-                    <>
-                        <div className="form-group">
-                            <label htmlFor="articleType">📚 Article Type</label>
-                            <select
-                                id="articleType"
-                                value={articleType}
-                                onChange={(e) => setArticleType(e.target.value)}
-                                className="select-input"
+                    <div className="form-group">
+                        <label htmlFor="ageGroup">👶 Age Group</label>
+                        <select
+                            id="ageGroup"
+                            value={ageGroup}
+                            onChange={(e) => setAgeGroup(e.target.value)}
+                            className="select-input"
+                        >
+                            {ageGroups.map(ag => (
+                                <option key={ag.value} value={ag.value}>{ag.label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {activeTab === 'story' && (
+                        <>
+                            <div className="form-group">
+                                <label htmlFor="wordCount">📏 Story Length</label>
+                                <input
+                                    type="range"
+                                    id="wordCount"
+                                    min="100"
+                                    max="500"
+                                    value={wordCount}
+                                    onChange={(e) => setWordCount(Number(e.target.value))}
+                                />
+                                <span className="range-value">{wordCount} words</span>
+                            </div>
+                            <button
+                                className="generate-btn"
+                                onClick={() => generateContent('story')}
+                                disabled={loading}
                             >
-                                {articleTypes.map(at => (
-                                    <option key={at.value} value={at.value}>{at.label}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <button
-                            className="generate-btn"
-                            onClick={() => generateContent('article')}
-                            disabled={loading}
-                        >
-                            {loading ? '✨ Writing Article...' : '📰 Generate Article'}
-                        </button>
-                    </>
-                )}
+                                {loading ? '✨ Creating Story...' : '📖 Generate Story'}
+                            </button>
+                        </>
+                    )}
 
-                {activeTab === 'quiz' && (
-                    <>
-                        <div className="form-group">
-                            <label htmlFor="numQuestions">❓ Number of Questions</label>
-                            <input
-                                type="range"
-                                id="numQuestions"
-                                min="3"
-                                max="10"
-                                value={numQuestions}
-                                onChange={(e) => setNumQuestions(Number(e.target.value))}
-                            />
-                            <span className="range-value">{numQuestions} questions</span>
-                        </div>
-                        <button
-                            className="generate-btn"
-                            onClick={() => generateContent('quiz')}
-                            disabled={loading}
-                        >
-                            {loading ? '✨ Creating Quiz...' : '🧠 Generate Quiz'}
-                        </button>
-                    </>
-                )}
+                    {activeTab === 'article' && (
+                        <>
+                            <div className="form-group">
+                                <label htmlFor="articleType">📚 Article Type</label>
+                                <select
+                                    id="articleType"
+                                    value={articleType}
+                                    onChange={(e) => setArticleType(e.target.value)}
+                                    className="select-input"
+                                >
+                                    {articleTypes.map(at => (
+                                        <option key={at.value} value={at.value}>{at.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <button
+                                className="generate-btn"
+                                onClick={() => generateContent('article')}
+                                disabled={loading}
+                            >
+                                {loading ? '✨ Writing Article...' : '📰 Generate Article'}
+                            </button>
+                        </>
+                    )}
 
-                {activeTab === 'fun' && (
-                    <div className="fun-buttons">
-                        <button
-                            className="generate-btn fun-btn"
-                            onClick={() => generateContent('fact')}
-                            disabled={loading}
-                        >
-                            {loading ? '✨ Finding...' : '🌟 Get Fun Fact'}
-                        </button>
-                        <button
-                            className="generate-btn fun-btn"
-                            onClick={() => generateContent('riddle')}
-                            disabled={loading}
-                        >
-                            {loading ? '✨ Thinking...' : '🤔 Get Riddle'}
-                        </button>
-                        <button
-                            className="generate-btn fun-btn"
-                            onClick={() => generateContent('words')}
-                            disabled={loading}
-                        >
-                            {loading ? '✨ Finding...' : '🔤 Word Search Words'}
-                        </button>
+                    {activeTab === 'quiz' && (
+                        <>
+                            <div className="form-group">
+                                <label htmlFor="numQuestions">❓ Number of Questions</label>
+                                <input
+                                    type="range"
+                                    id="numQuestions"
+                                    min="3"
+                                    max="10"
+                                    value={numQuestions}
+                                    onChange={(e) => setNumQuestions(Number(e.target.value))}
+                                />
+                                <span className="range-value">{numQuestions} questions</span>
+                            </div>
+                            <button
+                                className="generate-btn"
+                                onClick={() => generateContent('quiz')}
+                                disabled={loading}
+                            >
+                                {loading ? '✨ Creating Quiz...' : '🧠 Generate Quiz'}
+                            </button>
+                        </>
+                    )}
+
+                    {activeTab === 'fun' && (
+                        <div className="fun-buttons">
+                            <button
+                                className="generate-btn fun-btn"
+                                onClick={() => generateContent('fact')}
+                                disabled={loading}
+                            >
+                                {loading ? '✨ Finding...' : '🌟 Get Fun Fact'}
+                            </button>
+                            <button
+                                className="generate-btn fun-btn"
+                                onClick={() => generateContent('riddle')}
+                                disabled={loading}
+                            >
+                                {loading ? '✨ Thinking...' : '🤔 Get Riddle'}
+                            </button>
+                            <button
+                                className="generate-btn fun-btn"
+                                onClick={() => generateContent('words')}
+                                disabled={loading}
+                            >
+                                {loading ? '✨ Finding...' : '🔤 Word Search Words'}
+                            </button>
+                        </div>
+                    )}
+
+                    {error && <div className="error-message">❌ {error}</div>}
+                </div>
+
+                {loading && (
+                    <div className="loading-container">
+                        <div className="loading-spinner"></div>
+                        <p>AI is working its magic... ✨</p>
                     </div>
                 )}
 
-                {error && <div className="error-message">❌ {error}</div>}
-            </div>
-
-            {loading && (
-                <div className="loading-container">
-                    <div className="loading-spinner"></div>
-                    <p>AI is working its magic... ✨</p>
+                <div className="results-container">
+                    {renderResult()}
                 </div>
-            )}
-
-            <div className="results-container">
-                {renderResult()}
             </div>
         </div>
     );
