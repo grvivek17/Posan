@@ -14,6 +14,7 @@ from pathlib import Path
 
 from app.agents.ingestion_agent import ingestion_agent
 from app.agents.retrieval_agent import retrieval_agent
+from app.agents.question_generator_agent import question_generator_agent
 from app.agents import coordinator
 
 router = APIRouter()
@@ -504,7 +505,390 @@ async def delete_search_index(index_name: str):
         raise HTTPException(status_code=500, detail=f"Error deleting index: {str(e)}")
 
 
+# ============= QUESTION GENERATION ENDPOINTS (Phase 3) =============
+
+@router.post("/questions/generate")
+async def generate_questions(
+    context: str = Form(..., description="Text context for question generation"),
+    grade: int = Form(..., description="Grade level (1-8)"),
+    subject: str = Form(default="General", description="Subject area"),
+    question_types: str = Form(default="mcq,short_answer", description="Comma-separated types"),
+    count: int = Form(default=5, description="Number of questions"),
+    difficulty: str = Form(default="medium", description="Difficulty level")
+):
+    """
+    Generate practice questions from text context.
+    
+    **Question Types:**
+    - `mcq`: Multiple choice (4 options)
+    - `short_answer`: Short answer questions
+    - `fill_blank`: Fill in the blank
+    
+    **Difficulty Levels:**
+    - `easy`: Simple, straightforward questions
+    - `medium`: Moderate complexity
+    - `hard`: Challenging, requires deeper understanding
+    
+    **Example:**
+    ```
+    context: "Photosynthesis is the process by which plants make food..."
+    grade: 5
+    subject: "Science"
+    question_types: "mcq,short_answer"
+    count: 5
+    ```
+    """
+    try:
+        # Parse question types
+        types_list = [t.strip() for t in question_types.split(",")]
+        
+        # Execute question generator agent
+        output = question_generator_agent.execute(
+            input_data={
+                "operation": "generate_questions",
+                "context": context,
+                "grade": grade,
+                "subject": subject,
+                "question_types": types_list,
+                "count": count,
+                "difficulty": difficulty
+            },
+            related_entity="questions",
+            related_id=f"{subject}_{grade}"
+        )
+        
+        if output.status != "success":
+            raise HTTPException(
+                status_code=500,
+                detail=f"Question generation failed: {output.error}"
+            )
+        
+        return {
+            "success": True,
+            "task_id": output.task_id,
+            "processing_time_ms": output.execution_time_ms,
+            **output.result
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating questions: {str(e)}")
+
+
+@router.post("/questions/from-material")
+async def generate_questions_from_material(
+    index_name: str = Form(..., description="Material index to search"),
+    topic: str = Form(..., description="Topic or query to find relevant content"),
+    grade: int = Form(..., description="Grade level (1-8)"),
+    subject: str = Form(default="General", description="Subject area"),
+    question_types: str = Form(default="mcq,short_answer", description="Question types"),
+    count: int = Form(default=5, description="Number of questions"),
+    difficulty: str = Form(default="medium", description="Difficulty level")
+):
+    """
+    Generate questions from a specific material using semantic search.
+    
+    **Workflow:**
+    1. Search material index for relevant chunks
+    2. Use top chunks as context
+    3. Generate practice questions
+    
+    **This combines Retrieval Agent + Question Generator!**
+    
+    **Example:**
+    ```
+    index_name: "math_grade5"
+    topic: "multiplication"
+    grade: 5
+    count: 10
+    ```
+    """
+    try:
+        # Step 1: Search for relevant chunks
+        search_output = retrieval_agent.execute(
+            input_data={
+                "operation": "search",
+                "index_name": index_name,
+                "query": topic,
+                "top_k": 5,
+                "min_score": 0.0
+            },
+            related_entity="search",
+            related_id=index_name
+        )
+        
+        if search_output.status != "success":
+            raise HTTPException(
+                status_code=500,
+                detail=f"Search failed: {search_output.error}"
+            )
+        
+        # Extract chunks from search results
+        search_results = search_output.result.get("results", [])
+        chunks = [result["chunk"] for result in search_results]
+        
+        if not chunks:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No relevant content found for topic: {topic}"
+            )
+        
+        # Step 2: Generate questions from chunks
+        types_list = [t.strip() for t in question_types.split(",")]
+        
+        question_output = question_generator_agent.execute(
+            input_data={
+                "operation": "generate_questions",
+                "chunks": chunks,
+                "grade": grade,
+                "subject": subject,
+                "question_types": types_list,
+                "count": count,
+                "difficulty": difficulty
+            },
+            related_entity="questions",
+            related_id=index_name
+        )
+        
+        if question_output.status != "success":
+            raise HTTPException(
+                status_code=500,
+                detail=f"Question generation failed: {question_output.error}"
+            )
+        
+        return {
+            "success": True,
+            "search_task_id": search_output.task_id,
+            "question_task_id": question_output.task_id,
+            "chunks_used": len(chunks),
+            "processing_time_ms": search_output.execution_time_ms + question_output.execution_time_ms,
+            **question_output.result
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@router.post("/questions/practice-set")
+async def create_practice_set(
+    title: str = Form(..., description="Practice set title"),
+    context: str = Form(..., description="Text context"),
+    grade: int = Form(..., description="Grade level (1-8)"),
+    subject: str = Form(default="General", description="Subject area"),
+    question_types: str = Form(default="mcq,short_answer,fill_blank", description="Question types"),
+    count: int = Form(default=10, description="Number of questions"),
+    difficulty: str = Form(default="medium", description="Difficulty level")
+):
+    """
+    Create a complete practice set with metadata.
+    
+    **Returns:**
+    - Practice set with title and description
+    - All generated questions
+    - Metadata (grade, subject, difficulty)
+    
+    **Perfect for:**
+    - Creating homework assignments
+    - Quiz generation
+    - Practice worksheets
+    """
+    try:
+        types_list = [t.strip() for t in question_types.split(",")]
+        
+        output = question_generator_agent.execute(
+            input_data={
+                "operation": "generate_practice_set",
+                "title": title,
+                "context": context,
+                "grade": grade,
+                "subject": subject,
+                "question_types": types_list,
+                "count": count,
+                "difficulty": difficulty
+            },
+            related_entity="practice_sets",
+            related_id=f"{subject}_{grade}"
+        )
+        
+        if output.status != "success":
+            raise HTTPException(
+                status_code=500,
+                detail=f"Practice set creation failed: {output.error}"
+            )
+        
+        return {
+            "success": True,
+            "task_id": output.task_id,
+            "processing_time_ms": output.execution_time_ms,
+            **output.result
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating practice set: {str(e)}")
+
+
+@router.get("/questions/types")
+async def get_question_types():
+    """
+    Get available question types and their descriptions.
+    """
+    return {
+        "question_types": [
+            {
+                "type": "mcq",
+                "name": "Multiple Choice",
+                "description": "4 options with one correct answer",
+                "features": ["Options A-D", "Correct answer", "Hint"]
+            },
+            {
+                "type": "short_answer",
+                "name": "Short Answer",
+                "description": "Open-ended questions requiring 1-3 sentences",
+                "features": ["Expected answer", "Hint"]
+            },
+            {
+                "type": "fill_blank",
+                "name": "Fill in the Blank",
+                "description": "Complete the sentence with missing word/phrase",
+                "features": ["Sentence with blank", "Correct answer", "Hint"]
+            }
+        ],
+        "difficulty_levels": ["easy", "medium", "hard"],
+        "grade_range": [1, 8]
+    }
+
+
+# ============= INTEGRATED WORKFLOW ENDPOINT =============
+
+@router.post("/workflow/material-to-practice")
+async def material_to_practice_workflow(
+    file: UploadFile = File(..., description="Study material (PDF or image)"),
+    subject: str = Form(..., description="Subject area"),
+    grade: int = Form(..., description="Grade level (1-8)"),
+    topic: Optional[str] = Form(None, description="Specific topic (optional)"),
+    question_count: int = Form(default=10, description="Number of questions"),
+    question_types: str = Form(default="mcq,short_answer", description="Question types"),
+    difficulty: str = Form(default="medium", description="Difficulty level"),
+    user_id: str = Form(..., description="User ID")
+):
+    """
+    **Complete Workflow: Upload Material → Generate Practice Questions**
+    
+    This endpoint orchestrates all 3 agents:
+    1. **Ingestion Agent**: Process and chunk the material
+    2. **Retrieval Agent**: Create searchable index
+    3. **Question Generator**: Create practice questions
+    
+    **Perfect for:**
+    - Quick practice set creation from any material
+    - One-click homework generation
+    - Study guide creation
+    
+    **Example:**
+    Upload a PDF about "Photosynthesis" → Get 10 practice questions instantly!
+    """
+    file_extension = Path(file.filename).suffix.lower()
+    temp_file_path = None
+    
+    try:
+        # Save uploaded file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as temp_file:
+            content = await file.read()
+            temp_file.write(content)
+            temp_file_path = temp_file.name
+        
+        import uuid
+        material_id = str(uuid.uuid4())
+        index_name = f"material_{material_id[:8]}"
+        
+        # Define complete workflow
+        workflow = [
+            # Step 1: Ingest material
+            {
+                "agent": "ingestion",
+                "input": {
+                    "file_path": temp_file_path,
+                    "file_extension": file_extension,
+                    "material_id": material_id,
+                    "subject": subject,
+                    "grade": grade
+                },
+                "output_key": "ingestion_result"
+            },
+            # Step 2: Create search index
+            {
+                "agent": "retrieval",
+                "input": {
+                    "operation": "create_index",
+                    "index_name": index_name,
+                    "chunks": "${ingestion_result}[chunks]",  # Reference from step 1
+                    "force_recreate": True
+                },
+                "output_key": "index_result"
+            },
+            # Step 3: Generate questions
+            {
+                "agent": "question_generator",
+                "input": {
+                    "operation": "generate_practice_set",
+                    "title": f"{subject} Practice - {file.filename}",
+                    "chunks": "${ingestion_result}[chunks]",
+                    "grade": grade,
+                    "subject": subject,
+                    "question_types": question_types.split(","),
+                    "count": question_count,
+                    "difficulty": difficulty
+                },
+                "output_key": "questions_result"
+            }
+        ]
+        
+        # Execute workflow
+        result = coordinator.execute_workflow(workflow, user_id=user_id)
+        
+        if result["status"] != "success":
+            raise HTTPException(
+                status_code=500,
+                detail=f"Workflow failed at step {result.get('failed_step', 'unknown')}: {result.get('error', 'Unknown error')}"
+            )
+        
+        # Extract results
+        ingestion = result["results"].get("ingestion_result", {})
+        questions = result["results"].get("questions_result", {})
+        
+        return {
+            "success": True,
+            "workflow_id": result["workflow_id"],
+            "material_id": material_id,
+            "index_name": index_name,
+            "chunks_created": ingestion.get("total_chunks", 0),
+            "topics": ingestion.get("topics", []),
+            "questions": questions.get("questions", []),
+            "question_count": questions.get("count", 0),
+            "metadata": {
+                "subject": subject,
+                "grade": grade,
+                "difficulty": difficulty,
+                "filename": file.filename
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Workflow error: {str(e)}")
+    finally:
+        # Clean up
+        if temp_file_path and os.path.exists(temp_file_path):
+            try:
+                os.unlink(temp_file_path)
+            except Exception as e:
+                print(f"Warning: Could not delete temp file: {e}")
+
+
 # Register agents with coordinator
 coordinator.register_agent(ingestion_agent)
 coordinator.register_agent(retrieval_agent)
+coordinator.register_agent(question_generator_agent)
 
