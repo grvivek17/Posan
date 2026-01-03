@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 
 from app.agents.ingestion_agent import ingestion_agent
+from app.agents.retrieval_agent import retrieval_agent
 from app.agents import coordinator
 
 router = APIRouter()
@@ -280,5 +281,230 @@ async def demo_material_to_practice_workflow(
             os.unlink(temp_file_path)
 
 
-# Register ingestion agent with coordinator
+# ============= SEMANTIC SEARCH ENDPOINTS (Phase 2) =============
+
+@router.post("/search/create-index")
+async def create_search_index(
+    index_name: str = Form(..., description="Name for the index"),
+    chunks: str = Form(..., description="JSON string of chunks"),
+    force_recreate: bool = Form(default=False, description="Force recreate if exists")
+):
+    """
+    Create a FAISS index for semantic search.
+    
+    This endpoint:
+    1. Takes chunks from material processing
+    2. Generates embeddings using sentence-transformers
+    3. Creates FAISS index for fast similarity search
+    4. Saves index to disk for persistence
+    
+    **Use after material upload to enable semantic search**
+    """
+    import json
+    
+    try:
+        # Parse chunks JSON
+        chunks_list = json.loads(chunks)
+        
+        # Execute retrieval agent
+        output = retrieval_agent.execute(
+            input_data={
+                "operation": "create_index",
+                "index_name": index_name,
+                "chunks": chunks_list,
+                "force_recreate": force_recreate
+            },
+            related_entity="indices",
+            related_id=index_name
+        )
+        
+        if output.status != "success":
+            raise HTTPException(
+                status_code=500,
+                detail=f"Index creation failed: {output.error}"
+            )
+        
+        return {
+            "success": True,
+            "task_id": output.task_id,
+            "processing_time_ms": output.execution_time_ms,
+            **output.result
+        }
+        
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid JSON: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating index: {str(e)}")
+
+
+@router.post("/search/query")
+async def semantic_search(
+    index_name: str = Form(..., description="Index to search"),
+    query: str = Form(..., description="Search query"),
+    top_k: int = Form(default=5, description="Number of results"),
+    min_score: float = Form(default=0.0, description="Minimum similarity score (0-1)")
+):
+    """
+    Perform semantic search in a material index.
+    
+    This endpoint:
+    1. Takes a natural language query
+    2. Generates query embedding
+    3. Searches FAISS index for similar chunks
+    4. Returns ranked results with similarity scores
+    
+    **Example queries:**
+    - "What is photosynthesis?"
+    - "Explain multiplication"
+    - "Tell me about the solar system"
+    """
+    try:
+        # Execute retrieval agent
+        output = retrieval_agent.execute(
+            input_data={
+                "operation": "search",
+                "index_name": index_name,
+                "query": query,
+                "top_k": top_k,
+                "min_score": min_score
+            },
+            related_entity="search",
+            related_id=index_name
+        )
+        
+        if output.status != "success":
+            raise HTTPException(
+                status_code=500,
+                detail=f"Search failed: {output.error}"
+            )
+        
+        return {
+            "success": True,
+            "task_id": output.task_id,
+            "processing_time_ms": output.execution_time_ms,
+            **output.result
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error searching: {str(e)}")
+
+
+@router.post("/search/multi-index")
+async def multi_index_search(
+    index_names: str = Form(..., description="Comma-separated index names"),
+    query: str = Form(..., description="Search query"),
+    top_k: int = Form(default=5, description="Number of results"),
+    min_score: float = Form(default=0.0, description="Minimum similarity score (0-1)")
+):
+    """
+    Search across multiple material indices.
+    
+    Useful for:
+    - Searching all materials for a user
+    - Cross-subject search
+    - Finding related content across topics
+    """
+    try:
+        # Parse index names
+        indices = [name.strip() for name in index_names.split(",")]
+        
+        # Execute retrieval agent
+        output = retrieval_agent.execute(
+            input_data={
+                "operation": "search_multi",
+                "index_names": indices,
+                "query": query,
+                "top_k": top_k,
+                "min_score": min_score
+            },
+            related_entity="search",
+            related_id="multi"
+        )
+        
+        if output.status != "success":
+            raise HTTPException(
+                status_code=500,
+                detail=f"Multi-index search failed: {output.error}"
+            )
+        
+        return {
+            "success": True,
+            "task_id": output.task_id,
+            "processing_time_ms": output.execution_time_ms,
+            **output.result
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error in multi-index search: {str(e)}")
+
+
+@router.get("/search/indices")
+async def list_search_indices():
+    """
+    List all available search indices.
+    
+    Shows:
+    - Index names
+    - Number of chunks in each index
+    - Whether index is loaded in memory
+    """
+    try:
+        # Execute retrieval agent
+        output = retrieval_agent.execute(
+            input_data={"operation": "list_indices"},
+            related_entity="indices",
+            related_id="list"
+        )
+        
+        if output.status != "success":
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to list indices: {output.error}"
+            )
+        
+        return {
+            "success": True,
+            **output.result
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error listing indices: {str(e)}")
+
+
+@router.delete("/search/indices/{index_name}")
+async def delete_search_index(index_name: str):
+    """
+    Delete a search index.
+    
+    This removes both the FAISS index and metadata from disk.
+    """
+    try:
+        # Execute retrieval agent
+        output = retrieval_agent.execute(
+            input_data={
+                "operation": "delete_index",
+                "index_name": index_name
+            },
+            related_entity="indices",
+            related_id=index_name
+        )
+        
+        if output.status != "success":
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to delete index: {output.error}"
+            )
+        
+        return {
+            "success": True,
+            **output.result
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting index: {str(e)}")
+
+
+# Register agents with coordinator
 coordinator.register_agent(ingestion_agent)
+coordinator.register_agent(retrieval_agent)
+

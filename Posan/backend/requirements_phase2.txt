@@ -1,0 +1,9 @@
+# Additional dependencies for Phase 2: Retrieval Agent
+
+# Vector embeddings and search
+sentence-transformers>=2.2.0
+faiss-cpu>=1.7.4
+numpy>=1.24.0
+
+# Optional: GPU support (uncomment if you have CUDA)
+# faiss-gpu>=1.7.4
