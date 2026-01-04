@@ -262,7 +262,7 @@ const StudyMaterialAssistant = () => {
 
                     <div className="age-group-simple">
                         <label>Grade Level:</label>
-                        <select value={grade} onChange={(e) => setGrade(parseInt(e.target.value))}>
+                        <select value={String(grade)} onChange={(e) => setGrade(parseInt(e.target.value))}>
                             <option value="1">Grade 1</option>
                             <option value="2">Grade 2</option>
                             <option value="3">Grade 3</option>
