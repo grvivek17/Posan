@@ -50,7 +50,7 @@ const StudyMaterialAssistant = () => {
             // Format study data for display
             setStudyData({
                 summary: `Processed ${data.chunks_created} sections from your study material.`,
-                topics: data.topics || [],
+                key_topics: data.topics || [],  // Changed from 'topics' to 'key_topics' to match UI
                 chunks_created: data.chunks_created,
                 filename: data.metadata?.filename
             });
@@ -61,13 +61,20 @@ const StudyMaterialAssistant = () => {
             const shortAnswers = questions.filter(q => q.type === 'short_answer');
 
             setPracticeData({
-                mcqs: mcqs.map(q => ({
-                    question: q.question,
-                    options: q.options || {},
-                    correct: q.correct_answer,
-                    hint: q.hint,
-                    id: q.id
-                })),
+                mcqs: mcqs.map(q => {
+                    // Convert options object {A: "...", B: "...", C: "...", D: "..."} to array
+                    const optionsArray = q.options
+                        ? Object.entries(q.options).map(([key, value]) => `${key}) ${value}`)
+                        : [];
+
+                    return {
+                        question: q.question,
+                        options: optionsArray,
+                        correct: q.correct_answer,
+                        hint: q.hint,
+                        id: q.id
+                    };
+                }),
                 short_answers: shortAnswers.map(q => ({
                     question: q.question,
                     expected_answer: q.expected_answer,
@@ -77,7 +84,12 @@ const StudyMaterialAssistant = () => {
                 raw_questions: questions // Keep original for grading
             });
 
-            setStep('results');
+            // NEW: Automatically show practice questions if they were generated
+            if (questions.length > 0) {
+                setStep('practice');  // Skip results, go directly to practice
+            } else {
+                setStep('results');  // Show results if no questions generated
+            }
         } catch (error) {
             console.error('Error in multi-agent workflow:', error);
 
