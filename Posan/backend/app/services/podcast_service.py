@@ -105,9 +105,15 @@ Make it an adventure kids will love!"""
         try:
             # Try to use HuggingFace API
             if self.hf_token:
-                script = self._generate_with_hf(prompt)
+                try:
+                    script = self._generate_with_hf(prompt)
+                except Exception as hf_error:
+                    print(f"HuggingFace API failed: {hf_error}")
+                    print("Falling back to template generation...")
+                    script = self._generate_template(topic, age_group, duration, style)
             else:
                 # Fallback to template-based generation
+                print("No HUGGINGFACE_TOKEN found, using template generation")
                 script = self._generate_template(topic, age_group, duration, style)
             
             # Parse the script into sections
@@ -124,14 +130,19 @@ Make it an adventure kids will love!"""
                     "style": style,
                     "word_count": len(script.split()),
                     "estimated_minutes": self._estimate_duration(script),
-                    "generated_at": datetime.utcnow().isoformat()
+                    "generated_at": datetime.utcnow().isoformat(),
+                    "generation_method": "ai" if self.hf_token else "template"
                 }
             }
             
         except Exception as e:
+            print(f"Podcast generation error: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return {
                 "success": False,
-                "error": str(e),
+                "error": f"Podcast generation failed: {str(e)}",
+                "error_type": type(e).__name__,
                 "topic": topic
             }
     
@@ -270,8 +281,14 @@ Format with clear sections."""
 
         try:
             if self.hf_token:
-                script = self._generate_with_hf(prompt)
+                try:
+                    script = self._generate_with_hf(prompt)
+                except Exception as hf_error:
+                    print(f"HuggingFace API failed for weekly highlights: {hf_error}")
+                    print("Using template generation...")
+                    script = self._generate_weekly_template(magazine_topics)
             else:
+                print("No HUGGINGFACE_TOKEN, using weekly highlights template")
                 script = self._generate_weekly_template(magazine_topics)
             
             return {
@@ -283,14 +300,19 @@ Format with clear sections."""
                     "type": "weekly_highlights",
                     "word_count": len(script.split()),
                     "estimated_minutes": self._estimate_duration(script),
-                    "generated_at": datetime.utcnow().isoformat()
+                    "generated_at": datetime.utcnow().isoformat(),
+                    "generation_method": "ai" if self.hf_token else "template"
                 }
             }
             
         except Exception as e:
+            print(f"Weekly highlights generation error: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return {
                 "success": False,
-                "error": str(e)
+                "error": f"Weekly highlights failed: {str(e)}",
+                "error_type": type(e).__name__
             }
     
     def _generate_weekly_template(self, topics: list) -> str:
