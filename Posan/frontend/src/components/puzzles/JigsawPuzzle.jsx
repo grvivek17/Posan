@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './JigsawPuzzle.css';
+import { gamificationService } from '../../services/gamificationService';
 
 const JigsawPuzzle = ({ title = "Jigsaw Puzzle" }) => {
     // Simple 3x3 jigsaw (9 pieces)
@@ -9,12 +10,14 @@ const JigsawPuzzle = ({ title = "Jigsaw Puzzle" }) => {
     const [pieces, setPieces] = useState([]);
     const [solvedPieces, setSolvedPieces] = useState(Array(totalPieces).fill(false));
     const [draggedPiece, setDraggedPiece] = useState(null);
+    const [completed, setCompleted] = useState(false);
 
     useEffect(() => {
-        // Initialize shuffled pieces
+        // Initialize shuffled pieces - new shuffle on every mount!
         const initialPieces = Array.from({ length: totalPieces }, (_, i) => i);
         const shuffled = [...initialPieces].sort(() => Math.random() - 0.5);
         setPieces(shuffled);
+        setCompleted(false); // Reset completion status
     }, []);
 
     const handleDragStart = (e, piece) => {
@@ -50,8 +53,18 @@ const JigsawPuzzle = ({ title = "Jigsaw Puzzle" }) => {
         setDraggedPiece(null);
 
         // Check if puzzle is complete
-        if (newPieces.every((piece, index) => piece === index)) {
-            setTimeout(() => alert('🎉 Congratulations! Puzzle completed!'), 100);
+        if (newPieces.every((piece, index) => piece === index) && !completed) {
+            setCompleted(true);
+            setTimeout(async () => {
+                try {
+                    await gamificationService.addPoints('puzzle_complete', {
+                        puzzle_type: 'jigsaw'
+                    });
+                    alert('🎉 Congratulations! Puzzle completed! +50 points!');
+                } catch (error) {
+                    alert('🎉 Congratulations! Puzzle completed!');
+                }
+            }, 100);
         }
     };
 
@@ -68,6 +81,7 @@ const JigsawPuzzle = ({ title = "Jigsaw Puzzle" }) => {
             .sort(() => Math.random() - 0.5);
         setPieces(shuffled);
         setSolvedPieces(Array(totalPieces).fill(false));
+        setCompleted(false); // Reset completion status for new puzzle
     };
 
     if (pieces.length === 0) return <div>Loading...</div>;

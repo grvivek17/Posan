@@ -216,6 +216,18 @@ class GamificationService {
             return null;
         }
     }
+    /**
+     * Convenience method for adding points
+     * @param {string} activityType - Type of activity
+     * @param {object} metadata - Optional metadata (puzzle_type, etc.)
+     */
+    static async addPoints(activityType, metadata = {}) {
+        return await this.awardPoints(
+            activityType,
+            metadata.reference_id || null,
+            metadata.reference_type || activityType
+        );
+    }
 }
 
 // Add CSS for notifications
@@ -299,4 +311,6 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// Export both the class and an instance
+export const gamificationService = GamificationService;
 export default GamificationService;

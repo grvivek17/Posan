@@ -1,50 +1,123 @@
 import { useState, useEffect } from 'react';
 import './WordSearchPuzzle.css';
 import { getRandomWordSearch } from '../../data/puzzleData';
+import { gamificationService } from '../../services/gamificationService';
 
 const WordSearchPuzzle = ({ words = [], grid = [], title = "" }) => {
-    const [foundWords, setFoundWords] = useState([]);
+    const [foundWords, setFoundWords] = useState([]); // Array of found word strings (e.g., ['DOG'])
+    const [foundCells, setFoundCells] = useState([]); // Array of "row-col" strings for highlighting
     const [selectedCells, setSelectedCells] = useState([]);
-    const [isSelecting, setIsSelecting] = useState(false);
     const [currentPuzzle, setCurrentPuzzle] = useState(null);
+    const [completed, setCompleted] = useState(false);
 
-    // Load a random puzzle on component mount
+    // Initialize puzzle
     useEffect(() => {
+        if (words.length > 0 && grid.length > 0) {
+            // Use props if provided (AI mode)
+            setCurrentPuzzle({ words, grid, title });
+        } else {
+            // Load random puzzle
+            loadRandomPuzzle();
+        }
+    }, [words, grid, title]);
+
+    const loadRandomPuzzle = () => {
         const randomPuzzle = getRandomWordSearch();
         setCurrentPuzzle(randomPuzzle);
-    }, []);
-
-    // Use provided props or random puzzle data
-    const puzzleToUse = currentPuzzle || { grid: [[]], words: [], title: "Word Search" };
-    const currentGrid = grid.length > 0 ? grid : puzzleToUse.grid;
-    const currentWords = words.length > 0 ? words : puzzleToUse.words;
-    const puzzleTitle = title || puzzleToUse.title;
-
-    // Return loading state if puzzle not loaded
-    if (!currentPuzzle && grid.length === 0) {
-        return <div className="word-search-puzzle">Loading puzzle...</div>;
-    }
-
-    const handleCellClick = (row, col) => {
-        const cellKey = `${row}-${col}`;
-        if (selectedCells.includes(cellKey)) {
-            setSelectedCells(selectedCells.filter(c => c !== cellKey));
-        } else {
-            setSelectedCells([...selectedCells, cellKey]);
-        }
+        setFoundWords([]);
+        setFoundCells([]);
+        setSelectedCells([]);
+        setCompleted(false);
     };
 
+    // Determine current game state
+    const currentGrid = currentPuzzle ? currentPuzzle.grid : [];
+    const currentWordList = currentPuzzle ? currentPuzzle.words : [];
+    const displayTitle = currentPuzzle ? currentPuzzle.title : "Word Search";
+
+    // Validates if selected cells form a word
     const checkWord = () => {
-        // Simple check - in a real app, you'd validate the selection
-        if (selectedCells.length >= 3) {
-            setFoundWords([...foundWords, selectedCells.join(',')]);
+        if (!currentGrid.length) return;
+
+        // 1. Get letters from selected cells
+        // Note: In a robust implementation, we'd check if cells are contiguous and linear.
+        // For now, we'll assume the user selected them in order or sort them if needed.
+        // But users usually click in order. Let's build the string based on selection order.
+
+        const selectedLetters = selectedCells.map(key => {
+            const [r, c] = key.split('-').map(Number);
+            return currentGrid[r][c];
+        }).join('');
+
+        const reversedLetters = selectedLetters.split('').reverse().join('');
+
+        const matchedWord = currentWordList.find(word =>
+            (word === selectedLetters || word === reversedLetters) &&
+            !foundWords.includes(word)
+        );
+
+        if (matchedWord) {
+            // Valid word found!
+            setFoundWords([...foundWords, matchedWord]);
+            setFoundCells([...foundCells, ...selectedCells]);
+            setSelectedCells([]);
+
+            // Check for game completion
+            // We use the new length + 1 because state updates are async
+            if (foundWords.length + 1 === currentWordList.length) {
+                handleCompletion();
+            }
+        } else {
+            // Invalid - clear selection
+            alert("Not a valid word! Try again.");
             setSelectedCells([]);
         }
     };
 
+    const handleCompletion = () => {
+        if (!completed) {
+            setCompleted(true);
+
+            // Allow state to update before showing alert
+            setTimeout(async () => {
+                try {
+                    await gamificationService.addPoints(
+                        'puzzle_complete',
+                        { puzzle_type: 'word_search' }
+                    );
+                    alert('🎉 Congratulations! You found all the words! +50 points!');
+                } catch (error) {
+                    console.error('Error awarding points:', error);
+                    alert('🎉 Congratulations! You found all the words!');
+                }
+            }, 100);
+        }
+    };
+
+    const handleCellClick = (row, col) => {
+        if (completed) return;
+
+        const cellKey = `${row}-${col}`;
+
+        // Allow deselecting the last clicked cell (undo)
+        if (selectedCells[selectedCells.length - 1] === cellKey) {
+            setSelectedCells(selectedCells.slice(0, -1));
+            return;
+        }
+
+        // Prevent selecting already found cells or adding duplicates
+        if (!foundCells.includes(cellKey) && !selectedCells.includes(cellKey)) {
+            setSelectedCells([...selectedCells, cellKey]);
+        }
+    };
+
+    if (!currentPuzzle) {
+        return <div className="word-search-puzzle">Loading puzzle...</div>;
+    }
+
     return (
         <div className="word-search-puzzle">
-            <h3 className="puzzle-title">{puzzleTitle}</h3>
+            <h3 className="puzzle-title">{displayTitle}</h3>
 
             <div className="puzzle-layout">
                 <div className="word-grid">
@@ -53,10 +126,16 @@ const WordSearchPuzzle = ({ words = [], grid = [], title = "" }) => {
                             {row.map((letter, colIndex) => {
                                 const cellKey = `${rowIndex}-${colIndex}`;
                                 const isSelected = selectedCells.includes(cellKey);
+                                const isFound = foundCells.includes(cellKey);
+
+                                let className = 'grid-cell';
+                                if (isFound) className += ' found';
+                                if (isSelected) className += ' selected';
+
                                 return (
                                     <div
                                         key={colIndex}
-                                        className={`grid-cell ${isSelected ? 'selected' : ''}`}
+                                        className={className}
                                         onClick={() => handleCellClick(rowIndex, colIndex)}
                                     >
                                         {letter}
@@ -70,20 +149,30 @@ const WordSearchPuzzle = ({ words = [], grid = [], title = "" }) => {
                 <div className="word-list">
                     <h4>Find these words:</h4>
                     <ul>
-                        {currentWords.map((word, index) => (
+                        {currentWordList.map((word, index) => (
                             <li
                                 key={index}
-                                className={foundWords.some(fw => fw.includes(word)) ? 'found' : ''}
+                                className={foundWords.includes(word) ? 'found' : ''}
                             >
                                 {word}
                             </li>
                         ))}
                     </ul>
-                    {selectedCells.length > 0 && (
-                        <button className="check-btn" onClick={checkWord}>
-                            ✓ Check Word
-                        </button>
-                    )}
+
+                    <div className="puzzle-controls">
+                        {selectedCells.length > 0 && (
+                            <button className="check-btn" onClick={checkWord}>
+                                ✓ Check Word
+                            </button>
+                        )}
+
+                        {/* Only show refresh for non-AI puzzles */}
+                        {grid.length === 0 && (
+                            <button className="reset-btn" onClick={loadRandomPuzzle} style={{ marginTop: '10px' }}>
+                                ↻ New Puzzle
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

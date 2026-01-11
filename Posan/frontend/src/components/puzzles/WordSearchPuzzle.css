@@ -52,9 +52,20 @@
 }
 
 .grid-cell.selected {
+    background: #2196f3;
+    color: white;
+    border-color: #1976d2;
+}
+
+.grid-cell.found {
     background: #4caf50;
     color: white;
     border-color: #388e3c;
+}
+
+.grid-cell.found.selected {
+    background: #43a047;
+    /* Slightly different green if clicking found cells */
 }
 
 .word-list {
@@ -119,4 +130,21 @@
         height: 35px;
         font-size: 16px;
     }
+}
+
+.reset-btn {
+    width: 100%;
+    padding: 12px;
+    background: white;
+    color: #667eea;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.reset-btn:hover {
+    background: #f3f4fa;
+    transform: translateY(-2px);
 }

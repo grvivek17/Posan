@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.api.endpoints import auth, users, magazines, puzzles, gamification, ai_content, homework_agents, gamification_v2, podcasts
+from app.api.endpoints import auth, users, magazines, puzzles, gamification, ai_content, homework_agents, gamification_v2, podcasts, email
 import os
 
 # Create database tables
@@ -37,6 +37,7 @@ app.include_router(auth.router, prefix=f"{settings.API_V1_PREFIX}/auth", tags=["
 app.include_router(users.router, prefix=f"{settings.API_V1_PREFIX}/users", tags=["Users"])
 app.include_router(magazines.router, prefix=f"{settings.API_V1_PREFIX}/content", tags=["Content"])
 app.include_router(podcasts.router, prefix=f"{settings.API_V1_PREFIX}/podcasts", tags=["AI Podcasts"])
+app.include_router(email.router, prefix=f"{settings.API_V1_PREFIX}/email", tags=["Email"])
 app.include_router(puzzles.router, prefix=f"{settings.API_V1_PREFIX}/puzzles", tags=["Puzzles"])
 app.include_router(gamification.router, prefix=f"{settings.API_V1_PREFIX}/gamification", tags=["Gamification"])
 app.include_router(gamification_v2.router, prefix=f"{settings.API_V1_PREFIX}/gamification-v2", tags=["Gamification V2"])

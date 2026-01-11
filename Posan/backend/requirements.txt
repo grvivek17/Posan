@@ -38,3 +38,6 @@ Pillow==10.2.0
 pdf2image==1.17.0
 numpy==1.26.3
 opencv-python-headless==4.9.0.80
+
+# Email
+resend>=2.1.0
