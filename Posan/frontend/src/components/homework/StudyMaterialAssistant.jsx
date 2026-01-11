@@ -96,9 +96,33 @@ const StudyMaterialAssistant = () => {
             let errorMsg = 'Unknown error occurred';
 
             if (error.response) {
+                // Server responded with error
                 const data = error.response.data;
-                errorMsg = (typeof data === 'string') ? data : (data.detail || data.message || JSON.stringify(data));
                 console.log('Server Error Data:', data);
+
+                // Try to extract meaningful error message
+                if (typeof data === 'string') {
+                    errorMsg = data;
+                } else if (data.detail) {
+                    // FastAPI validation errors or custom errors
+                    if (typeof data.detail === 'string') {
+                        errorMsg = data.detail;
+                    } else if (Array.isArray(data.detail)) {
+                        // Validation errors array
+                        errorMsg = data.detail.map(err =>
+                            `${err.loc?.join(' → ') || 'Field'}: ${err.msg}`
+                        ).join('\n');
+                    } else {
+                        errorMsg = JSON.stringify(data.detail, null, 2);
+                    }
+                } else if (data.message) {
+                    errorMsg = data.message;
+                } else if (data.error) {
+                    errorMsg = data.error;
+                } else {
+                    // Last resort: stringify the whole object
+                    errorMsg = JSON.stringify(data, null, 2);
+                }
             } else if (error.request) {
                 errorMsg = 'No response from server. The PDF might be too large or the connection timed out.';
                 console.log('No Response Error:', error.request);

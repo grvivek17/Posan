@@ -8,6 +8,8 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import MagazinePage from './pages/MagazinePage';
 import MagazineDetailPage from './pages/MagazineDetailPage';
 import PuzzlePage from './pages/PuzzlePage';
@@ -16,6 +18,7 @@ import ParentPortal from './pages/ParentPortal';
 import AIContentPage from './pages/AIContentPage';
 import PuzzleZone from './pages/PuzzleZone';
 import HomeworkPage from './pages/HomeworkPage';
+import GamificationPage from './pages/GamificationPage';
 
 // Components
 import Header from './components/common/Header';
@@ -43,6 +46,8 @@ function App() {
                         <Route path="/about" element={<About />} />
                         <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
                         <Route path="/register" element={<Register setIsAuthenticated={setIsAuthenticated} />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
                         <Route
                             path="/magazines"
                             element={isAuthenticated ? <MagazinePage /> : <Navigate to="/login" />}
@@ -74,6 +79,10 @@ function App() {
                         <Route
                             path="/homework"
                             element={isAuthenticated ? <HomeworkPage /> : <Navigate to="/login" />}
+                        />
+                        <Route
+                            path="/achievements"
+                            element={isAuthenticated ? <GamificationPage /> : <Navigate to="/login" />}
                         />
                     </Routes>
                 </main>

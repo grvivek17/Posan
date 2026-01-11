@@ -66,6 +66,24 @@
     border-color: var(--primary-color);
 }
 
+.forgot-password-link {
+    text-align: right;
+    margin-top: 0.25rem;
+}
+
+.forgot-password-link a {
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.forgot-password-link a:hover {
+    text-decoration: underline;
+    color: var(--primary-dark);
+}
+
 .login-footer {
     text-align: center;
     margin-top: 1.5rem;

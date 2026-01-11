@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import AudioPlayer from '../components/podcasts/AudioPlayer';
 import './AIContentPage.css';
 
 // Use environment variable or fallback to localhost for development
@@ -7,6 +8,7 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 const AIContentPage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [activeTab, setActiveTab] = useState('story');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
@@ -18,6 +20,11 @@ const AIContentPage = () => {
     const [wordCount, setWordCount] = useState(200);
     const [articleType, setArticleType] = useState('educational');
     const [numQuestions, setNumQuestions] = useState(5);
+
+    // Podcast states
+    const [podcastDuration, setPodcastDuration] = useState('short');
+    const [podcastStyle, setPodcastStyle] = useState('fun');
+    const [currentPodcast, setCurrentPodcast] = useState(null);
 
     const ageGroups = [
         { value: '3-5', label: '🧒 Toddlers (3-5 years)' },
@@ -33,8 +40,31 @@ const AIContentPage = () => {
         { value: 'science', label: '🔬 Science' }
     ];
 
+    // Handle navigation from weekly highlights
+    useEffect(() => {
+        if (location.state?.showPodcast && location.state?.podcastData) {
+            const podcastData = location.state.podcastData;
+
+            // Set the podcast data
+            setCurrentPodcast({
+                ...podcastData,
+                id: Date.now(),
+                createdAt: new Date().toISOString()
+            });
+
+            // Set result to display
+            setResult({ type: 'podcast', data: podcastData });
+
+            // Switch to podcast tab
+            setActiveTab('podcast');
+
+            // Clear the navigation state
+            navigate(location.pathname, { replace: true, state: {} });
+        }
+    }, [location.state]);
+
     const generateContent = async (type) => {
-        if (!topic.trim()) {
+        if (!topic.trim() && type !== 'fact' && type !== 'riddle') {
             setError('Please enter a topic!');
             return;
         }
@@ -82,6 +112,18 @@ const AIContentPage = () => {
                         body: JSON.stringify({ topic, age_group: ageGroup, num_words: 10 })
                     });
                     break;
+                case 'podcast':
+                    response = await fetch(`${API_BASE}/podcasts/generate`, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({
+                            topic,
+                            age_group: ageGroup,
+                            duration: podcastDuration,
+                            style: podcastStyle
+                        })
+                    });
+                    break;
                 default:
                     throw new Error('Unknown content type');
             }
@@ -89,6 +131,16 @@ const AIContentPage = () => {
             if (!response.ok) throw new Error('Failed to generate content');
 
             const data = await response.json();
+
+            // Special handling for podcast
+            if (type === 'podcast') {
+                setCurrentPodcast({
+                    ...data,
+                    id: Date.now(),
+                    createdAt: new Date().toISOString()
+                });
+            }
+
             setResult({ type, data });
         } catch (err) {
             setError(err.message || 'Something went wrong!');
@@ -175,6 +227,42 @@ const AIContentPage = () => {
                     </div>
                 );
 
+            case 'podcast':
+                return (
+                    <div className="result-card podcast-result">
+                        <h3 className="result-title">🎙️ {data.topic || 'Your Podcast'}</h3>
+                        <div className="result-meta">
+                            <span className="badge">{data.metadata?.style || 'fun'}</span>
+                            <span className="badge">{data.metadata?.estimated_minutes || 3} min</span>
+                            <span className="badge">{data.metadata?.age_group || ageGroup}</span>
+                        </div>
+
+                        {/* Audio Player */}
+                        {currentPodcast && (
+                            <AudioPlayer
+                                script={currentPodcast.script}
+                                podcastId={currentPodcast.id?.toString()}
+                                topic={currentPodcast.topic}
+                            />
+                        )}
+
+                        {/* Script */}
+                        <div className="podcast-script-container">
+                            <h4>📝 Podcast Script:</h4>
+                            <div className="podcast-script-content">
+                                {data.script?.split('\n').map((line, i) => {
+                                    if (line.trim().startsWith('[') && line.trim().endsWith(']')) {
+                                        return <h5 key={i} className="script-section">{line.trim()}</h5>;
+                                    } else if (line.trim()) {
+                                        return <p key={i}>{line}</p>;
+                                    }
+                                    return null;
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                );
+
             default:
                 return <pre>{JSON.stringify(data, null, 2)}</pre>;
         }
@@ -212,6 +300,12 @@ const AIContentPage = () => {
                         onClick={() => setActiveTab('fun')}
                     >
                         🎉 Fun Stuff
+                    </button>
+                    <button
+                        className={`tab ${activeTab === 'podcast' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('podcast')}
+                    >
+                        🎙️ Podcast
                     </button>
                 </div>
 
@@ -339,6 +433,44 @@ const AIContentPage = () => {
                                 {loading ? '✨ Finding...' : '🔤 Word Search Words'}
                             </button>
                         </div>
+                    )}
+
+                    {activeTab === 'podcast' && (
+                        <>
+                            <div className="form-group">
+                                <label htmlFor="podcastDuration">⏱️ Duration</label>
+                                <select
+                                    id="podcastDuration"
+                                    value={podcastDuration}
+                                    onChange={(e) => setPodcastDuration(e.target.value)}
+                                    className="select-input"
+                                >
+                                    <option value="short">Short (2-3 min)</option>
+                                    <option value="medium">Medium (5 min)</option>
+                                    <option value="long">Long (10 min)</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="podcastStyle">🎨 Style</label>
+                                <select
+                                    id="podcastStyle"
+                                    value={podcastStyle}
+                                    onChange={(e) => setPodcastStyle(e.target.value)}
+                                    className="select-input"
+                                >
+                                    <option value="fun">🎉 Fun & Exciting</option>
+                                    <option value="educational">📚 Educational</option>
+                                    <option value="story">📖 Story-based</option>
+                                </select>
+                            </div>
+                            <button
+                                className="generate-btn"
+                                onClick={() => generateContent('podcast')}
+                                disabled={loading}
+                            >
+                                {loading ? '🎙️ Creating Podcast...' : '🎧 Generate Podcast'}
+                            </button>
+                        </>
                     )}
 
                     {error && <div className="error-message">❌ {error}</div>}

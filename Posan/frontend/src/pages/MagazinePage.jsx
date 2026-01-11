@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { contentAPI } from '../services/api';
 import SearchBar from '../components/magazine/SearchBar';
 import CategoryFilter from '../components/magazine/CategoryFilter';
+import axios from 'axios';
 import './MagazinePage.css';
 
 function MagazinePage() {
@@ -12,6 +13,7 @@ function MagazinePage() {
     const [error, setError] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('All');
+    const [weeklyLoading, setWeeklyLoading] = useState(false);
 
     useEffect(() => {
         fetchMagazines();
@@ -25,6 +27,27 @@ function MagazinePage() {
             setError('Failed to load magazines');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const generateWeeklyHighlights = async () => {
+        setWeeklyLoading(true);
+        try {
+            const response = await axios.post('http://localhost:8000/api/v1/podcasts/weekly-highlights', {
+                topics: null
+            });
+
+            // Navigate to AI Creator with the podcast result
+            navigate('/ai-content', {
+                state: {
+                    podcastData: response.data,
+                    showPodcast: true
+                }
+            });
+        } catch (err) {
+            setError('Failed to generate weekly highlights');
+        } finally {
+            setWeeklyLoading(false);
         }
     };
 
@@ -62,6 +85,13 @@ function MagazinePage() {
                 <div className="page-header-lib">
                     <div className="header-icon">📚</div>
                     <h1 className="page-title-lib">Library</h1>
+                    <button
+                        className="weekly-highlights-btn"
+                        onClick={generateWeeklyHighlights}
+                        disabled={weeklyLoading}
+                    >
+                        {weeklyLoading ? '🎙️ Creating...' : '🎧 Weekly Highlights Podcast'}
+                    </button>
                 </div>
 
                 {/* Search Bar */}

@@ -26,12 +26,14 @@ function Login({ setIsAuthenticated }) {
 
         try {
             const response = await authAPI.login(formData);
-            const { access_token, refresh_token } = response.data;
+            const { access_token, refresh_token, user_id } = response.data;
 
-            // Store tokens and username
+            // Store tokens and user info
             localStorage.setItem('access_token', access_token);
+            localStorage.setItem('token', access_token); // For gamification system
             localStorage.setItem('refresh_token', refresh_token);
             localStorage.setItem('username', formData.username);
+            localStorage.setItem('user_id', user_id); // For gamification system
 
             setIsAuthenticated(true);
             navigate('/magazines');
@@ -77,6 +79,9 @@ function Login({ setIsAuthenticated }) {
                                     required
                                     placeholder="Enter your password"
                                 />
+                                <div className="forgot-password-link">
+                                    <Link to="/forgot-password">Forgot password?</Link>
+                                </div>
                             </div>
 
                             <button type="submit" className="btn btn-primary btn-large" disabled={loading}>

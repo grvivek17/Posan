@@ -36,7 +36,7 @@ To verify if it's an API issue vs code issue, try this in Python:
 ```python
 from huggingface_hub import InferenceClient
 
-token = "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"
+token = "hf_YOUR_TOKEN_HERE"  # Replace with your actual token
 client = InferenceClient(token=token)
 
 try:

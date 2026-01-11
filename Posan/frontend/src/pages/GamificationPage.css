@@ -1,0 +1,419 @@
+/* Gamification Page Styles */
+
+.gamification-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 80px 20px 40px;
+}
+
+.gamification-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header */
+.gamification-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.gamification-header h1 {
+    font-size: 48px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    font-size: 18px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Points Section */
+.points-section {
+    margin-bottom: 32px;
+}
+
+/* Streak Section */
+.streak-section {
+    margin-bottom: 32px;
+}
+
+.streak-card {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 10px 30px rgba(249, 115, 22, 0.3);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.streak-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 36px rgba(249, 115, 22, 0.4);
+}
+
+.streak-icon {
+    font-size: 64px;
+    animation: flicker 2s ease-in-out infinite;
+}
+
+.streak-info h3 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.streak-info p {
+    font-size: 16px;
+    opacity: 0.95;
+}
+
+/* Earn Points Section */
+.earn-points-section {
+    margin-bottom: 48px;
+}
+
+.earn-points-section h2 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.activities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.activity-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+}
+
+.activity-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    border-color: #667eea;
+}
+
+.activity-icon {
+    font-size: 40px;
+    animation: float 3s ease-in-out infinite;
+}
+
+.activity-card:nth-child(2) .activity-icon {
+    animation-delay: 0.3s;
+}
+
+.activity-card:nth-child(3) .activity-icon {
+    animation-delay: 0.6s;
+}
+
+.activity-card:nth-child(4) .activity-icon {
+    animation-delay: 0.9s;
+}
+
+.activity-info {
+    flex: 1;
+}
+
+.activity-info h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.activity-points {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.points-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: #667eea;
+}
+
+.points-label {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+/* Levels Section */
+.levels-section {
+    margin-bottom: 48px;
+}
+
+.levels-section h2 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.levels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.level-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.level-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.level-card:hover::before {
+    transform: scaleX(1);
+}
+
+.level-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    border-color: #667eea;
+}
+
+.level-icon-large {
+    font-size: 56px;
+    margin-bottom: 12px;
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+}
+
+.level-card:nth-child(2) .level-icon-large {
+    animation-delay: 0.4s;
+}
+
+.level-card:nth-child(3) .level-icon-large {
+    animation-delay: 0.8s;
+}
+
+.level-card:nth-child(4) .level-icon-large {
+    animation-delay: 1.2s;
+}
+
+.level-card:nth-child(5) .level-icon-large {
+    animation-delay: 1.6s;
+}
+
+.level-card:nth-child(6) .level-icon-large {
+    animation-delay: 2s;
+}
+
+.level-card h3 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.level-range {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+/* Badges Section */
+.badges-section {
+    margin-bottom: 48px;
+}
+
+/* Tips Section */
+.tips-section {
+    margin-bottom: 48px;
+}
+
+.tips-section h2 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.tip-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+}
+
+.tip-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    border-color: #10b981;
+}
+
+.tip-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+}
+
+.tip-card:nth-child(2) .tip-icon {
+    animation-delay: 0.5s;
+}
+
+.tip-card:nth-child(3) .tip-icon {
+    animation-delay: 1s;
+}
+
+.tip-card:nth-child(4) .tip-icon {
+    animation-delay: 1.5s;
+}
+
+.tip-card h4 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.tip-card p {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+/* Loading */
+.gamification-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    color: #64748b;
+}
+
+.spinner {
+    width: 56px;
+    height: 56px;
+    border: 5px solid #e2e8f0;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+/* Animations */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes flicker {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .gamification-page {
+        padding: 60px 16px 40px;
+    }
+
+    .gamification-header h1 {
+        font-size: 36px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+    }
+
+    .earn-points-section h2,
+    .levels-section h2,
+    .tips-section h2 {
+        font-size: 24px;
+    }
+
+    .activities-grid,
+    .levels-grid,
+    .tips-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .streak-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .streak-icon {
+        font-size: 48px;
+    }
+
+    .streak-info h3 {
+        font-size: 24px;
+    }
+}

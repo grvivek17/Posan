@@ -91,7 +91,11 @@ export const homeworkAPI = {
         formData.append('question_types', 'mcq,short_answer');
         formData.append('difficulty', 'medium');
         formData.append('user_id', localStorage.getItem('user_id') || 'guest');
-        return api.post('/homework-agents/workflow/material-to-practice', formData);
+        return api.post('/homework-agents/workflow/material-to-practice', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
     },
 
     // NEW: Upload and process material (Phase 1: Ingestion)
@@ -100,7 +104,11 @@ export const homeworkAPI = {
         formData.append('grade', grade);
         if (topic) formData.append('topic', topic);
         formData.append('user_id', localStorage.getItem('user_id') || 'guest');
-        return api.post('/homework-agents/materials/upload-v2', formData);
+        return api.post('/homework-agents/materials/upload-v2', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
     },
 
     // NEW: Generate questions from context (Phase 3: Question Generator)
@@ -134,7 +142,11 @@ export const homeworkAPI = {
         formData.append('questions', JSON.stringify(questions));
         if (studentId) formData.append('student_id', studentId);
         if (examId) formData.append('exam_id', examId);
-        return api.post('/homework-agents/exams/grade', formData);
+        return api.post('/homework-agents/exams/grade', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
     },
 
     // NEW: Quick grade single question

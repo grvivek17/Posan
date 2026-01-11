@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import PointsDisplay from './PointsDisplay';
 import './Header.css';
 
 function Header({ isAuthenticated, setIsAuthenticated }) {
@@ -49,6 +50,9 @@ function Header({ isAuthenticated, setIsAuthenticated }) {
                             <>
                                 <Link to="/about" className="nav-link-secondary">About</Link>
                                 <div className="divider"></div>
+                                <Link to="/achievements">
+                                    <PointsDisplay compact={true} />
+                                </Link>
                                 <div className="user-menu">
                                     <div className="username-label">{username}</div>
                                     <Link to="/profile" className="profile-link">

@@ -76,7 +76,7 @@ function ProfilePage() {
                 </div>
 
                 {/* Achievements */}
-                <div className="achievements-card">
+                <div className="achievements-card" onClick={() => navigate('/achievements')}>
                     <div className="achievements-icon">🏆</div>
                     <h3>My Achievements</h3>
                     <span className="achievements-badge">12 New!</span>

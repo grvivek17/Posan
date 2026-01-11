@@ -131,10 +131,22 @@ def submit_puzzle(submission: PuzzleSubmission, user_id: int, db: Session = Depe
         points_earned = puzzle.points_reward
         progress.points_earned = points_earned
         
-        # Update child profile points
+        # Update child profile points (legacy)
         child_profile = db.query(ChildProfile).filter(ChildProfile.user_id == user_id).first()
         if child_profile:
             child_profile.total_points += points_earned
+        
+        # Award points using gamification service
+        from app.services.gamification_service import GamificationService
+        from app.models.activity import ActivityType
+        
+        gamification_service = GamificationService(db)
+        gamification_service.award_points(
+            user_id=user_id,
+            activity_type=ActivityType.PUZZLE_SOLVED,
+            reference_id=puzzle.id,
+            reference_type="puzzle"
+        )
         
         message = f"Congratulations! You earned {points_earned} points!"
     elif is_correct and progress.is_completed:

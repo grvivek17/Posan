@@ -29,3 +29,6 @@ htmlcov/
 
 # Uploads
 uploads/
+
+# Podcasts
+static/podcasts/
