@@ -83,6 +83,9 @@ function Header({ isAuthenticated, setIsAuthenticated }) {
                                 <Link to="/achievements">
                                     <PointsDisplay compact={true} />
                                 </Link>
+                                <Link to="/store" className="cart-link" title="Activity Book Store">
+                                    🛒
+                                </Link>
                                 <div className="user-menu">
                                     <div className="username-label">{username}</div>
                                     <Link to="/profile" className="profile-link">
@@ -96,6 +99,9 @@ function Header({ isAuthenticated, setIsAuthenticated }) {
                         ) : (
                             <>
                                 <Link to="/about" className="nav-link-secondary">About</Link>
+                                <Link to="/store" className="cart-link" title="Activity Book Store">
+                                    🛒
+                                </Link>
                                 <Link to="/login" className="btn btn-primary">Login</Link>
                                 <Link to="/register" className="btn btn-secondary">Sign Up</Link>
                             </>

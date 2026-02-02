@@ -68,6 +68,17 @@
     color: white;
 }
 
+.btn-secondary.email-btn {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    border: none;
+}
+
+.btn-secondary.email-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+}
+
 .btn-refresh {
     background: #f3f4f6;
     color: #333;

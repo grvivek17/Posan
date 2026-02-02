@@ -28,6 +28,8 @@ import ActivityBookStore from './pages/ActivityBookStore';
 import CheckoutPage from './pages/CheckoutPage';
 import AdminProductsPage from './pages/AdminProductsPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
+import AdminOrdersPage from './pages/AdminOrdersPage';
+import AdminPromotionalEmailPage from './pages/AdminPromotionalEmailPage';
 
 // Components
 import Header from './components/common/Header';
@@ -67,7 +69,7 @@ function App() {
                         />
                         <Route
                             path="/store"
-                            element={isAuthenticated ? <ActivityBookStore /> : <Navigate to="/login" />}
+                            element={<ActivityBookStore />}
                         />
                         <Route
                             path="/store/checkout"
@@ -129,6 +131,14 @@ function App() {
                         <Route
                             path="/admin/products"
                             element={isAuthenticated ? <AdminProductsPage /> : <Navigate to="/login" />}
+                        />
+                        <Route
+                            path="/admin/orders"
+                            element={isAuthenticated ? <AdminOrdersPage /> : <Navigate to="/login" />}
+                        />
+                        <Route
+                            path="/admin/promotional-email"
+                            element={isAuthenticated ? <AdminPromotionalEmailPage /> : <Navigate to="/login" />}
                         />
                     </Routes>
                 </main>

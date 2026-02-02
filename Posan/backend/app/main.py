@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.api.endpoints import auth, users, magazines, puzzles, gamification, ai_content, homework_agents, gamification_v2, podcasts, email, calculator, subscription, admin, store
+from app.api.endpoints import auth, users, magazines, puzzles, gamification, ai_content, homework_agents, gamification_v2, podcasts, email, calculator, subscription, admin, store, promotional_email
 import os
 
 # Create database tables
@@ -47,6 +47,7 @@ app.include_router(subscription.router, prefix=f"{settings.API_V1_PREFIX}", tags
 app.include_router(admin.router, prefix=f"{settings.API_V1_PREFIX}", tags=["Admin"])
 app.include_router(store.router, prefix=f"{settings.API_V1_PREFIX}", tags=["Store"])
 app.include_router(homework_agents.router, prefix=f"{settings.API_V1_PREFIX}/homework-agents", tags=["Homework Agents (Multi-Agent System)"])
+app.include_router(promotional_email.router, prefix=f"{settings.API_V1_PREFIX}", tags=["Admin Promotional Email"])
 
 
 @app.get("/")

@@ -62,6 +62,12 @@ const AdminDashboard = () => {
                     <button onClick={() => navigate('/admin/products')} className="btn-secondary">
                         📦 Manage Products
                     </button>
+                    <button onClick={() => navigate('/admin/orders')} className="btn-secondary">
+                        🛒 Manage Orders
+                    </button>
+                    <button onClick={() => navigate('/admin/promotional-email')} className="btn-secondary email-btn">
+                        📧 Promotional Email
+                    </button>
                 </div>
             </div>
 
