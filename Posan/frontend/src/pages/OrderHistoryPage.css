@@ -1,0 +1,477 @@
+/* Order History Page Styles */
+
+.order-history-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+    padding-bottom: 80px;
+}
+
+/* Header */
+.orders-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 24px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
+.orders-header-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.back-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 12px;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.orders-title h1 {
+    color: white;
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.orders-title p {
+    color: rgba(255, 255, 255, 0.9);
+    margin: 4px 0 0;
+    font-size: 0.95rem;
+}
+
+/* Container */
+.orders-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 20px;
+}
+
+/* No Orders */
+.no-orders {
+    background: white;
+    border-radius: 24px;
+    padding: 60px 40px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.no-orders-icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+}
+
+.no-orders h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin: 0 0 12px;
+}
+
+.no-orders p {
+    color: #666;
+    margin: 0 0 24px;
+}
+
+.shop-now-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.shop-now-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+}
+
+/* Orders List */
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Order Card */
+.order-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s;
+}
+
+.order-card:hover {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.order-card.expanded {
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15);
+}
+
+/* Order Summary */
+.order-summary {
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.order-summary:hover {
+    background: #f8f9fa;
+}
+
+.order-main-info {
+    flex: 1;
+}
+
+.order-id-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.order-id {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.order-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+}
+
+.order-date {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.order-quick-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.order-items-count {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.count-icon {
+    font-size: 1rem;
+}
+
+.order-total {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #667eea;
+}
+
+.expand-icon {
+    color: #aaa;
+    font-size: 0.8rem;
+    padding: 8px;
+}
+
+/* Order Details */
+.order-details {
+    padding: 0 24px 24px;
+    border-top: 1px solid #eee;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.order-details h4 {
+    font-size: 1rem;
+    color: #333;
+    margin: 20px 0 12px;
+}
+
+/* Order Items List */
+.order-items-list {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.order-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.item-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.item-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.item-qty {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 2px;
+}
+
+.item-price {
+    font-weight: 700;
+    color: #667eea;
+}
+
+/* Order Timeline */
+.order-timeline {
+    margin-top: 20px;
+}
+
+.timeline {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    padding: 0 10px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 30px;
+    right: 30px;
+    height: 3px;
+    background: #e0e0e0;
+    z-index: 0;
+}
+
+.timeline-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1;
+}
+
+.timeline-step .step-icon {
+    width: 40px;
+    height: 40px;
+    background: #e0e0e0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    transition: all 0.3s;
+}
+
+.timeline-step.completed .step-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.timeline-step .step-label {
+    font-size: 0.7rem;
+    color: #888;
+    text-align: center;
+    font-weight: 500;
+}
+
+.timeline-step.completed .step-label {
+    color: #667eea;
+    font-weight: 600;
+}
+
+/* Order Summary Section */
+.order-summary-section {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px dashed #ddd;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 0.95rem;
+    color: #666;
+}
+
+.summary-row.total {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #333;
+    border-top: 1px solid #eee;
+    margin-top: 8px;
+    padding-top: 12px;
+}
+
+.summary-row.total span:last-child {
+    color: #667eea;
+}
+
+.free-text {
+    color: #10b981;
+    font-weight: 600;
+}
+
+/* Reorder Button */
+.reorder-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.reorder-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* Loading State */
+.orders-loading {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+}
+
+.orders-loading .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #e0e0e0;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.orders-loading p {
+    margin-top: 16px;
+    color: #666;
+    font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .orders-header {
+        padding: 16px;
+    }
+
+    .orders-title h1 {
+        font-size: 1.4rem;
+    }
+
+    .order-summary {
+        flex-wrap: wrap;
+        padding: 16px;
+    }
+
+    .order-main-info {
+        width: 100%;
+        margin-bottom: 12px;
+    }
+
+    .order-quick-info {
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .expand-icon {
+        position: absolute;
+        right: 16px;
+        top: 20px;
+    }
+
+    .order-card {
+        position: relative;
+    }
+
+    .timeline {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .timeline::before {
+        display: none;
+    }
+
+    .timeline-step {
+        width: 60px;
+    }
+
+    .timeline-step .step-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+}

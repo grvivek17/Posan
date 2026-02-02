@@ -3,24 +3,51 @@ import { Link, useNavigate } from 'react-router-dom';
 import PointsDisplay from './PointsDisplay';
 import './Header.css';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+
 function Header({ isAuthenticated, setIsAuthenticated }) {
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
+    const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         // Get username from localStorage when component mounts or auth changes
         if (isAuthenticated) {
             const storedUsername = localStorage.getItem('username');
             setUsername(storedUsername || 'User');
+
+            // Check if user is admin
+            const checkAdmin = async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    if (!token) return;
+
+                    const response = await fetch(`${API_BASE}/users/me`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (response.ok) {
+                        const userData = await response.json();
+                        setIsAdmin(userData.is_admin || false);
+                    }
+                } catch (err) {
+                    console.error('Error checking admin status:', err);
+                }
+            };
+            checkAdmin();
+        } else {
+            setIsAdmin(false);
         }
     }, [isAuthenticated]);
 
     const handleLogout = () => {
         localStorage.removeItem('access_token');
+        localStorage.removeItem('token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user_id');
         localStorage.removeItem('username');
         setIsAuthenticated(false);
+        setIsAdmin(false);
         setUsername('');
         navigate('/');
     };
@@ -49,6 +76,9 @@ function Header({ isAuthenticated, setIsAuthenticated }) {
                         {isAuthenticated ? (
                             <>
                                 <Link to="/about" className="nav-link-secondary">About</Link>
+                                {isAdmin && (
+                                    <Link to="/admin" className="nav-link-admin">⚙️ Admin</Link>
+                                )}
                                 <div className="divider"></div>
                                 <Link to="/achievements">
                                     <PointsDisplay compact={true} />

@@ -1,0 +1,104 @@
+.test-subscription-page {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.test-subscription-page h1 {
+    color: #333;
+    margin-bottom: 2rem;
+}
+
+.test-subscription-page h2 {
+    color: #555;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 0.5rem;
+}
+
+.debug-section,
+.subscription-section,
+.actions-section,
+.raw-data-section {
+    margin-bottom: 2rem;
+}
+
+.debug-box,
+.subscription-box {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.debug-box p,
+.subscription-box p {
+    margin: 0.5rem 0;
+}
+
+.debug-box strong,
+.subscription-box strong {
+    color: #333;
+    margin-right: 0.5rem;
+}
+
+.subscription-box ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.subscription-box li {
+    padding: 0.5rem 0;
+}
+
+.error {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.actions-section button {
+    margin: 0.5rem 0.5rem 0.5rem 0;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+
+.btn-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background: #138496;
+}
+
+.raw-data-section pre {
+    background: #282c34;
+    color: #61dafb;
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.9rem;
+}

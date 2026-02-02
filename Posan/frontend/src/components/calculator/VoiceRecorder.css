@@ -1,0 +1,155 @@
+.voice-recorder {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.record-btn {
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.record-btn.start {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.record-btn.start:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+}
+
+.record-btn.stop {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    color: #333;
+}
+
+.record-btn.stop:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(250, 112, 154, 0.4);
+}
+
+.recording-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
+
+.recording-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.pulse-dot {
+    width: 12px;
+    height: 12px;
+    background: #ff4444;
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
+}
+
+.recording-text {
+    font-size: 1rem;
+}
+
+.recording-time {
+    font-family: 'Courier New', monospace;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.live-transcript {
+    background: rgba(255, 255, 255, 0.95);
+    color: #333;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0.5rem 0;
+    min-height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.processing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .voice-recorder {
+        padding: 1rem;
+    }
+
+    .record-btn {
+        padding: 0.9rem 2rem;
+        font-size: 1rem;
+    }
+
+    .recording-indicator {
+        font-size: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}

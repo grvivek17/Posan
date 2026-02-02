@@ -220,10 +220,13 @@ def generate_ai_puzzle(
     difficulty: Optional[str] = "easy",
     age_group: Optional[str] = "6-8",
     save_to_db: bool = False,
+    user_id: Optional[int] = None,  # Required for limit checking
     db: Session = Depends(get_db)
 ) -> Dict[str, Any]:
     """
     Generate a random puzzle using AI (Hugging Face models).
+    
+    **LIMIT**: Each user can generate only ONE puzzle per day (resets at midnight).
     
     Args:
         puzzle_type: word_search, crossword, sudoku
@@ -231,10 +234,38 @@ def generate_ai_puzzle(
         difficulty: easy, medium, hard
         age_group: 3-5, 6-8, 9-11, 12-14
         save_to_db: Whether to save the generated puzzle to database
+        user_id: User ID for generation limit tracking
     
     Returns:
         Generated puzzle with all data
     """
+    from datetime import date
+    from app.models.puzzle_generation import DailyPuzzleGeneration
+    
+    # Check if user has already generated a puzzle today
+    if user_id:
+        today = date.today()
+        
+        # Check if user already generated a puzzle today
+        existing_generation = db.query(DailyPuzzleGeneration).filter(
+            DailyPuzzleGeneration.user_id == user_id,
+            DailyPuzzleGeneration.generation_date == today
+        ).first()
+        
+        if existing_generation:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail={
+                    "message": "Daily puzzle generation limit reached! You can generate one puzzle per day.",
+                    "next_available": "Tomorrow at midnight",
+                    "last_generated": {
+                        "type": existing_generation.puzzle_type,
+                        "topic": existing_generation.topic,
+                        "time": existing_generation.created_at.isoformat()
+                    }
+                }
+            )
+    
     try:
         from app.services.ai_content import generate_complete_puzzle
         
@@ -289,8 +320,24 @@ def generate_ai_puzzle(
             db.add(puzzle)
             db.commit()
             db.refresh(puzzle)
+        
+        # Record this generation to prevent duplicate generations today
+        if user_id:
+            from datetime import date
+            from app.models.puzzle_generation import DailyPuzzleGeneration
             
-            # Convert to dict for response
+            generation_record = DailyPuzzleGeneration(
+                user_id=user_id,
+                generation_date=date.today(),
+                puzzle_type=puzzle_type,
+                topic=topic,
+                difficulty=difficulty
+            )
+            db.add(generation_record)
+            db.commit()
+        
+        # Return appropriate response
+        if save_to_db:
             return {
                 "id": puzzle.id,
                 "title": puzzle.title,
@@ -300,10 +347,10 @@ def generate_ai_puzzle(
                 "age_group": age_group,
                 "puzzle_data": puzzle.puzzle_data,
                 "solution_data": puzzle.solution_data,
-                "points_reward": puzzle.points_reward
+                "points_reward": puzzle.points_reward,
+                "message": "✅ Puzzle generated and saved! You've used your daily puzzle generation."
             }
         else:
-            # Return generated puzzle data directly
             return {
                 "id": 0,
                 "title": puzzle_data.get("title", f"{topic.title()} Puzzle"),
@@ -313,7 +360,8 @@ def generate_ai_puzzle(
                 "age_group": age_group,
                 "puzzle_data": puzzle_data.get("puzzle_data", {}),
                 "solution_data": puzzle_data.get("solution_data", {}),
-                "points_reward": points_map.get(difficulty, 50)
+                "points_reward": points_map.get(difficulty, 50),
+                "message": "✅ Puzzle generated! You've used your daily puzzle generation."
             }
     
     except Exception as e:

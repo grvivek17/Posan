@@ -74,6 +74,24 @@
     opacity: 1;
 }
 
+/* Admin Link - Special styling */
+.nav-link-admin {
+    color: var(--text-white);
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    padding: 0.4rem 0.8rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.nav-link-admin:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
 /* Visual Divider */
 .divider {
     width: 1px;

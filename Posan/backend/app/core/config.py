@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     # HuggingFace AI - Load from environment variable
     HUGGINGFACE_TOKEN: str = ""
     
+    # Razorpay Payment Gateway
+    RAZORPAY_KEY_ID: Optional[str] = None
+    RAZORPAY_KEY_SECRET: Optional[str] = None
+    
     @property
     def allowed_origins_list(self) -> List[str]:
         """Convert comma-separated origins to list."""

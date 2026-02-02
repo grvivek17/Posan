@@ -19,6 +19,15 @@ import AIContentPage from './pages/AIContentPage';
 import PuzzleZone from './pages/PuzzleZone';
 import HomeworkPage from './pages/HomeworkPage';
 import GamificationPage from './pages/GamificationPage';
+import TestSubscriptionPage from './pages/TestSubscriptionPage';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminUsersPage from './pages/AdminUsersPage';
+import AdminUserDetailPage from './pages/AdminUserDetailPage';
+import AdminSubscriptionsPage from './pages/AdminSubscriptionsPage';
+import ActivityBookStore from './pages/ActivityBookStore';
+import CheckoutPage from './pages/CheckoutPage';
+import AdminProductsPage from './pages/AdminProductsPage';
+import OrderHistoryPage from './pages/OrderHistoryPage';
 
 // Components
 import Header from './components/common/Header';
@@ -57,6 +66,18 @@ function App() {
                             element={isAuthenticated ? <MagazineDetailPage /> : <Navigate to="/login" />}
                         />
                         <Route
+                            path="/store"
+                            element={isAuthenticated ? <ActivityBookStore /> : <Navigate to="/login" />}
+                        />
+                        <Route
+                            path="/store/checkout"
+                            element={isAuthenticated ? <CheckoutPage /> : <Navigate to="/login" />}
+                        />
+                        <Route
+                            path="/store/orders"
+                            element={isAuthenticated ? <OrderHistoryPage /> : <Navigate to="/login" />}
+                        />
+                        <Route
                             path="/puzzles"
                             element={isAuthenticated ? <PuzzlePage /> : <Navigate to="/login" />}
                         />
@@ -83,6 +104,31 @@ function App() {
                         <Route
                             path="/achievements"
                             element={isAuthenticated ? <GamificationPage /> : <Navigate to="/login" />}
+                        />
+                        <Route
+                            path="/test-subscription"
+                            element={isAuthenticated ? <TestSubscriptionPage /> : <Navigate to="/login" />}
+                        />
+                        {/* Admin Routes */}
+                        <Route
+                            path="/admin"
+                            element={isAuthenticated ? <AdminDashboard /> : <Navigate to="/login" />}
+                        />
+                        <Route
+                            path="/admin/users"
+                            element={isAuthenticated ? <AdminUsersPage /> : <Navigate to="/login" />}
+                        />
+                        <Route
+                            path="/admin/users/:id"
+                            element={isAuthenticated ? <AdminUserDetailPage /> : <Navigate to="/login" />}
+                        />
+                        <Route
+                            path="/admin/subscriptions"
+                            element={isAuthenticated ? <AdminSubscriptionsPage /> : <Navigate to="/login" />}
+                        />
+                        <Route
+                            path="/admin/products"
+                            element={isAuthenticated ? <AdminProductsPage /> : <Navigate to="/login" />}
                         />
                     </Routes>
                 </main>

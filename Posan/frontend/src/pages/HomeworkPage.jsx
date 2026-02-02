@@ -1,14 +1,19 @@
 import { useState } from 'react';
+import { useSubscription } from '../hooks/useSubscription';
+import ProBadge from '../components/subscription/ProBadge';
+import UpgradeModal from '../components/subscription/UpgradeModal';
 import TestAnalysis from '../components/homework/TestAnalysis';
 import StudyMaterialAssistant from '../components/homework/StudyMaterialAssistant';
 import './HomeworkPage.css';
 import './HomeworkPageSidebar.css';
 
 const HomeworkPage = () => {
+    const { subscription, isPro, hasFeature } = useSubscription();
     const [selectedGrade, setSelectedGrade] = useState('Grade 4');
     const [activeTab, setActiveTab] = useState('study'); // 'study' or 'test'
     const [quizAnswer, setQuizAnswer] = useState(null);
     const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
     const grades = ['Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
 
@@ -76,7 +81,15 @@ const HomeworkPage = () => {
                         <div className="user-avatar">👩</div>
                         <div>
                             <p className="greeting-text">Good Morning,</p>
-                            <h1 className="user-name">Alex!</h1>
+                            <h1 className="user-name">
+                                Alex!
+                                {isPro() && <ProBadge variant="inline" style={{ marginLeft: '10px', fontSize: '0.5em' }} />}
+                            </h1>
+                            {subscription && (
+                                <p style={{ fontSize: '0.85em', color: '#666', marginTop: '4px' }}>
+                                    {isPro() ? '🌟 Pro Member' : '📚 Free Plan'}
+                                </p>
+                            )}
                         </div>
                     </div>
                     <button className="notification-btn">
@@ -218,31 +231,56 @@ const HomeworkPage = () => {
                         <div className="sidebar-widget ai-tool-widget">
                             <div className="widget-header">
                                 <h3>🤖 AI Study Tool</h3>
+                                {!isPro() && <ProBadge variant="small" />}
                             </div>
                             <div className="widget-content">
-                                <p className="widget-description">
-                                    Get instant help with homework using AI assistance
-                                </p>
-                                <div className="quick-actions">
-                                    <button className="quick-action-btn open-ai-tool-btn" onClick={() => { setActiveTab('study'); setIsAIModalOpen(true); }}>
-                                        <span className="action-icon">📖</span>
-                                        <span>Study Help</span>
-                                    </button>
-                                    <button className="quick-action-btn open-ai-tool-btn" onClick={() => { setActiveTab('test'); setIsAIModalOpen(true); }}>
-                                        <span className="action-icon">🎯</span>
-                                        <span>Test Analysis</span>
-                                    </button>
-                                </div>
-                                <div className="ai-stats">
-                                    <div className="stat-item">
-                                        <span className="stat-number">24</span>
-                                        <span className="stat-label">Questions Answered</span>
+                                {isPro() ? (
+                                    <>
+                                        <p className="widget-description">
+                                            Get instant help with homework using AI assistance
+                                        </p>
+                                        <div className="quick-actions">
+                                            <button className="quick-action-btn open-ai-tool-btn" onClick={() => { setActiveTab('study'); setIsAIModalOpen(true); }}>
+                                                <span className="action-icon">📖</span>
+                                                <span>Study Help</span>
+                                            </button>
+                                            <button className="quick-action-btn open-ai-tool-btn" onClick={() => { setActiveTab('test'); setIsAIModalOpen(true); }}>
+                                                <span className="action-icon">🎯</span>
+                                                <span>Test Analysis</span>
+                                            </button>
+                                        </div>
+                                        <div className="ai-stats">
+                                            <div className="stat-item">
+                                                <span className="stat-number">24</span>
+                                                <span className="stat-label">Questions Answered</span>
+                                            </div>
+                                            <div className="stat-item">
+                                                <span className="stat-number">5</span>
+                                                <span className="stat-label">Tests Analyzed</span>
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="pro-required-message">
+                                        <div className="lock-icon" style={{ fontSize: '3em', marginBottom: '10px' }}>🔒</div>
+                                        <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>Pro Feature</p>
+                                        <p style={{ fontSize: '0.9em', color: '#666', marginBottom: '15px' }}>
+                                            Upgrade to Pro to access AI-powered homework assistance
+                                        </p>
+                                        <button
+                                            className="quick-action-btn"
+                                            style={{ width: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+                                            onClick={() => setShowUpgradeModal(true)}
+                                        >
+                                            <span>⭐ Upgrade to Pro</span>
+                                        </button>
+                                        <ul style={{ textAlign: 'left', fontSize: '0.85em', marginTop: '15px', color: '#555' }}>
+                                            <li>✅ AI material processing</li>
+                                            <li>✅ Unlimited question generation</li>
+                                            <li>✅ Test analysis & insights</li>
+                                        </ul>
                                     </div>
-                                    <div className="stat-item">
-                                        <span className="stat-number">5</span>
-                                        <span className="stat-label">Tests Analyzed</span>
-                                    </div>
-                                </div>
+                                )}
                             </div>
                         </div>
 
@@ -344,6 +382,13 @@ const HomeworkPage = () => {
                     </div>
                 )}
             </div>
+
+            {/* Upgrade Modal */}
+            <UpgradeModal
+                isOpen={showUpgradeModal}
+                onClose={() => setShowUpgradeModal(false)}
+                featureName="AI Study Tools"
+            />
         </div>
     );
 };

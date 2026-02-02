@@ -1,0 +1,393 @@
+/* Admin Subscriptions Page Styles */
+
+.admin-subscriptions-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    color: #667eea;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 0;
+    margin-bottom: 16px;
+    transition: color 0.2s;
+}
+
+.back-btn:hover {
+    color: #764ba2;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0 0 8px 0;
+    color: #1a1a1a;
+}
+
+.page-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    margin: 0 0 32px 0;
+}
+
+/* Summary Cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.summary-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.summary-icon {
+    font-size: 2.5rem;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+}
+
+.summary-card.pro .summary-icon {
+    background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+}
+
+.summary-card.premium .summary-icon {
+    background: linear-gradient(135deg, #9333ea20 0%, #c026d320 100%);
+}
+
+.summary-card.revenue .summary-icon {
+    background: linear-gradient(135deg, #10b98120 0%, #059669 20 100%);
+}
+
+.summary-content h3 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0;
+    color: #1a1a1a;
+}
+
+.summary-content p {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #666;
+    margin: 4px 0;
+}
+
+.summary-content span {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+/* Filters Section */
+.filters-section {
+    background: white;
+    padding: 20px 24px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: #666;
+}
+
+.filter-group select {
+    padding: 10px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-group select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.clear-filters-btn {
+    margin-left: auto;
+    background: #f3f4f6;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.clear-filters-btn:hover {
+    background: #e5e7eb;
+}
+
+/* Subscriptions Table */
+.subscriptions-table-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.subscriptions-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.subscriptions-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.subscriptions-table th {
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.subscriptions-table td {
+    padding: 16px;
+    border-bottom: 1px solid #f3f4f6;
+    color: #333;
+}
+
+.subscriptions-table tbody tr {
+    transition: background 0.2s;
+}
+
+.subscriptions-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+/* Tier Badge */
+.tier-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.tier-badge.pro {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.tier-badge.premium {
+    background: linear-gradient(135deg, #9333ea 0%, #c026d3 100%);
+    color: white;
+}
+
+.tier-badge.free {
+    background: #f3f4f6;
+    color: #666;
+}
+
+/* Status Badge */
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-badge.active {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.status-badge.cancelled {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.status-badge.expired {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.expired-date {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.no-expiry {
+    color: #888;
+    font-style: italic;
+}
+
+.payment-provider {
+    background: #f3f4f6;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    text-transform: capitalize;
+}
+
+.no-payment {
+    color: #ccc;
+}
+
+.action-btn {
+    padding: 8px 16px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background: #764ba2;
+    transform: scale(1.05);
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+    border-top: 2px solid #f3f4f6;
+}
+
+.page-btn {
+    padding: 10px 20px;
+    border: 2px solid #667eea;
+    background: white;
+    color: #667eea;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: #667eea;
+    color: white;
+}
+
+.page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.page-info {
+    font-weight: 600;
+    color: #666;
+}
+
+/* Loading & Empty States */
+.loading-state,
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f4f6;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    margin: 0 0 8px 0;
+    color: #333;
+}
+
+.empty-state p {
+    color: #666;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .summary-cards {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .filters-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        justify-content: space-between;
+    }
+
+    .clear-filters-btn {
+        margin-left: 0;
+        margin-top: 8px;
+    }
+
+    .subscriptions-table-container {
+        overflow-x: auto;
+    }
+
+    .subscriptions-table {
+        min-width: 800px;
+    }
+}

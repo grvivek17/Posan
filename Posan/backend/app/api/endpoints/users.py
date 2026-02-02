@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from app.core.database import get_db
+from app.core.security import get_current_user
 from app.models.user import User, ChildProfile, ParentAccount, AgeGroup
 from app.schemas.user import UserResponse, ChildProfileCreate, ChildProfileUpdate, ChildProfileResponse
 
@@ -23,12 +24,9 @@ def get_age_group(age: int) -> AgeGroup:
 
 
 @router.get("/me", response_model=UserResponse)
-def get_current_user(user_id: int, db: Session = Depends(get_db)):
-    """Get current user information."""
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+def get_me(current_user: User = Depends(get_current_user)):
+    """Get current user information from JWT token."""
+    return current_user
 
 
 @router.post("/child-profile", response_model=ChildProfileResponse, status_code=status.HTTP_201_CREATED)

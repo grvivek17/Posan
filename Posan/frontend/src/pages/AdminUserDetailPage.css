@@ -1,0 +1,519 @@
+/* Admin User Detail Page Styles */
+
+.admin-user-detail {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.page-header {
+    margin-bottom: 32px;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    color: #667eea;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 0;
+    margin-bottom: 16px;
+    transition: color 0.2s;
+}
+
+.back-btn:hover {
+    color: #764ba2;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0;
+    color: #1a1a1a;
+}
+
+/* Detail Grid */
+.user-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.detail-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.detail-card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 20px 0;
+    color: #333;
+}
+
+/* Main Info Card */
+.detail-card.main-info {
+    grid-column: 1 / 2;
+    text-align: center;
+    padding: 40px;
+}
+
+.user-avatar-large {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 3rem;
+    font-weight: 800;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.detail-card.main-info h2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0 0 8px 0;
+    color: #1a1a1a;
+}
+
+.detail-card.main-info .email {
+    color: #666;
+    font-size: 1.1rem;
+    margin: 0 0 16px 0;
+}
+
+.admin-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* Subscription Card */
+.subscription-details {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tier-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.tier-badge {
+    font-size: 1.25rem;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 12px;
+}
+
+.tier-badge.pro {
+    background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+    color: #667eea;
+}
+
+.tier-badge.premium {
+    background: linear-gradient(135deg, #9333ea20 0%, #c026d320 100%);
+    color: #9333ea;
+}
+
+.tier-badge.free {
+    background: #f3f4f6;
+    color: #666;
+}
+
+.status {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.status.active {
+    color: #10b981;
+}
+
+.status.inactive {
+    color: #ef4444;
+}
+
+.no-subscription {
+    color: #888;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Info Grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-item label {
+    font-size: 0.85rem;
+    color: #888;
+    font-weight: 500;
+}
+
+.info-item span {
+    font-size: 1rem;
+    color: #333;
+    font-weight: 600;
+}
+
+/* Activity Stats */
+.activity-stats {
+    display: flex;
+    gap: 24px;
+}
+
+.activity-stat {
+    flex: 1;
+    text-align: center;
+    padding: 24px;
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    border-radius: 12px;
+}
+
+.activity-stat .stat-value {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #667eea;
+    margin-bottom: 8px;
+}
+
+.activity-stat .stat-label {
+    font-size: 0.95rem;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Action Section */
+.action-section {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.action-section h3 {
+    margin: 0 0 20px 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 16px;
+}
+
+.action-btn {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.action-btn.upgrade {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.action-btn.upgrade:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+}
+
+.action-btn.delete {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.action-btn.delete:hover {
+    background: #fecaca;
+}
+
+.action-btn.edit {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.action-btn.edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+}
+
+.action-btn.password {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.action-btn.password:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3);
+}
+
+/* Edit Form Styles */
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.edit-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.edit-form .form-group label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.edit-form .form-group input[type="text"],
+.edit-form .form-group input[type="email"],
+.edit-form .form-group input[type="password"] {
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.edit-form .form-group input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.edit-form .checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.edit-form .checkbox-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #667eea;
+    cursor: pointer;
+}
+
+.save-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.save-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+}
+
+.save-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 32px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-content h2 {
+    margin: 0 0 16px 0;
+    font-size: 1.5rem;
+}
+
+.modal-content p {
+    color: #666;
+    margin: 0 0 24px 0;
+}
+
+.upgrade-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.tier-btn {
+    padding: 16px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.tier-btn.pro {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.tier-btn.premium {
+    background: linear-gradient(135deg, #9333ea 0%, #c026d3 100%);
+    color: white;
+}
+
+.tier-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.tier-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.cancel-btn {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 12px;
+}
+
+.cancel-btn:hover {
+    color: #333;
+}
+
+/* Delete Modal */
+.delete-modal .warning {
+    background: #fee2e2;
+    color: #dc2626;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 24px;
+}
+
+.confirm-delete-btn {
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.confirm-delete-btn:hover:not(:disabled) {
+    background: #b91c1c;
+}
+
+.confirm-delete-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Loading & Error States */
+.loading-state,
+.error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}
+
+.error-state h2 {
+    margin-bottom: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .user-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-card.main-info {
+        grid-column: 1;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .activity-stats {
+        flex-direction: column;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+}

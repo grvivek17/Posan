@@ -1,0 +1,107 @@
+.pro-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Small badge (for feature labels) */
+.pro-badge.small {
+    display: inline-block;
+}
+
+.pro-badge-icon {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.6rem;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(255, 165, 0, 0.3);
+    letter-spacing: 0.5px;
+    animation: subtle-pulse 2s ease-in-out infinite;
+}
+
+/* Large badge (for locked features) */
+.pro-badge.large {
+    display: block;
+}
+
+.pro-badge-large {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.pro-badge-icon-large {
+    font-size: 3rem;
+    animation: bounce-gentle 2s ease-in-out infinite;
+}
+
+.pro-badge-text {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Inline badge (for buttons/links) */
+.pro-badge-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.7rem;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(255, 165, 0, 0.25);
+}
+
+.crown-icon {
+    font-size: 1em;
+}
+
+/* Animations */
+@keyframes subtle-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(255, 165, 0, 0.3);
+    }
+
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(255, 165, 0, 0.5);
+    }
+}
+
+@keyframes bounce-gentle {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pro-badge-icon-large {
+        font-size: 2.5rem;
+    }
+
+    .pro-badge-text {
+        font-size: 1rem;
+    }
+}

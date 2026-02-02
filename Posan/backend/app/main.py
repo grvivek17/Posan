@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.api.endpoints import auth, users, magazines, puzzles, gamification, ai_content, homework_agents, gamification_v2, podcasts, email
+from app.api.endpoints import auth, users, magazines, puzzles, gamification, ai_content, homework_agents, gamification_v2, podcasts, email, calculator, subscription, admin, store
 import os
 
 # Create database tables
@@ -42,6 +42,10 @@ app.include_router(puzzles.router, prefix=f"{settings.API_V1_PREFIX}/puzzles", t
 app.include_router(gamification.router, prefix=f"{settings.API_V1_PREFIX}/gamification", tags=["Gamification"])
 app.include_router(gamification_v2.router, prefix=f"{settings.API_V1_PREFIX}/gamification-v2", tags=["Gamification V2"])
 app.include_router(ai_content.router, prefix=f"{settings.API_V1_PREFIX}/ai", tags=["AI Content Generation"])
+app.include_router(calculator.router, prefix=f"{settings.API_V1_PREFIX}", tags=["Speaking Calculator"])
+app.include_router(subscription.router, prefix=f"{settings.API_V1_PREFIX}", tags=["Subscription"])
+app.include_router(admin.router, prefix=f"{settings.API_V1_PREFIX}", tags=["Admin"])
+app.include_router(store.router, prefix=f"{settings.API_V1_PREFIX}", tags=["Store"])
 app.include_router(homework_agents.router, prefix=f"{settings.API_V1_PREFIX}/homework-agents", tags=["Homework Agents (Multi-Agent System)"])
 
 

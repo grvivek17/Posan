@@ -85,13 +85,21 @@ function MagazinePage() {
                 <div className="page-header-lib">
                     <div className="header-icon">📚</div>
                     <h1 className="page-title-lib">Library</h1>
-                    <button
-                        className="weekly-highlights-btn"
-                        onClick={generateWeeklyHighlights}
-                        disabled={weeklyLoading}
-                    >
-                        {weeklyLoading ? '🎙️ Creating...' : '🎧 Weekly Highlights Podcast'}
-                    </button>
+                    <div className="header-buttons">
+                        <button
+                            className="store-btn"
+                            onClick={() => navigate('/store')}
+                        >
+                            🛒 Shop Activity Books
+                        </button>
+                        <button
+                            className="weekly-highlights-btn"
+                            onClick={generateWeeklyHighlights}
+                            disabled={weeklyLoading}
+                        >
+                            {weeklyLoading ? '🎙️ Creating...' : '🎧 Weekly Highlights Podcast'}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Search Bar */}

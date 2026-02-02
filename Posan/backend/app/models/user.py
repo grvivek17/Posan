@@ -20,14 +20,18 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
+    full_name = Column(String, nullable=True)
     role = Column(SQLEnum(UserRole), default=UserRole.CHILD)
     is_active = Column(Boolean, default=True)
+    is_admin = Column(Boolean, default=False)
+    last_login = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     # Relationships
     parent_account = relationship("ParentAccount", back_populates="user", uselist=False)
     child_profile = relationship("ChildProfile", back_populates="user", uselist=False)
+    subscription = relationship("Subscription", back_populates="user", uselist=False)
     puzzle_progress = relationship("UserPuzzleProgress", back_populates="user")
     achievements = relationship("UserAchievement", back_populates="user")
 

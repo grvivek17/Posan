@@ -4,6 +4,8 @@ from app.models.content import Magazine, Article, Quiz, ContentType
 from app.models.puzzle import Puzzle, UserPuzzleProgress, PuzzleType, DifficultyLevel
 from app.models.gamification import Badge, UserAchievement, Leaderboard
 from app.models.activity import UserActivity, UserLevel, ActivityType, ACTIVITY_POINTS
+from app.models.subscription import Subscription, SubscriptionTier, SubscriptionStatus
+from app.models.store import Product, Cart, CartItem, Order, OrderItem, ProductCategory, OrderStatus
 
 __all__ = [
     "User",
@@ -26,4 +28,14 @@ __all__ = [
     "UserLevel",
     "ActivityType",
     "ACTIVITY_POINTS",
+    "Subscription",
+    "SubscriptionTier",
+    "SubscriptionStatus",
+    "Product",
+    "Cart",
+    "CartItem",
+    "Order",
+    "OrderItem",
+    "ProductCategory",
+    "OrderStatus",
 ]

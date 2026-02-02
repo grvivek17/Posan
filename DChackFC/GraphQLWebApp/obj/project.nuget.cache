@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "dgSpecHash": "r/MoERqV67k=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\grviv\\projects\\Pratices\\DChackFC\\GraphQLWebApp\\GraphQLWebApp.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\grviv\\.nuget\\packages\\azure.core\\1.50.0\\azure.core.1.50.0.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\azure.identity\\1.17.1\\azure.identity.1.17.1.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\graphql\\8.8.3\\graphql.8.8.3.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\graphql-parser\\9.5.0\\graphql-parser.9.5.0.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\graphql.analyzers\\8.8.3\\graphql.analyzers.8.8.3.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\graphql.client\\6.1.0\\graphql.client.6.1.0.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\graphql.client.abstractions\\6.1.0\\graphql.client.abstractions.6.1.0.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\graphql.client.abstractions.websocket\\6.1.0\\graphql.client.abstractions.websocket.6.1.0.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\graphql.client.serializer.newtonsoft\\6.1.0\\graphql.client.serializer.newtonsoft.6.1.0.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\graphql.primitives\\6.1.0\\graphql.primitives.6.1.0.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\8.0.0\\microsoft.bcl.asyncinterfaces.8.0.0.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\microsoft.identity.client\\4.78.0\\microsoft.identity.client.4.78.0.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\microsoft.identity.client.extensions.msal\\4.78.0\\microsoft.identity.client.extensions.msal.4.78.0.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\microsoft.identitymodel.abstractions\\8.14.0\\microsoft.identitymodel.abstractions.8.14.0.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\system.clientmodel\\1.8.0\\system.clientmodel.1.8.0.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\system.memory.data\\8.0.1\\system.memory.data.8.0.1.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\system.reactive\\6.0.0\\system.reactive.6.0.0.nupkg.sha512",
+    "C:\\Users\\grviv\\.nuget\\packages\\system.security.cryptography.protecteddata\\4.5.0\\system.security.cryptography.protecteddata.4.5.0.nupkg.sha512"
+  ],
+  "logs": []
+}

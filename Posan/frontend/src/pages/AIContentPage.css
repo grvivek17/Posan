@@ -4,24 +4,50 @@
     background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
 }
 
-.ai-header {
+.ai-content-page .ai-header {
     text-align: center;
     margin-bottom: 2rem;
+    width: 100%;
+    display: block;
 }
 
-.ai-header h1 {
+.ai-content-page .header-content {
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+.ai-content-page .header-content>div {
+    width: 100%;
+    text-align: center;
+    display: block;
+}
+
+.ai-content-page .subscription-badge {
+    animation: float 3s ease-in-out infinite;
+    display: inline-block;
+    margin-top: 1rem;
+}
+
+.ai-content-page .ai-header h1 {
     font-size: 3rem;
     margin-bottom: 0.5rem;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
     animation: float 3s ease-in-out infinite;
     color: #FF6B6B;
     font-weight: 700;
+    text-align: center;
+    width: 100%;
+    display: block;
 }
 
-.ai-header p {
+.ai-content-page .ai-header p {
     font-size: 1.2rem;
     opacity: 0.95;
     color: white;
+    text-align: center;
+    width: 100%;
+    display: block;
 }
 
 @keyframes float {

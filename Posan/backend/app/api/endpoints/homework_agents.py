@@ -5,18 +5,20 @@ New endpoints that use the multi-agent architecture while maintaining
 backward compatibility with existing homework features.
 """
 
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Query
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Query, Depends
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 import tempfile
 import os
 from pathlib import Path
 
+from app.models.user import User
 from app.agents.ingestion_agent import ingestion_agent
 from app.agents.retrieval_agent import retrieval_agent
 from app.agents.question_generator_agent import question_generator_agent
 from app.agents.exam_analysis_agent import exam_analysis_agent
 from app.agents import coordinator
+from app.core.subscription_deps import require_pro_subscription
 
 router = APIRouter()
 
@@ -50,10 +52,13 @@ async def upload_material_v2(
     subject: Optional[str] = Form(None, description="Subject (Math, Science, etc.)"),
     topic: Optional[str] = Form(None, description="Specific topic"),
     grade: Optional[int] = Form(None, description="Grade level (1-8)"),
-    user_id: str = Form(..., description="User ID")
+    user_id: str = Form(..., description="User ID"),
+    current_user: User = Depends(require_pro_subscription)  # 🔒 PRO REQUIRED
 ):
     """
     Upload and process study material using the new agent architecture.
+    
+    **🌟 PRO FEATURE - Requires Pro or Premium subscription**
     
     This endpoint:
     1. Saves the uploaded file
@@ -515,10 +520,13 @@ async def generate_questions(
     subject: str = Form(default="General", description="Subject area"),
     question_types: str = Form(default="mcq,short_answer", description="Comma-separated types"),
     count: int = Form(default=5, description="Number of questions"),
-    difficulty: str = Form(default="medium", description="Difficulty level")
+    difficulty: str = Form(default="medium", description="Difficulty level"),
+    current_user: User = Depends(require_pro_subscription)  # 🔒 PRO REQUIRED
 ):
     """
     Generate practice questions from text context.
+    
+    **🌟 PRO FEATURE - Requires Pro or Premium subscription**
     
     **Question Types:**
     - `mcq`: Multiple choice (4 options)
@@ -771,10 +779,13 @@ async def material_to_practice_workflow(
     question_count: int = Form(default=10, description="Number of questions"),
     question_types: str = Form(default="mcq,short_answer", description="Question types"),
     difficulty: str = Form(default="medium", description="Difficulty level"),
-    user_id: str = Form(..., description="User ID")
+    user_id: str = Form(..., description="User ID"),
+    current_user: User = Depends(require_pro_subscription)  # 🔒 PRO REQUIRED
 ):
     """
     **Complete Workflow: Upload Material → Generate Practice Questions**
+    
+    **🌟 PRO FEATURE - Requires Pro or Premium subscription**
     
     This endpoint orchestrates all 3 agents:
     1. **Ingestion Agent**: Process and chunk the material

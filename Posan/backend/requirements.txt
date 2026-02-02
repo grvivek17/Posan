@@ -41,3 +41,6 @@ opencv-python-headless==4.9.0.80
 
 # Email
 resend>=2.1.0
+
+# Payment
+razorpay>=1.4.1

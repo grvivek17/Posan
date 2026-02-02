@@ -28,12 +28,14 @@ function Register({ setIsAuthenticated }) {
 
         try {
             const response = await authAPI.register(formData);
-            const { access_token, refresh_token } = response.data;
+            const { access_token, refresh_token, user_id } = response.data;
 
             // Store tokens and username
             localStorage.setItem('access_token', access_token);
+            localStorage.setItem('token', access_token); // For gamification and admin systems
             localStorage.setItem('refresh_token', refresh_token);
             localStorage.setItem('username', formData.username);
+            localStorage.setItem('user_id', user_id); // For gamification system
 
             setIsAuthenticated(true);
             navigate('/magazines');
