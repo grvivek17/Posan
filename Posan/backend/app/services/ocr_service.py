@@ -190,9 +190,41 @@ class OCRService:
         
         return enhanced
     
+    def _get_red_mask(self, image: np.ndarray) -> np.ndarray:
+        """
+        Create a mask of red ink regions in the image.
+        
+        Args:
+            image: Input BGR color image
+            
+        Returns:
+            Binary mask where red regions are white (255)
+        """
+        if len(image.shape) != 3:
+            return np.zeros(image.shape[:2], dtype=np.uint8)
+        
+        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        
+        # Red color occupies two ranges in HSV (wraps around 0/180)
+        lower_red1 = np.array([0, 70, 50])
+        upper_red1 = np.array([10, 255, 255])
+        mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
+        
+        lower_red2 = np.array([170, 70, 50])
+        upper_red2 = np.array([180, 255, 255])
+        mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
+        
+        red_mask = mask1 | mask2
+        
+        # Dilate the mask slightly to cover edges of red marks
+        kernel = np.ones((3, 3), np.uint8)
+        red_mask = cv2.dilate(red_mask, kernel, iterations=1)
+        
+        return red_mask
+    
     def filter_red_ink(self, image: np.ndarray) -> np.ndarray:
         """
-        Optionally filter out red ink (teacher corrections/marks) 
+        Filter out red ink (teacher corrections/marks) 
         to avoid confusing OCR with overlapping text.
         
         This creates a mask of red regions and fills them with white.
@@ -206,29 +238,155 @@ class OCRService:
         if len(image.shape) != 3:
             return image
         
-        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        
-        # Red color occupies two ranges in HSV (wraps around 0/180)
-        # Lower red range
-        lower_red1 = np.array([0, 70, 50])
-        upper_red1 = np.array([10, 255, 255])
-        mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
-        
-        # Upper red range
-        lower_red2 = np.array([170, 70, 50])
-        upper_red2 = np.array([180, 255, 255])
-        mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
-        
-        # Combine both red masks
-        red_mask = mask1 | mask2
-        
-        # Dilate the mask slightly to cover edges of red marks
-        kernel = np.ones((3, 3), np.uint8)
-        red_mask = cv2.dilate(red_mask, kernel, iterations=1)
+        red_mask = self._get_red_mask(image)
         
         # Replace red regions with white (background)
         result = image.copy()
         result[red_mask > 0] = [255, 255, 255]
+        
+        return result
+    
+    def extract_teacher_corrections(self, image: np.ndarray) -> Dict[str, any]:
+        """
+        Extract teacher corrections (red ink annotations) from the image.
+        Instead of removing red ink, isolate it and OCR separately to capture
+        teacher marks, scores, ticks, crosses, and comments.
+        
+        Args:
+            image: Input BGR color image
+            
+        Returns:
+            Dictionary with teacher correction data:
+            - raw_text: Full OCR text from red ink regions
+            - marks_per_question: Dict mapping question numbers to awarded marks
+            - tick_cross_marks: List of detected tick/cross annotations
+            - comments: List of teacher comments found
+            - total_awarded: Total marks awarded by teacher (if detectable)
+        """
+        result = {
+            "raw_text": "",
+            "marks_per_question": {},
+            "tick_cross_marks": [],
+            "comments": [],
+            "total_awarded": None,
+            "has_corrections": False
+        }
+        
+        if len(image.shape) != 3:
+            return result
+        
+        red_mask = self._get_red_mask(image)
+        
+        # Check if there is meaningful red ink
+        red_pixel_count = cv2.countNonZero(red_mask)
+        total_pixels = image.shape[0] * image.shape[1]
+        red_ratio = red_pixel_count / total_pixels
+        
+        if red_ratio < 0.001:  # Less than 0.1% red pixels -- no teacher marks
+            logger.info("No significant red ink detected")
+            return result
+        
+        result["has_corrections"] = True
+        logger.info(f"Red ink detected: {red_ratio:.3%} of image")
+        
+        # Create red-ink-only image: white background + red ink as dark text
+        red_only = np.ones_like(image) * 255  # White background
+        red_only[red_mask > 0] = image[red_mask > 0]
+        
+        # Convert to grayscale for OCR
+        red_gray = cv2.cvtColor(red_only, cv2.COLOR_BGR2GRAY)
+        
+        # Invert if needed (make text dark on light background)
+        # Red ink on white bg should already be dark on light
+        _, red_thresh = cv2.threshold(red_gray, 200, 255, cv2.THRESH_BINARY_INV)
+        
+        # Invert back for OCR (black text on white background)
+        red_for_ocr = cv2.bitwise_not(red_thresh)
+        
+        try:
+            # OCR the red ink regions
+            red_text = pytesseract.image_to_string(
+                Image.fromarray(red_for_ocr),
+                config='--oem 3 --psm 6'
+            )
+            result["raw_text"] = red_text.strip()
+            logger.info(f"Teacher corrections OCR: {len(red_text)} chars extracted")
+        except Exception as e:
+            logger.warning(f"Failed to OCR teacher corrections: {e}")
+            return result
+        
+        if not red_text.strip():
+            return result
+        
+        # Parse teacher marks and annotations
+        lines = red_text.strip().split('\n')
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            
+            # Detect marks like "2/5", "3/3", "8/10", "5", standalone numbers
+            marks_pattern = re.findall(
+                r'(\d{1,2})\s*/\s*(\d{1,2})', line
+            )
+            if marks_pattern:
+                for awarded, total in marks_pattern:
+                    result["marks_per_question"][len(result["marks_per_question"]) + 1] = {
+                        "awarded": int(awarded),
+                        "max": int(total)
+                    }
+                continue
+            
+            # Detect standalone score numbers (e.g., just "3" or "5" written next to answer)
+            standalone_mark = re.match(r'^(\d{1,2})$', line)
+            if standalone_mark:
+                mark_val = int(standalone_mark.group(1))
+                if mark_val <= 20:  # Reasonable per-question mark
+                    result["marks_per_question"][len(result["marks_per_question"]) + 1] = {
+                        "awarded": mark_val,
+                        "max": None
+                    }
+                continue
+            
+            # Detect tick/cross symbols
+            if any(symbol in line for symbol in ['V', 'v', '/', '✓', '✔']):
+                if len(line) <= 3:  # Short tick mark
+                    result["tick_cross_marks"].append({"type": "correct", "text": line})
+                    continue
+            if any(symbol in line for symbol in ['X', 'x', '✗', '✘', '×']):
+                if len(line) <= 3:
+                    result["tick_cross_marks"].append({"type": "incorrect", "text": line})
+                    continue
+            
+            # Detect total marks (e.g., "Total: 35/50", "35/50")
+            total_pattern = re.search(
+                r'(?:total|score|marks?)\s*[:\s]*(\d+)\s*/\s*(\d+)',
+                line, re.IGNORECASE
+            )
+            if total_pattern:
+                result["total_awarded"] = {
+                    "score": int(total_pattern.group(1)),
+                    "total": int(total_pattern.group(2))
+                }
+                continue
+            
+            # Everything else is a teacher comment
+            if len(line) > 2:
+                result["comments"].append(line)
+        
+        # Try to align tick/cross marks to questions by order
+        tick_cross_aligned = {}
+        for idx, mark in enumerate(result["tick_cross_marks"]):
+            q_num = idx + 1
+            tick_cross_aligned[q_num] = mark["type"]
+        result["tick_cross_by_question"] = tick_cross_aligned
+        
+        logger.info(
+            f"Teacher corrections parsed: {len(result['marks_per_question'])} marks, "
+            f"{len(result['tick_cross_marks'])} ticks/crosses, "
+            f"{len(result['comments'])} comments"
+        )
         
         return result
     
@@ -836,19 +994,24 @@ class OCRService:
         file_path: str, 
         file_extension: str,
         student_name: str,
-        subject: Optional[str] = None
+        subject: Optional[str] = None,
+        model_answers: Optional[List[Dict[str, str]]] = None
     ) -> Dict[str, any]:
         """
-        Complete test paper analysis pipeline with detailed question-answer extraction.
+        Complete test paper analysis pipeline with detailed question-answer extraction,
+        teacher correction alignment, and optional rubric comparison.
         
         Args:
             file_path: Path to uploaded file
             file_extension: File extension
             student_name: Student's name
             subject: Optional subject (if not provided, will try to detect)
+            model_answers: Optional list of model answers for rubric comparison
+                           Format: [{"question": "...", "answer": "...", "marks": 5}, ...]
             
         Returns:
-            Analysis results including extracted text, parsed scores, and question-answer pairs
+            Analysis results including extracted text, parsed scores, question-answer pairs,
+            teacher corrections, and rubric comparison results
         """
         try:
             # Extract text using OCR
@@ -862,6 +1025,45 @@ class OCRService:
             
             # Parse question-answer pairs for detailed analysis
             question_answers = self.parse_question_answers(extracted_text, final_subject)
+            
+            # Extract teacher corrections from red ink (for image files)
+            teacher_corrections = {
+                "has_corrections": False,
+                "raw_text": "",
+                "marks_per_question": {},
+                "tick_cross_marks": [],
+                "comments": [],
+                "total_awarded": None
+            }
+            
+            if file_extension.lower() in ['.jpg', '.jpeg', '.png']:
+                try:
+                    pil_image = Image.open(file_path)
+                    pil_image = self.fix_orientation_exif(pil_image)
+                    img_array = np.array(pil_image)
+                    if len(img_array.shape) == 3 and img_array.shape[2] == 3:
+                        img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
+                    elif len(img_array.shape) == 3 and img_array.shape[2] == 4:
+                        img_array = cv2.cvtColor(img_array, cv2.COLOR_RGBA2BGR)
+                    
+                    # Resize for consistency
+                    h, w = img_array.shape[:2]
+                    scale = min(1800 / max(h, w), 1.0)
+                    if scale < 1.0:
+                        img_array = cv2.resize(img_array, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+                    
+                    teacher_corrections = self.extract_teacher_corrections(img_array)
+                except Exception as e:
+                    logger.warning(f"Teacher correction extraction failed: {e}")
+            
+            # Align teacher corrections with parsed questions
+            if teacher_corrections.get("has_corrections"):
+                self._align_corrections_with_answers(question_answers, teacher_corrections)
+            
+            # Compare against model answers / rubric if provided
+            rubric_comparison = []
+            if model_answers and question_answers:
+                rubric_comparison = self._compare_against_rubric(question_answers, model_answers)
             
             # Calculate statistics from parsed questions
             total_questions = len(question_answers)
@@ -879,11 +1081,17 @@ class OCRService:
                     parsed_data["total_score"] = total_marks
                     parsed_data["max_score"] = max_marks if max_marks > 0 else 100
             
+            # Use teacher's total score if available and no other score detected
+            if parsed_data.get("total_score") is None and teacher_corrections.get("total_awarded"):
+                parsed_data["total_score"] = teacher_corrections["total_awarded"]["score"]
+                parsed_data["max_score"] = teacher_corrections["total_awarded"]["total"]
+                parsed_data["confidence"] = "medium"
+            
             return {
                 "success": True,
                 "student_name": student_name,
                 "subject": final_subject,
-                "extracted_text": extracted_text,  # Full text for AI analysis
+                "extracted_text": extracted_text,
                 "full_text_length": len(extracted_text),
                 "score": parsed_data.get("total_score"),
                 "total": parsed_data.get("max_score", 100),
@@ -892,7 +1100,9 @@ class OCRService:
                 "correct_count": correct_answers,
                 "incorrect_count": incorrect_answers,
                 "unanswered_count": unanswered,
-                "question_answers": question_answers,  # Detailed Q&A for AI analysis
+                "question_answers": question_answers,
+                "teacher_corrections": teacher_corrections,
+                "rubric_comparison": rubric_comparison,
                 "parsing_info": parsed_data
             }
             
@@ -904,6 +1114,128 @@ class OCRService:
                 "student_name": student_name,
                 "subject": subject or "Unknown"
             }
+    
+    def _align_corrections_with_answers(
+        self,
+        question_answers: List[Dict[str, any]],
+        teacher_corrections: Dict[str, any]
+    ) -> None:
+        """
+        Align teacher corrections (ticks, crosses, marks) with parsed student answers.
+        Modifies question_answers in place.
+        
+        Args:
+            question_answers: List of parsed question-answer dicts
+            teacher_corrections: Teacher correction data from extract_teacher_corrections()
+        """
+        tick_cross = teacher_corrections.get("tick_cross_by_question", {})
+        marks = teacher_corrections.get("marks_per_question", {})
+        
+        for q in question_answers:
+            q_num = q.get("question_number")
+            if q_num is None:
+                continue
+            
+            # Apply tick/cross correctness if not already determined
+            if q.get("is_correct") is None and q_num in tick_cross:
+                q["is_correct"] = tick_cross[q_num] == "correct"
+                q["feedback_marks"].append(
+                    "teacher_tick" if tick_cross[q_num] == "correct" else "teacher_cross"
+                )
+            
+            # Apply teacher-awarded marks
+            if q_num in marks:
+                mark_data = marks[q_num]
+                q["marks_awarded"] = mark_data["awarded"]
+                if mark_data.get("max") is not None:
+                    q["max_marks"] = mark_data["max"]
+                # Infer correctness from marks
+                if q.get("is_correct") is None and mark_data.get("max"):
+                    q["is_correct"] = mark_data["awarded"] >= mark_data["max"] * 0.6
+        
+        # Attach teacher comments to the result (not per-question since we can't reliably align)
+        if teacher_corrections.get("comments"):
+            for q in question_answers:
+                q.setdefault("teacher_comments_global", teacher_corrections["comments"])
+                break  # Only add once to the first question as metadata
+    
+    def _compare_against_rubric(
+        self,
+        question_answers: List[Dict[str, any]],
+        model_answers: List[Dict[str, str]]
+    ) -> List[Dict[str, any]]:
+        """
+        Compare student answers against provided model answers/rubric.
+        
+        Args:
+            question_answers: Parsed student answers
+            model_answers: List of model answer dicts with 'question', 'answer', optional 'marks'
+            
+        Returns:
+            List of comparison results per question
+        """
+        from difflib import SequenceMatcher
+        
+        comparisons = []
+        
+        # Build a lookup by question number from model answers
+        model_by_num = {}
+        for idx, ma in enumerate(model_answers, 1):
+            q_num = ma.get("question_number", idx)
+            model_by_num[q_num] = ma
+        
+        for q in question_answers:
+            q_num = q.get("question_number")
+            student_ans = q.get("student_answer", "").strip()
+            
+            if q_num not in model_by_num:
+                continue
+            
+            model = model_by_num[q_num]
+            model_ans = model.get("answer", "").strip()
+            max_marks = model.get("marks", 1)
+            
+            if not student_ans or not model_ans:
+                comparisons.append({
+                    "question_number": q_num,
+                    "student_answer": student_ans,
+                    "model_answer": model_ans,
+                    "similarity": 0,
+                    "is_correct": False,
+                    "marks_awarded": 0,
+                    "max_marks": max_marks
+                })
+                continue
+            
+            # Calculate similarity
+            similarity = SequenceMatcher(
+                None, student_ans.lower(), model_ans.lower()
+            ).ratio()
+            
+            is_correct = similarity > 0.75
+            awarded = max_marks if is_correct else (
+                round(max_marks * similarity, 1) if similarity > 0.4 else 0
+            )
+            
+            # Update the original question data
+            q["correct_answer"] = model_ans
+            q["max_marks"] = max_marks
+            if q.get("is_correct") is None:
+                q["is_correct"] = is_correct
+            if q.get("marks_awarded") is None:
+                q["marks_awarded"] = awarded
+            
+            comparisons.append({
+                "question_number": q_num,
+                "student_answer": student_ans,
+                "model_answer": model_ans,
+                "similarity": round(similarity, 3),
+                "is_correct": is_correct,
+                "marks_awarded": awarded,
+                "max_marks": max_marks
+            })
+        
+        return comparisons
 
 
 # Global OCR service instance

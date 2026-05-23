@@ -918,6 +918,509 @@ Keep the tone warm, supportive, and focused on growth. Be specific about their a
             "uses_educational_ai": True  # Flag to indicate enhanced analysis
         }
     
+    # ==================== GRADE-SPECIFIC ACTIVITY TEMPLATES ====================
+    
+    GRADE_ACTIVITIES = {
+        1: {
+            "label": "Grade 1",
+            "age": "6-7",
+            "activity_types": {
+                "Mathematics": [
+                    {"title": "Counting with Objects", "description": "Use buttons, beads, or toys to count and practice addition. Line up 5 toys, then add 3 more - how many now?", "type": "hands_on", "duration": "10 min"},
+                    {"title": "Number Tracing Worksheet", "description": "Trace numbers 1-20 and draw that many stars next to each number.", "type": "writing", "duration": "15 min"},
+                    {"title": "Skip Counting Song", "description": "Sing along while counting by 2s and 5s. Clap your hands on each number!", "type": "fun", "duration": "5 min"},
+                ],
+                "Science": [
+                    {"title": "Nature Walk & Draw", "description": "Go for a short walk and draw 3 living things and 3 non-living things you see.", "type": "hands_on", "duration": "20 min"},
+                    {"title": "Sort It Out", "description": "Collect 10 items from around the house and sort them: big/small, hard/soft, heavy/light.", "type": "hands_on", "duration": "10 min"},
+                ],
+                "English": [
+                    {"title": "Letter Sound Hunt", "description": "Pick a letter and find 5 things in your room that start with that sound.", "type": "fun", "duration": "10 min"},
+                    {"title": "Story Time Drawing", "description": "Listen to a short story, then draw your favorite part and write one sentence about it.", "type": "creative", "duration": "15 min"},
+                ],
+                "default": [
+                    {"title": "Color and Learn", "description": "Color a picture related to today's topic. Tell someone what you learned!", "type": "creative", "duration": "10 min"},
+                    {"title": "Show and Tell", "description": "Find something at home related to what you studied. Show it to your family and explain it.", "type": "fun", "duration": "5 min"},
+                ]
+            }
+        },
+        2: {
+            "label": "Grade 2",
+            "age": "7-8",
+            "activity_types": {
+                "Mathematics": [
+                    {"title": "Math Story Problems", "description": "Create your own word problem using your favorite toys. Write it down and solve it!", "type": "creative", "duration": "15 min"},
+                    {"title": "Place Value Craft", "description": "Use straws or sticks - bundle 10 together for tens, single ones for units. Build different numbers!", "type": "hands_on", "duration": "15 min"},
+                    {"title": "Mental Math Race", "description": "Ask a family member to give you 10 quick addition problems. Time yourself and try to beat your record!", "type": "practice", "duration": "10 min"},
+                ],
+                "Science": [
+                    {"title": "Mini Experiment", "description": "Plant a seed in a cup. Water it daily and draw what you see each day for a week.", "type": "hands_on", "duration": "10 min/day"},
+                    {"title": "Body Parts Poster", "description": "Draw yourself and label 10 body parts. Add arrows showing what each part does.", "type": "creative", "duration": "20 min"},
+                ],
+                "English": [
+                    {"title": "Sentence Builder", "description": "Write 5 sentences using this week's spelling words. Draw a picture for each!", "type": "writing", "duration": "15 min"},
+                    {"title": "Read Aloud", "description": "Read a short story aloud to a family member. Practice reading smoothly and with expression.", "type": "practice", "duration": "10 min"},
+                ],
+                "default": [
+                    {"title": "Teach Your Teddy", "description": "Pretend your stuffed toy is a student. Teach it what you learned today!", "type": "fun", "duration": "10 min"},
+                    {"title": "Quiz Cards", "description": "Make 5 question cards about what you studied. Test a family member!", "type": "creative", "duration": "15 min"},
+                ]
+            }
+        },
+        3: {
+            "label": "Grade 3",
+            "age": "8-9",
+            "activity_types": {
+                "Mathematics": [
+                    {"title": "Multiplication Flashcards", "description": "Make flashcards for the times tables you're learning. Practice 10 minutes daily!", "type": "practice", "duration": "10 min"},
+                    {"title": "Fraction Pizza", "description": "Draw 4 circles (pizzas). Divide them into halves, thirds, fourths, and sixths. Color different fractions!", "type": "hands_on", "duration": "15 min"},
+                    {"title": "Math in the Kitchen", "description": "Help with cooking and practice measuring - cups, spoons, halves and quarters.", "type": "real_world", "duration": "20 min"},
+                ],
+                "Science": [
+                    {"title": "States of Matter Hunt", "description": "Find 3 solids, 3 liquids, and 1 gas in your house. Make a chart with drawings.", "type": "hands_on", "duration": "15 min"},
+                ],
+                "English": [
+                    {"title": "Paragraph Writing", "description": "Write a paragraph about your favorite animal. Include a topic sentence, 3 details, and a closing sentence.", "type": "writing", "duration": "15 min"},
+                    {"title": "Grammar Detective", "description": "Read a page from your favorite book. Find 5 nouns, 5 verbs, and 3 adjectives.", "type": "practice", "duration": "10 min"},
+                ],
+                "default": [
+                    {"title": "Mind Map", "description": "Draw a mind map of the topic in the center, with branches for key facts you remember.", "type": "creative", "duration": "15 min"},
+                    {"title": "Practice Problems", "description": "Solve 10 problems related to the weak areas identified in your test.", "type": "practice", "duration": "20 min"},
+                ]
+            }
+        },
+        4: {
+            "label": "Grade 4",
+            "age": "9-10",
+            "activity_types": {
+                "Mathematics": [
+                    {"title": "Long Division Practice", "description": "Solve 8 division problems. Check each answer by multiplying back!", "type": "practice", "duration": "20 min"},
+                    {"title": "Geometry Scavenger Hunt", "description": "Walk around your home and find examples of parallel lines, right angles, and symmetry. Photograph or draw them.", "type": "real_world", "duration": "15 min"},
+                ],
+                "Science": [
+                    {"title": "Food Chain Poster", "description": "Create a food chain poster for a habitat (forest, ocean, or desert). Show producers, consumers, and decomposers.", "type": "creative", "duration": "25 min"},
+                ],
+                "English": [
+                    {"title": "Story Continuation", "description": "Take a story you know and write what happens next. Use at least 3 paragraphs with dialogue.", "type": "writing", "duration": "20 min"},
+                ],
+                "default": [
+                    {"title": "Summary Notes", "description": "Write a 1-page summary of the topic in your own words. Highlight key vocabulary.", "type": "writing", "duration": "20 min"},
+                    {"title": "Teach Someone", "description": "Explain the topic to a family member or friend. Teaching helps you learn better!", "type": "practice", "duration": "10 min"},
+                ]
+            }
+        },
+        5: {
+            "label": "Grade 5",
+            "age": "10-11",
+            "activity_types": {
+                "Mathematics": [
+                    {"title": "Decimal Practice Set", "description": "Complete 10 problems with decimals - adding, subtracting, and comparing. Show your working!", "type": "practice", "duration": "20 min"},
+                    {"title": "Real-World Math", "description": "Look at a grocery flyer or menu. Calculate totals, discounts, and change for different scenarios.", "type": "real_world", "duration": "15 min"},
+                ],
+                "Science": [
+                    {"title": "Experiment Journal", "description": "Design a simple experiment to test a question you have. Write: hypothesis, materials, steps, and what you observed.", "type": "hands_on", "duration": "30 min"},
+                ],
+                "English": [
+                    {"title": "Essay Outline", "description": "Create an outline for a 5-paragraph essay on a topic you choose. Include introduction, 3 body paragraph ideas, and conclusion.", "type": "writing", "duration": "15 min"},
+                ],
+                "default": [
+                    {"title": "Concept Map", "description": "Create a concept map connecting the key ideas from this topic. Show how they relate to each other.", "type": "creative", "duration": "15 min"},
+                    {"title": "Self-Quiz", "description": "Write 10 questions about the topic and answer them without looking at notes. Check your answers after.", "type": "practice", "duration": "20 min"},
+                ]
+            }
+        },
+        6: {
+            "label": "Grade 6",
+            "age": "11-12",
+            "activity_types": {
+                "Mathematics": [
+                    {"title": "Ratio & Proportion Problems", "description": "Solve 10 real-life ratio problems. Example: If 3 apples cost Rs 30, how much do 7 cost?", "type": "practice", "duration": "25 min"},
+                    {"title": "Algebra Introduction", "description": "Practice solving for x in 8 simple equations. Write out each step clearly.", "type": "practice", "duration": "20 min"},
+                ],
+                "Science": [
+                    {"title": "Classification Chart", "description": "Create a classification chart for the topic (e.g., types of forces, parts of a cell). Add diagrams.", "type": "creative", "duration": "20 min"},
+                ],
+                "English": [
+                    {"title": "Comprehension Practice", "description": "Read a passage and answer 5 questions: who, what, when, where, why. Support answers with evidence from the text.", "type": "practice", "duration": "20 min"},
+                ],
+                "default": [
+                    {"title": "Study Notes", "description": "Create neat, organized study notes for this topic. Use headings, bullet points, and diagrams.", "type": "writing", "duration": "25 min"},
+                    {"title": "Practice Test", "description": "Create a mini practice test (8 questions) and solve it under timed conditions.", "type": "practice", "duration": "25 min"},
+                ]
+            }
+        },
+        7: {
+            "label": "Grade 7",
+            "age": "12-13",
+            "activity_types": {
+                "Mathematics": [
+                    {"title": "Equation Solving Set", "description": "Solve 12 equations of increasing difficulty. Include linear equations and those with brackets.", "type": "practice", "duration": "30 min"},
+                    {"title": "Geometry Constructions", "description": "Practice compass-and-ruler constructions: angle bisectors, perpendicular bisectors, and triangle construction.", "type": "practice", "duration": "25 min"},
+                ],
+                "Science": [
+                    {"title": "Diagram & Label", "description": "Draw and label a detailed diagram of the topic (e.g., human digestive system, electric circuit). Add brief explanations.", "type": "creative", "duration": "25 min"},
+                ],
+                "English": [
+                    {"title": "Analytical Writing", "description": "Write a 3-paragraph analysis of a poem or short story. Discuss theme, language, and your interpretation.", "type": "writing", "duration": "25 min"},
+                ],
+                "default": [
+                    {"title": "Revision Flashcards", "description": "Create 15 flashcards with key terms on one side and definitions/explanations on the other.", "type": "practice", "duration": "20 min"},
+                    {"title": "Error Analysis", "description": "Review your test mistakes. For each wrong answer, write: what you wrote, the correct answer, and WHY you made the error.", "type": "practice", "duration": "20 min"},
+                ]
+            }
+        },
+        8: {
+            "label": "Grade 8",
+            "age": "13-14",
+            "activity_types": {
+                "Mathematics": [
+                    {"title": "Mixed Problem Set", "description": "Solve 15 problems covering the weak areas. Include algebraic expressions, geometry proofs, and data handling.", "type": "practice", "duration": "35 min"},
+                    {"title": "Application Problems", "description": "Solve 5 real-world application problems that use the concepts from this chapter.", "type": "real_world", "duration": "25 min"},
+                ],
+                "Science": [
+                    {"title": "Concept Summary", "description": "Write a 1-page summary explaining the key scientific concept in your own words. Include a diagram and real-world example.", "type": "writing", "duration": "25 min"},
+                ],
+                "English": [
+                    {"title": "Critical Response", "description": "Write a critical response (300+ words) to a text you've studied. Include thesis, evidence, and personal reflection.", "type": "writing", "duration": "30 min"},
+                ],
+                "default": [
+                    {"title": "Mock Test", "description": "Create a 30-minute mock test for yourself covering the weak areas. Solve it, mark it, and review mistakes.", "type": "practice", "duration": "40 min"},
+                    {"title": "Peer Study", "description": "Study with a friend or sibling. Quiz each other on the difficult topics and explain concepts to each other.", "type": "collaborative", "duration": "30 min"},
+                ]
+            }
+        }
+    }
+    
+    def generate_structured_exam_report(
+        self,
+        subject: str,
+        grade: int,
+        question_answers: List[Dict[str, Any]],
+        extracted_text: str,
+        teacher_corrections: Optional[Dict[str, Any]] = None,
+        rubric_comparison: Optional[List[Dict[str, Any]]] = None,
+        student_name: str = "Student"
+    ) -> Dict[str, Any]:
+        """
+        Generate a structured exam evaluation report with three clear sections:
+        A. Strong Zones - topics where the student performs well
+        B. Weak Zones - topics with mistakes or misunderstandings
+        C. Focus Plan - personalized, grade-appropriate study activities
+        
+        Args:
+            subject: Subject of the test
+            grade: Student's grade level (1-8)
+            question_answers: Parsed question-answer data
+            extracted_text: Full OCR text
+            teacher_corrections: Optional teacher correction data
+            rubric_comparison: Optional rubric comparison results
+            student_name: Student's name
+            
+        Returns:
+            Structured report dict with strong_zones, weak_zones, focus_plan
+        """
+        grade = max(1, min(8, grade))  # Clamp to 1-8
+        age_group = self.GRADE_ACTIVITIES.get(grade, {}).get("age", "6-8")
+        
+        total_questions = len(question_answers)
+        correct_questions = [q for q in question_answers if q.get("is_correct") == True]
+        incorrect_questions = [q for q in question_answers if q.get("is_correct") == False]
+        correct_count = len(correct_questions)
+        incorrect_count = len(incorrect_questions)
+        
+        # Calculate score
+        total_marks = sum(q.get("marks_awarded", 0) for q in question_answers if q.get("marks_awarded") is not None)
+        max_marks = sum(q.get("max_marks", 10) for q in question_answers)
+        if max_marks == 0:
+            max_marks = total_questions * 10
+        if total_marks == 0 and (correct_count > 0 or incorrect_count > 0):
+            marks_per_q = max_marks / total_questions if total_questions > 0 else 10
+            total_marks = int(correct_count * marks_per_q)
+        
+        percentage = (total_marks / max_marks * 100) if max_marks > 0 else 0
+        
+        # ===== A. STRONG ZONES =====
+        strong_zones = self._identify_strong_zones(
+            subject, grade, correct_questions, extracted_text, student_name
+        )
+        
+        # ===== B. WEAK ZONES =====
+        weak_zones = self._identify_weak_zones(
+            subject, grade, incorrect_questions, extracted_text, student_name
+        )
+        
+        # ===== C. FOCUS PLAN =====
+        focus_plan = self._generate_focus_plan(
+            subject, grade, weak_zones, strong_zones, percentage, student_name
+        )
+        
+        # Performance level
+        if percentage >= 90:
+            performance_level = "Excellent"
+        elif percentage >= 75:
+            performance_level = "Very Good"
+        elif percentage >= 60:
+            performance_level = "Good"
+        elif percentage >= 45:
+            performance_level = "Satisfactory"
+        else:
+            performance_level = "Needs Improvement"
+        
+        # Teacher insights
+        teacher_insights = None
+        if teacher_corrections and teacher_corrections.get("has_corrections"):
+            teacher_insights = {
+                "comments": teacher_corrections.get("comments", []),
+                "marks_detected": len(teacher_corrections.get("marks_per_question", {})),
+                "ticks_detected": sum(1 for m in teacher_corrections.get("tick_cross_marks", []) if m["type"] == "correct"),
+                "crosses_detected": sum(1 for m in teacher_corrections.get("tick_cross_marks", []) if m["type"] == "incorrect"),
+            }
+        
+        return {
+            "report_type": "structured_exam_evaluation",
+            "student_name": student_name,
+            "subject": subject,
+            "grade": grade,
+            "score": total_marks,
+            "total": max_marks,
+            "percentage": round(percentage, 1),
+            "performance_level": performance_level,
+            "total_questions": total_questions,
+            "correct_count": correct_count,
+            "incorrect_count": incorrect_count,
+            "strong_zones": strong_zones,
+            "weak_zones": weak_zones,
+            "focus_plan": focus_plan,
+            "teacher_insights": teacher_insights,
+            "encouragement": self._get_encouragement(percentage, student_name, grade)
+        }
+    
+    def _identify_strong_zones(
+        self, subject: str, grade: int, correct_questions: List[Dict], 
+        extracted_text: str, student_name: str
+    ) -> List[Dict[str, str]]:
+        """Identify topics where the student consistently performs well."""
+        if not correct_questions:
+            return [{
+                "topic": "Attempting Questions",
+                "evidence": "Keep trying! Every question you attempt is a step forward.",
+                "message": f"Great job for taking the test, {student_name}! That takes courage."
+            }]
+        
+        # Build question summary for AI
+        q_summary = "\n".join(
+            f"Q{q.get('question_number', '?')}: {q.get('question_text', '')[:80]}"
+            for q in correct_questions[:8]
+        )
+        
+        prompt = f"""Analyze these CORRECT answers from a Grade {grade} {subject} test for {student_name}.
+
+Correct answers:
+{q_summary}
+
+Identify 2-3 specific topic areas (Strong Zones) where the student performed well.
+For each zone, provide:
+1. Topic name (specific, not vague)
+2. Brief evidence (which questions show this strength)
+3. An encouraging message for the student (warm, age-appropriate for Grade {grade})
+
+Format each zone on its own line as:
+TOPIC: [topic name] | EVIDENCE: [evidence] | MESSAGE: [encouraging message]"""
+        
+        response = self._generate_text(prompt, max_tokens=300)
+        
+        zones = []
+        for line in response.split('\n'):
+            line = line.strip()
+            if not line or 'TOPIC:' not in line:
+                continue
+            
+            parts = {}
+            for segment in line.split('|'):
+                segment = segment.strip()
+                if segment.startswith('TOPIC:'):
+                    parts['topic'] = segment.replace('TOPIC:', '').strip()
+                elif segment.startswith('EVIDENCE:'):
+                    parts['evidence'] = segment.replace('EVIDENCE:', '').strip()
+                elif segment.startswith('MESSAGE:'):
+                    parts['message'] = segment.replace('MESSAGE:', '').strip()
+            
+            if parts.get('topic'):
+                zones.append({
+                    "topic": parts.get('topic', 'General Knowledge'),
+                    "evidence": parts.get('evidence', f'Answered correctly in the {subject} test'),
+                    "message": parts.get('message', f'Great work, {student_name}!')
+                })
+        
+        # Fallback if AI didn't produce parseable results
+        if not zones:
+            zones = [{
+                "topic": f"{subject} Fundamentals",
+                "evidence": f"Got {len(correct_questions)} out of {len(correct_questions) + len([q for q in correct_questions])} questions right",
+                "message": f"Well done, {student_name}! You have a solid understanding of the basics."
+            }]
+        
+        return zones[:3]
+    
+    def _identify_weak_zones(
+        self, subject: str, grade: int, incorrect_questions: List[Dict],
+        extracted_text: str, student_name: str
+    ) -> List[Dict[str, str]]:
+        """Identify topics with frequent mistakes or misunderstandings."""
+        if not incorrect_questions:
+            return []  # No weak zones is great!
+        
+        q_summary = "\n".join(
+            f"Q{q.get('question_number', '?')}: {q.get('question_text', '')[:80]} "
+            f"(Student wrote: {q.get('student_answer', 'no answer')[:50]})"
+            for q in incorrect_questions[:8]
+        )
+        
+        prompt = f"""Analyze these INCORRECT answers from a Grade {grade} {subject} test for {student_name}.
+
+Incorrect answers:
+{q_summary}
+
+Identify 2-3 specific Weak Zones (topics where the student struggled).
+For each zone, provide:
+1. Topic name (specific concept, not vague)
+2. What went wrong (common mistake or misconception observed)
+3. An encouraging message (positive, growth-mindset, age-appropriate for Grade {grade})
+
+Format each zone on its own line as:
+TOPIC: [topic name] | ISSUE: [what went wrong] | MESSAGE: [encouraging message]"""
+        
+        response = self._generate_text(prompt, max_tokens=300)
+        
+        zones = []
+        for line in response.split('\n'):
+            line = line.strip()
+            if not line or 'TOPIC:' not in line:
+                continue
+            
+            parts = {}
+            for segment in line.split('|'):
+                segment = segment.strip()
+                if segment.startswith('TOPIC:'):
+                    parts['topic'] = segment.replace('TOPIC:', '').strip()
+                elif segment.startswith('ISSUE:'):
+                    parts['issue'] = segment.replace('ISSUE:', '').strip()
+                elif segment.startswith('MESSAGE:'):
+                    parts['message'] = segment.replace('MESSAGE:', '').strip()
+            
+            if parts.get('topic'):
+                zones.append({
+                    "topic": parts.get('topic', 'Review Needed'),
+                    "issue": parts.get('issue', 'Some answers need correction'),
+                    "message": parts.get('message', f"Don't worry, {student_name}! This is how we learn and grow.")
+                })
+        
+        if not zones:
+            zones = [{
+                "topic": f"{subject} Practice Needed",
+                "issue": f"Made errors on {len(incorrect_questions)} questions",
+                "message": f"Every mistake is a chance to learn something new, {student_name}!"
+            }]
+        
+        return zones[:3]
+    
+    def _generate_focus_plan(
+        self, subject: str, grade: int, weak_zones: List[Dict],
+        strong_zones: List[Dict], percentage: float, student_name: str
+    ) -> Dict[str, Any]:
+        """Generate a personalized, grade-appropriate Focus Plan."""
+        grade_data = self.GRADE_ACTIVITIES.get(grade, self.GRADE_ACTIVITIES.get(3, {}))
+        activity_pool = grade_data.get("activity_types", {})
+        
+        # Get subject-specific activities, falling back to default
+        subject_activities = activity_pool.get(subject, activity_pool.get("default", []))
+        default_activities = activity_pool.get("default", [])
+        
+        # Pick activities based on performance
+        selected_activities = []
+        
+        # Always include subject-specific activities
+        for act in subject_activities[:2]:
+            selected_activities.append(act)
+        
+        # Add default activities if we need more
+        for act in default_activities:
+            if len(selected_activities) >= 3:
+                break
+            if act not in selected_activities:
+                selected_activities.append(act)
+        
+        # Generate AI-powered specific recommendations based on weak zones
+        weak_topics = [z.get("topic", "") for z in weak_zones]
+        specific_tips = []
+        
+        if weak_topics:
+            tips_prompt = f"""For a Grade {grade} student named {student_name} who needs to improve in {subject}, specifically in: {', '.join(weak_topics)}.
+
+Give 3 simple, specific study tips. Each tip should be:
+- One sentence
+- Actionable (something they can do TODAY)
+- Encouraging and age-appropriate for Grade {grade}
+
+Format: one tip per line, starting with a number."""
+            
+            tips_response = self._generate_text(tips_prompt, max_tokens=200)
+            for line in tips_response.split('\n'):
+                line = line.strip()
+                if line and (line[0].isdigit() or line.startswith('-')):
+                    tip = line.lstrip('0123456789.-) ').strip()
+                    if tip and len(tip) > 10:
+                        specific_tips.append(tip)
+        
+        if not specific_tips:
+            specific_tips = [
+                f"Practice {subject} for 15-20 minutes every day.",
+                "Review your test mistakes and understand why each answer was wrong.",
+                "Ask your teacher or a parent if you're stuck on a concept."
+            ]
+        
+        # Summary message based on performance
+        if percentage >= 80:
+            summary = f"Amazing work, {student_name}! You're doing great in {subject}. Here are some ways to become even better!"
+        elif percentage >= 60:
+            summary = f"Good effort, {student_name}! You understand a lot already. Let's work on making those tricky parts easier!"
+        elif percentage >= 40:
+            summary = f"You're learning, {student_name}! With some focused practice, you'll see big improvements. Let's make a plan!"
+        else:
+            summary = f"Every expert was once a beginner, {student_name}! Let's start with the basics and build up step by step. You can do this!"
+        
+        return {
+            "summary": summary,
+            "activities": selected_activities,
+            "specific_tips": specific_tips[:3],
+            "daily_goal": f"Spend 15-20 minutes practicing {subject} every day",
+            "weekly_goal": f"Complete all {len(selected_activities)} activities this week",
+            "encouragement": f"Remember, {student_name} - making mistakes means you're learning! Keep going!"
+        }
+    
+    def _get_encouragement(self, percentage: float, student_name: str, grade: int) -> str:
+        """Get a warm, grade-appropriate encouragement message."""
+        if grade <= 3:
+            # Younger kids - very warm, simple language
+            if percentage >= 80:
+                return f"WOW, {student_name}! You are a superstar! Your hard work is really showing!"
+            elif percentage >= 60:
+                return f"Great job, {student_name}! You're learning so much. Keep being awesome!"
+            elif percentage >= 40:
+                return f"You're doing good, {student_name}! Every time you try, you get a little bit better!"
+            else:
+                return f"You're so brave for trying, {student_name}! Let's practice together and you'll get better really fast!"
+        else:
+            # Older kids - encouraging but more mature
+            if percentage >= 80:
+                return f"Excellent performance, {student_name}! Your dedication to studying is clearly paying off."
+            elif percentage >= 60:
+                return f"Good work, {student_name}! You have a solid foundation. With focused practice, you'll master the rest."
+            elif percentage >= 40:
+                return f"Keep going, {student_name}! The areas you found difficult are exactly where the biggest learning happens."
+            else:
+                return f"Don't be discouraged, {student_name}. Every expert was once a beginner. Focus on one topic at a time and you'll improve steadily."
+    
     def generate_sudoku_puzzle(
         self,
         difficulty: str = "easy",

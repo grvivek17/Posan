@@ -277,24 +277,29 @@ async def api_analyze_test_upload(
     file: UploadFile = File(..., description="Test paper image or PDF"),
     student_name: str = Query(..., description="Student's name"),
     subject: str = Query(..., description="Subject of the test"),
-    age_group: str = Query(default="6-8", description="Student age group")
+    age_group: str = Query(default="6-8", description="Student age group"),
+    grade: int = Query(default=3, ge=1, le=8, description="Student grade level (1-8)"),
+    model_answers: Optional[str] = Query(default=None, description="JSON string of model answers: [{question_number, answer, marks}]")
 ):
     """
     Upload a test paper (image or PDF) and analyze it using OCR + AI.
     
-    This endpoint:
-    1. Accepts JPG, PNG, or PDF files
-    2. Uses Tesseract OCR to extract text from the test paper
-    3. Parses the text to identify scores and marks
-    4. Sends the results to AI for personalized analysis
+    Returns a structured report with:
+    - A. Strong Zones: topics where the student consistently performs well
+    - B. Weak Zones: topics with frequent mistakes or misunderstandings
+    - C. Focus Plan: personalized, grade-appropriate study activities
     
     - **file**: Test paper file (JPG, PNG, PDF, max 10MB)
     - **student_name**: Student's name for personalized feedback
     - **subject**: Subject of the test
     - **age_group**: Student age group for age-appropriate analysis
+    - **grade**: Student grade level (1-8) for grade-specific recommendations
+    - **model_answers**: Optional JSON string of model answers for rubric comparison
     
-    Returns OCR extraction results and AI-powered recommendations.
+    Returns OCR extraction results and structured exam evaluation report.
     """
+    import json
+    
     # Validate file type
     allowed_extensions = ['.jpg', '.jpeg', '.png', '.pdf']
     file_extension = Path(file.filename).suffix.lower()
@@ -304,6 +309,17 @@ async def api_analyze_test_upload(
             status_code=400, 
             detail=f"Invalid file type. Allowed: {', '.join(allowed_extensions)}"
         )
+    
+    # Parse model answers if provided
+    parsed_model_answers = None
+    if model_answers:
+        try:
+            parsed_model_answers = json.loads(model_answers)
+        except json.JSONDecodeError:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid model_answers JSON format. Expected: [{\"question_number\": 1, \"answer\": \"...\", \"marks\": 5}]"
+            )
     
     # Validate file size (max 10MB)
     max_size = 10 * 1024 * 1024  # 10MB in bytes
@@ -328,12 +344,13 @@ async def api_analyze_test_upload(
             temp_file.write(content)
             temp_file_path = temp_file.name
         
-        # Process with OCR service
+        # Process with OCR service (now includes teacher correction extraction + rubric comparison)
         ocr_result = ocr_service.analyze_test_paper(
             file_path=temp_file_path,
             file_extension=file_extension,
             student_name=student_name,
-            subject=subject
+            subject=subject,
+            model_answers=parsed_model_answers
         )
         
         if not ocr_result.get("success"):
@@ -342,29 +359,33 @@ async def api_analyze_test_upload(
                 detail=f"OCR processing failed: {ocr_result.get('error', 'Unknown error')}"
             )
         
-        # Get question-answer pairs for content analysis
+        # Get question-answer pairs and teacher corrections
         question_answers = ocr_result.get("question_answers", [])
         extracted_text = ocr_result.get("extracted_text", "")
+        teacher_corrections = ocr_result.get("teacher_corrections", {})
+        rubric_comparison = ocr_result.get("rubric_comparison", [])
         
-        # Use new content-based analysis if we have question-answer pairs
+        # Generate structured report if we have question-answer data
         if question_answers and len(question_answers) > 0:
-            # Perform deep content analysis based on actual answers
-            ai_result = content_generator.analyze_test_paper_content(
+            # Generate the structured 3-section report
+            structured_report = content_generator.generate_structured_exam_report(
                 subject=subject,
+                grade=grade,
                 question_answers=question_answers,
                 extracted_text=extracted_text,
-                age_group=age_group,
+                teacher_corrections=teacher_corrections,
+                rubric_comparison=rubric_comparison,
                 student_name=student_name
             )
             
-            # Combine OCR and AI results
             return {
                 "ocr_success": True,
-                "analysis_type": "content_based",
-                "message": f"Analyzed {len(question_answers)} questions with detailed answer evaluation",
+                "analysis_type": "structured_report",
+                "message": f"Analyzed {len(question_answers)} questions with structured evaluation",
                 "ocr_confidence": ocr_result.get("confidence", "medium"),
                 "extracted_text_preview": extracted_text[:200] if extracted_text else "",
-                **ai_result
+                "questions_found": len(question_answers),
+                **structured_report
             }
         
         # Fallback: If no questions extracted but score found, use score-based analysis

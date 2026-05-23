@@ -305,7 +305,149 @@
     }
 }
 
-.analysis-results {
+/* ===== ANSWER KEY SECTION ===== */
+
+.answer-key-section {
+    margin: 10px 0;
+}
+
+.answer-key-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: #f8f9fa;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    color: #555;
+    width: 100%;
+    text-align: left;
+    transition: all 0.3s ease;
+}
+
+.answer-key-toggle:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.answer-key-toggle.active {
+    border-color: #667eea;
+    background: #f0f3ff;
+    color: #667eea;
+}
+
+.answer-key-form {
+    margin-top: 12px;
+    padding: 20px;
+    background: #fafbfc;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    animation: fadeIn 0.3s ease;
+}
+
+.answer-key-hint {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0 0 15px 0;
+    line-height: 1.5;
+}
+
+.answer-key-table {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.answer-key-header {
+    display: grid;
+    grid-template-columns: 60px 1fr 80px 40px;
+    gap: 10px;
+    padding: 8px 5px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #888;
+    text-transform: uppercase;
+}
+
+.answer-key-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 80px 40px;
+    gap: 10px;
+    align-items: center;
+}
+
+.ak-input-num,
+.ak-input-marks {
+    padding: 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    text-align: center;
+    font-family: inherit;
+}
+
+.ak-input-answer {
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+.ak-input-num:focus,
+.ak-input-answer:focus,
+.ak-input-marks:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.ak-remove-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #ffebee;
+    color: #f44336;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.ak-remove-btn:hover:not(:disabled) {
+    background: #f44336;
+    color: white;
+}
+
+.ak-remove-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.ak-add-btn {
+    margin-top: 10px;
+    padding: 10px 20px;
+    border: 2px dashed #667eea;
+    background: transparent;
+    color: #667eea;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ak-add-btn:hover {
+    background: #f0f3ff;
+}
+
+/* ===== STRUCTURED REPORT ===== */
+
+.structured-report {
     margin-top: 30px;
     animation: fadeIn 0.6s ease;
 }
@@ -318,6 +460,550 @@
     to {
         opacity: 1;
     }
+}
+
+/* Report Header */
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.report-student-info h3 {
+    margin: 0 0 5px 0;
+    color: #2c3e50;
+    font-size: 1.3rem;
+}
+
+.report-meta {
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.report-score-ring {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.score-ring {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--score-color) var(--score-pct),
+        #e0e0e0 var(--score-pct)
+    );
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.score-ring::before {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: white;
+}
+
+.score-number {
+    position: relative;
+    z-index: 1;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.score-label {
+    position: relative;
+    z-index: 1;
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.performance-badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: capitalize;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Question Stats */
+.question-stats {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 25px;
+    border-radius: 12px;
+    min-width: 90px;
+}
+
+.stat-item.correct {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+}
+
+.stat-item.incorrect {
+    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+}
+
+.stat-item.total {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+}
+
+.stat-icon {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.stat-item.correct .stat-icon {
+    color: #4caf50;
+}
+
+.stat-item.incorrect .stat-icon {
+    color: #f44336;
+}
+
+.stat-item.total .stat-icon {
+    color: #2196f3;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Encouragement */
+.encouragement-banner {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 18px 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    margin-bottom: 25px;
+    color: white;
+}
+
+.encouragement-icon {
+    font-size: 2rem;
+}
+
+.encouragement-banner p {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.5;
+}
+
+/* Teacher Insights */
+.teacher-insights {
+    padding: 20px;
+    background: #fff8e1;
+    border: 1px solid #ffecb3;
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
+
+.teacher-insights h4 {
+    margin: 0 0 12px 0;
+    color: #f57f17;
+}
+
+.teacher-stats {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.teacher-stat {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.teacher-stat.tick {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.teacher-stat.cross {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.teacher-stat.marks {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.teacher-comments {
+    margin-top: 10px;
+}
+
+.teacher-comment {
+    color: #795548;
+    font-style: italic;
+    margin: 5px 0;
+    padding-left: 10px;
+    border-left: 3px solid #ffca28;
+}
+
+/* Report Sections (A, B, C) */
+.report-section {
+    margin-bottom: 25px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 25px;
+    color: white;
+}
+
+.section-letter {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    flex: 1;
+}
+
+.section-tagline {
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+
+/* Strong Zones */
+.strong-zones-section .section-header {
+    background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+}
+
+/* Weak Zones */
+.weak-zones-section .section-header {
+    background: linear-gradient(135deg, #ff9800 0%, #ffa726 100%);
+}
+
+/* Focus Plan */
+.focus-plan-section .section-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Zone Cards */
+.zones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    padding: 20px;
+    background: #fafbfc;
+}
+
+.zone-card {
+    padding: 20px;
+    border-radius: 12px;
+    position: relative;
+}
+
+.zone-card.strong {
+    background: white;
+    border-left: 4px solid #4caf50;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+}
+
+.zone-card.weak {
+    background: white;
+    border-left: 4px solid #ff9800;
+    box-shadow: 0 2px 8px rgba(255, 152, 0, 0.1);
+}
+
+.zone-icon {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.zone-card h4 {
+    margin: 0 0 8px 0;
+    color: #2c3e50;
+    font-size: 1.05rem;
+}
+
+.zone-evidence {
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 8px 0;
+}
+
+.zone-issue {
+    color: #e65100;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 8px 0;
+}
+
+.zone-message {
+    color: #444;
+    font-size: 0.9rem;
+    font-style: italic;
+    margin: 0;
+    padding-top: 8px;
+    border-top: 1px solid #eee;
+}
+
+/* Focus Plan Content */
+.focus-summary {
+    padding: 15px 25px;
+    background: #fafbfc;
+    color: #555;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin: 0;
+    border-bottom: 1px solid #eee;
+}
+
+.focus-activities {
+    padding: 20px 25px;
+    background: #fafbfc;
+}
+
+.focus-activities h4 {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+}
+
+.activities-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.activity-card {
+    padding: 16px 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease;
+}
+
+.activity-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.activity-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.activity-icon {
+    font-size: 1.3rem;
+}
+
+.activity-header h5 {
+    margin: 0;
+    flex: 1;
+    color: #2c3e50;
+    font-size: 1rem;
+}
+
+.activity-duration {
+    font-size: 0.8rem;
+    color: #888;
+    background: #f5f5f5;
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+.activity-desc {
+    margin: 0 0 10px 0;
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.activity-type-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.activity-type-badge.hands_on {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.activity-type-badge.writing {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.activity-type-badge.fun {
+    background: #fce4ec;
+    color: #c62828;
+}
+
+.activity-type-badge.creative {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.activity-type-badge.practice {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.activity-type-badge.real_world {
+    background: #e0f2f1;
+    color: #00695c;
+}
+
+.activity-type-badge.collaborative {
+    background: #ede7f6;
+    color: #4527a0;
+}
+
+/* Focus Tips */
+.focus-tips {
+    padding: 20px 25px;
+    background: #fafbfc;
+    border-top: 1px solid #eee;
+}
+
+.focus-tips h4 {
+    margin: 0 0 12px 0;
+    color: #2c3e50;
+}
+
+.tips-list {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.tips-list li {
+    padding: 6px 0;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* Goals */
+.focus-goals {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    padding: 20px 25px;
+    background: #fafbfc;
+    border-top: 1px solid #eee;
+}
+
+.goal-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.goal-item.daily {
+    background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+}
+
+.goal-item.weekly {
+    background: linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%);
+}
+
+.goal-icon {
+    font-size: 1.5rem;
+}
+
+.goal-item strong {
+    display: block;
+    color: #2c3e50;
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+}
+
+.goal-item p {
+    margin: 0;
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Focus Encouragement */
+.focus-encouragement {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 25px;
+    background: linear-gradient(135deg, #f3e5f5 0%, #e8eaf6 100%);
+    border-radius: 0 0 16px 16px;
+}
+
+.focus-encouragement span {
+    font-size: 1.5rem;
+}
+
+.focus-encouragement p {
+    margin: 0;
+    color: #555;
+    font-size: 0.95rem;
+    font-style: italic;
+}
+
+/* ===== LEGACY REPORT (unchanged) ===== */
+
+.analysis-results {
+    margin-top: 30px;
+    animation: fadeIn 0.6s ease;
 }
 
 .results-header {
@@ -433,7 +1119,7 @@
 }
 
 .areas-card li::before {
-    content: '•';
+    content: '\2022';
     position: absolute;
     left: 5px;
     font-size: 1.5rem;
@@ -457,5 +1143,43 @@
 
     .form-row {
         grid-template-columns: 1fr;
+    }
+
+    .report-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .question-stats {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .stat-item {
+        flex-direction: row;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .zones-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .focus-goals {
+        grid-template-columns: 1fr;
+    }
+
+    .answer-key-header,
+    .answer-key-row {
+        grid-template-columns: 50px 1fr 60px 35px;
+    }
+
+    .encouragement-banner {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .teacher-stats {
+        flex-direction: column;
     }
 }
