@@ -14,6 +14,7 @@ function MagazinePage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('All');
     const [weeklyLoading, setWeeklyLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
         fetchMagazines();
@@ -22,11 +23,58 @@ function MagazinePage() {
     const fetchMagazines = async () => {
         try {
             const response = await contentAPI.getMagazines({ published_only: true });
-            setMagazines(response.data);
+            const allMagazines = response.data;
+            setMagazines(allMagazines);
+
+            // Auto-check: if no magazines exist for the current month, trigger a refresh
+            const now = new Date();
+            const currentMonth = now.getMonth() + 1;
+            const currentYear = now.getFullYear();
+            const hasCurrentMonth = allMagazines.some(mag => {
+                if (!mag.publication_date) return false;
+                const pubDate = new Date(mag.publication_date);
+                return pubDate.getMonth() + 1 === currentMonth && pubDate.getFullYear() === currentYear;
+            });
+
+            if (!hasCurrentMonth && allMagazines.length >= 0) {
+                console.log('[Magazines] No current-month magazines found. Triggering auto-refresh...');
+                await autoRefreshMagazines();
+            }
         } catch (err) {
             setError('Failed to load magazines');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const autoRefreshMagazines = async () => {
+        setRefreshing(true);
+        try {
+            await contentAPI.refreshMonthlyMagazines();
+            // Re-fetch magazines after refresh
+            const response = await contentAPI.getMagazines({ published_only: true });
+            setMagazines(response.data);
+        } catch (err) {
+            console.warn('[Magazines] Auto-refresh failed:', err);
+            // Don't show error to user - they still see existing magazines
+        } finally {
+            setRefreshing(false);
+        }
+    };
+
+    const handleForceRefresh = async () => {
+        setRefreshing(true);
+        setError('');
+        try {
+            const result = await contentAPI.refreshMonthlyMagazines(true);
+            console.log('[Magazines] Force refresh result:', result.data);
+            // Re-fetch magazines after refresh
+            const response = await contentAPI.getMagazines({ published_only: true });
+            setMagazines(response.data);
+        } catch (err) {
+            setError('Failed to refresh magazines. Please try again later.');
+        } finally {
+            setRefreshing(false);
         }
     };
 
@@ -88,6 +136,13 @@ function MagazinePage() {
                     <div className="header-buttons">
                         <button
                             className="store-btn"
+                            onClick={handleForceRefresh}
+                            disabled={refreshing}
+                        >
+                            {refreshing ? '🔄 Refreshing...' : '🔄 Get Latest'}
+                        </button>
+                        <button
+                            className="store-btn"
                             onClick={() => navigate('/store')}
                         >
                             🛒 Shop Activity Books
@@ -101,6 +156,14 @@ function MagazinePage() {
                         </button>
                     </div>
                 </div>
+
+                {/* Refreshing indicator */}
+                {refreshing && (
+                    <div className="refresh-banner">
+                        <div className="spinner-small"></div>
+                        <span>Fetching latest magazines from the web...</span>
+                    </div>
+                )}
 
                 {/* Search Bar */}
                 <SearchBar

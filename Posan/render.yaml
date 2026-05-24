@@ -25,5 +25,28 @@ services:
       - key: HUGGINGFACE_TOKEN
         sync: false
 
+  # Cron job: Monthly magazine refresh (runs on the 1st of every month at 6:00 AM UTC)
+  # Fetches latest educational content from RSS feeds and web sources
+  - type: cron
+    name: monthly-magazine-refresh
+    runtime: python
+    pythonVersion: 3.11.0
+    schedule: "0 6 1 * *"
+    buildCommand: pip install --upgrade pip && pip install -r backend/requirements.txt
+    startCommand: cd backend && python scripts/monthly_magazine_refresh.py --force
+    envVars:
+      - key: BACKEND_URL
+        sync: false
+      - key: REFRESH_METHOD
+        value: direct
+      - key: FORCE_REFRESH
+        value: "true"
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: HUGGINGFACE_TOKEN
+        sync: false
+
 # Database is hosted externally (Neon/Supabase/etc)
 # Set DATABASE_URL in Render dashboard environment variables

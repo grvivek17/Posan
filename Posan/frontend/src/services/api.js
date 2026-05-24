@@ -58,6 +58,8 @@ export const usersAPI = {
 export const contentAPI = {
     getMagazines: (params) => api.get('/content/magazines', { params }),
     getMagazine: (id) => api.get(`/content/magazines/${id}`),
+    getCurrentMonthMagazines: () => api.get('/content/magazines/current-month'),
+    refreshMonthlyMagazines: (force = false) => api.post(`/content/magazines/refresh-monthly${force ? '?force=true' : ''}`),
     getArticles: (params) => api.get('/content/articles', { params }),
     getArticle: (id) => api.get(`/content/articles/${id}`),
     submitQuiz: (userId, data) => api.post(`/content/quizzes/submit?user_id=${userId}`, data),
