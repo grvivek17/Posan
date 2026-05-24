@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Boolean, Enum as SQLEnum
+from sqlalchemy import Column, Index, Integer, String, Text, DateTime, ForeignKey, Boolean, Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
@@ -17,6 +17,11 @@ class ContentType(enum.Enum):
 class Magazine(Base):
     """Magazine model."""
     __tablename__ = "magazines"
+    __table_args__ = (
+        Index('idx_magazine_is_published', 'is_published'),
+        Index('idx_magazine_age_group', 'age_group'),
+        Index('idx_magazine_publication_date', 'publication_date'),
+    )
     
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
@@ -35,6 +40,10 @@ class Magazine(Base):
 class Article(Base):
     """Article/Story model within a magazine."""
     __tablename__ = "articles"
+    __table_args__ = (
+        Index('idx_article_magazine_id', 'magazine_id'),
+        Index('idx_article_age_group', 'age_group'),
+    )
     
     id = Column(Integer, primary_key=True, index=True)
     magazine_id = Column(Integer, ForeignKey("magazines.id"))

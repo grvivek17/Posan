@@ -437,6 +437,16 @@
     margin: 1rem 0;
 }
 
+/* Success */
+.success-message {
+    background: #D1FAE5;
+    color: #065F46;
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    margin: 1rem 0;
+    animation: fadeIn 0.3s ease;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .page-header-lib {

@@ -1,16 +1,62 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '../hooks/useAdmin';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
-    const { stats, recentActivity, loading, fetchStats, fetchRecentActivity } = useAdmin();
+    const { stats, recentActivity, loading, fetchStats, fetchRecentActivity, fetchMagazines, refreshMagazines } = useAdmin();
+
+    const [magazines, setMagazines] = useState([]);
+    const [magLoading, setMagLoading] = useState(false);
+    const [magRefreshing, setMagRefreshing] = useState(false);
+    const [magResult, setMagResult] = useState(null);
 
     useEffect(() => {
         fetchStats();
         fetchRecentActivity(20);
+        loadMagazines();
     }, []);
+
+    const loadMagazines = async () => {
+        setMagLoading(true);
+        try {
+            const data = await fetchMagazines();
+            setMagazines(data);
+        } finally {
+            setMagLoading(false);
+        }
+    };
+
+    const handleRefreshMagazines = async (force = false) => {
+        setMagRefreshing(true);
+        setMagResult(null);
+        try {
+            const result = await refreshMagazines(force);
+            setMagResult(result);
+            await loadMagazines();
+        } catch (err) {
+            setMagResult({ status: 'error', message: err.message || 'Refresh failed' });
+        } finally {
+            setMagRefreshing(false);
+        }
+    };
+
+    const getMagazineStats = () => {
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1;
+        const currentYear = now.getFullYear();
+        const currentMonthMags = magazines.filter(m => {
+            if (!m.publication_date) return false;
+            const d = new Date(m.publication_date);
+            return d.getMonth() + 1 === currentMonth && d.getFullYear() === currentYear;
+        });
+        const ageGroups = {};
+        magazines.forEach(m => {
+            ageGroups[m.age_group] = (ageGroups[m.age_group] || 0) + 1;
+        });
+        return { total: magazines.length, currentMonth: currentMonthMags.length, ageGroups };
+    };
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('en-IN', {
@@ -162,6 +208,116 @@ const AdminDashboard = () => {
                     </div>
                 </>
             )}
+
+            {/* Magazine Management */}
+            <div className="dashboard-section magazine-management">
+                <div className="section-header">
+                    <h2>📚 Magazine Management</h2>
+                    <div className="mag-header-actions">
+                        <button
+                            onClick={loadMagazines}
+                            className="btn-refresh"
+                            disabled={magLoading}
+                        >
+                            {magLoading ? '...' : '🔄'} Reload List
+                        </button>
+                    </div>
+                </div>
+
+                {(() => {
+                    const magStats = getMagazineStats();
+                    const monthName = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+                    return (
+                        <>
+                            <div className="mag-stats-row">
+                                <div className="mag-stat-chip">
+                                    <span className="mag-stat-number">{magStats.total}</span>
+                                    <span className="mag-stat-label">Total Magazines</span>
+                                </div>
+                                <div className={`mag-stat-chip ${magStats.currentMonth > 0 ? 'green' : 'red'}`}>
+                                    <span className="mag-stat-number">{magStats.currentMonth}</span>
+                                    <span className="mag-stat-label">{monthName}</span>
+                                </div>
+                                {Object.entries(magStats.ageGroups).map(([age, count]) => (
+                                    <div className="mag-stat-chip" key={age}>
+                                        <span className="mag-stat-number">{count}</span>
+                                        <span className="mag-stat-label">Ages {age}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="mag-actions-row">
+                                <button
+                                    className="mag-action-btn refresh-btn"
+                                    onClick={() => handleRefreshMagazines(false)}
+                                    disabled={magRefreshing}
+                                >
+                                    {magRefreshing ? (
+                                        <><span className="spinner-inline"></span> Fetching from web...</>
+                                    ) : (
+                                        <>🌐 Refresh This Month</>
+                                    )}
+                                </button>
+                                <button
+                                    className="mag-action-btn force-btn"
+                                    onClick={() => handleRefreshMagazines(true)}
+                                    disabled={magRefreshing}
+                                >
+                                    {magRefreshing ? (
+                                        <><span className="spinner-inline"></span> Regenerating...</>
+                                    ) : (
+                                        <>🔄 Force Regenerate</>
+                                    )}
+                                </button>
+                            </div>
+                            <p className="mag-help-text">
+                                <strong>Refresh:</strong> Fetches new magazines from web sources if none exist for this month.
+                                <strong> Force Regenerate:</strong> Deletes existing magazines for this month and creates fresh ones from RSS feeds &amp; web scraping.
+                            </p>
+
+                            {magResult && (
+                                <div className={`mag-result ${magResult.status === 'error' ? 'error' : magResult.status === 'skipped' ? 'skipped' : 'success'}`}>
+                                    <strong>{magResult.status === 'success' ? '✅' : magResult.status === 'skipped' ? '⏭️' : '❌'} {magResult.status?.toUpperCase()}</strong>
+                                    <span>{magResult.message}</span>
+                                    {magResult.magazines && (
+                                        <div className="mag-result-details">
+                                            {magResult.magazines.map((m, i) => (
+                                                <span key={i} className="mag-result-tag">
+                                                    {m.title} ({m.articles_count} articles)
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {magazines.length > 0 && (
+                                <div className="mag-list">
+                                    <h3>Recent Magazines</h3>
+                                    <div className="mag-grid">
+                                        {magazines.slice(0, 8).map(mag => (
+                                            <div key={mag.id} className="mag-card-mini" onClick={() => navigate(`/magazines/${mag.id}`)}>
+                                                <div className="mag-card-cover">
+                                                    {mag.cover_image_url ? (
+                                                        <img src={mag.cover_image_url} alt={mag.title} />
+                                                    ) : (
+                                                        <div className="mag-placeholder">📚</div>
+                                                    )}
+                                                </div>
+                                                <div className="mag-card-info">
+                                                    <h4>{mag.title}</h4>
+                                                    <span className="mag-age-badge">{mag.age_group}</span>
+                                                    <span className="mag-issue">#{mag.issue_number}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    );
+                })()}
+            </div>
 
             {/* Recent Activity */}
             <div className="dashboard-section">

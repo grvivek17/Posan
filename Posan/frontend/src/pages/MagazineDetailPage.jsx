@@ -11,6 +11,7 @@ function MagazineDetailPage() {
     const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [selectedArticle, setSelectedArticle] = useState(null);
 
     useEffect(() => {
         fetchMagazineAndArticles();
@@ -54,6 +55,57 @@ function MagazineDetailPage() {
 
     return (
         <div className="magazine-detail-page">
+            {/* Article Reader View */}
+            {selectedArticle && (
+                <div className="article-reader-overlay" onClick={() => setSelectedArticle(null)}>
+                    <div className="article-reader" onClick={(e) => e.stopPropagation()}>
+                        <div className="article-reader-header">
+                            <button
+                                className="article-reader-close"
+                                onClick={() => setSelectedArticle(null)}
+                            >
+                                &times;
+                            </button>
+                            <div className="article-reader-meta">
+                                {selectedArticle.content_type && (
+                                    <span className="article-reader-type">
+                                        {selectedArticle.content_type === 'ARTICLE' && '📰'}
+                                        {selectedArticle.content_type === 'STORY' && '📖'}
+                                        {selectedArticle.content_type === 'ACTIVITY' && '🎨'}
+                                        {selectedArticle.content_type === 'COMIC' && '💭'}
+                                        {' '}{selectedArticle.content_type}
+                                    </span>
+                                )}
+                                {selectedArticle.reading_time_minutes && (
+                                    <span className="article-reader-time">
+                                        ⏱️ {selectedArticle.reading_time_minutes} min read
+                                    </span>
+                                )}
+                            </div>
+                            <h1 className="article-reader-title">{selectedArticle.title}</h1>
+                            {selectedArticle.author && (
+                                <p className="article-reader-author">By {selectedArticle.author}</p>
+                            )}
+                        </div>
+                        <div className="article-reader-body">
+                            {selectedArticle.content.split('\n').map((paragraph, idx) => (
+                                paragraph.trim() ? (
+                                    <p key={idx}>{paragraph}</p>
+                                ) : null
+                            ))}
+                        </div>
+                        <div className="article-reader-footer">
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => setSelectedArticle(null)}
+                            >
+                                Back to Magazine
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Magazine Header */}
             <div className="magazine-header" style={{ backgroundImage: `url(${magazine.cover_image_url})` }}>
                 <div className="magazine-header-overlay">
@@ -107,7 +159,7 @@ function MagazineDetailPage() {
                                     </p>
                                     <button
                                         className="btn btn-secondary"
-                                        onClick={() => openArticle(article.id)}
+                                        onClick={() => setSelectedArticle(article)}
                                     >
                                         Read Article →
                                     </button>
@@ -119,16 +171,6 @@ function MagazineDetailPage() {
             </div>
         </div>
     );
-
-    function openArticle(articleId) {
-        // For now, scroll to article or open modal
-        // You can enhance this to navigate to a full article view
-        const article = articles.find(a => a.id === articleId);
-        if (article) {
-            alert(`Opening: ${article.title}\n\n${article.content}`);
-            // TODO: Navigate to article detail page or open in modal
-        }
-    }
 }
 
 export default MagazineDetailPage;

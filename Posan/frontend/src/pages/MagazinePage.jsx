@@ -11,6 +11,7 @@ function MagazinePage() {
     const [magazines, setMagazines] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [successMsg, setSuccessMsg] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('All');
     const [weeklyLoading, setWeeklyLoading] = useState(false);
@@ -25,8 +26,9 @@ function MagazinePage() {
             const response = await contentAPI.getMagazines({ published_only: true });
             const allMagazines = response.data;
             setMagazines(allMagazines);
+            setLoading(false);
 
-            // Auto-check: if no magazines exist for the current month, trigger a refresh
+            // Auto-check: if no magazines exist for the current month, trigger a background refresh
             const now = new Date();
             const currentMonth = now.getMonth() + 1;
             const currentYear = now.getFullYear();
@@ -36,27 +38,34 @@ function MagazinePage() {
                 return pubDate.getMonth() + 1 === currentMonth && pubDate.getFullYear() === currentYear;
             });
 
-            if (!hasCurrentMonth && allMagazines.length >= 0) {
-                console.log('[Magazines] No current-month magazines found. Triggering auto-refresh...');
-                await autoRefreshMagazines();
+            // Throttle auto-refresh: only try once per hour to avoid repeated slow loads
+            const lastRefresh = localStorage.getItem('magazine_last_auto_refresh');
+            const oneHourAgo = Date.now() - 60 * 60 * 1000;
+            const shouldAutoRefresh = !lastRefresh || Number(lastRefresh) < oneHourAgo;
+
+            if (shouldAutoRefresh && (!hasCurrentMonth || allMagazines.length === 0)) {
+                console.log('[Magazines] Triggering background auto-refresh...');
+                // Run in background - don't block the UI
+                autoRefreshMagazines();
             }
         } catch (err) {
             setError('Failed to load magazines');
-        } finally {
             setLoading(false);
         }
     };
 
     const autoRefreshMagazines = async () => {
         setRefreshing(true);
+        localStorage.setItem('magazine_last_auto_refresh', String(Date.now()));
         try {
-            await contentAPI.refreshMonthlyMagazines();
+            // Use force=false so existing magazines are kept if they exist
+            const result = await contentAPI.refreshMonthlyMagazines(false);
+            console.log('[Magazines] Auto-refresh result:', result.data);
             // Re-fetch magazines after refresh
             const response = await contentAPI.getMagazines({ published_only: true });
             setMagazines(response.data);
         } catch (err) {
             console.warn('[Magazines] Auto-refresh failed:', err);
-            // Don't show error to user - they still see existing magazines
         } finally {
             setRefreshing(false);
         }
@@ -65,12 +74,21 @@ function MagazinePage() {
     const handleForceRefresh = async () => {
         setRefreshing(true);
         setError('');
+        setSuccessMsg('');
         try {
             const result = await contentAPI.refreshMonthlyMagazines(true);
             console.log('[Magazines] Force refresh result:', result.data);
             // Re-fetch magazines after refresh
             const response = await contentAPI.getMagazines({ published_only: true });
             setMagazines(response.data);
+            const count = result.data?.magazines?.length || response.data?.length || 0;
+            if (result.data?.status === 'success' && count > 0) {
+                setSuccessMsg(`Refreshed! ${count} magazines loaded with latest content.`);
+            } else if (response.data?.length > 0) {
+                setSuccessMsg('Magazines updated successfully!');
+            }
+            // Auto-dismiss success message after 4 seconds
+            setTimeout(() => setSuccessMsg(''), 4000);
         } catch (err) {
             setError('Failed to refresh magazines. Please try again later.');
         } finally {
@@ -179,6 +197,7 @@ function MagazinePage() {
                 />
 
                 {error && <div className="error-message">{error}</div>}
+                {successMsg && <div className="success-message">{successMsg}</div>}
 
                 {/* Issue of the Month */}
                 {featuredMagazine && (
@@ -222,6 +241,7 @@ function MagazinePage() {
                                             <img
                                                 src={magazine.cover_image_url}
                                                 alt={magazine.title}
+                                                loading="lazy"
                                             />
                                         ) : (
                                             <div className="placeholder-icon-lib">
@@ -255,6 +275,7 @@ function MagazinePage() {
                                             <img
                                                 src={magazine.cover_image_url}
                                                 alt={magazine.title}
+                                                loading="lazy"
                                             />
                                         ) : (
                                             <div className="explore-placeholder">

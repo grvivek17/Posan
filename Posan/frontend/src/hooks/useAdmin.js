@@ -211,6 +211,36 @@ export const useAdmin = () => {
         }
     };
 
+    const fetchMagazines = async () => {
+        try {
+            const response = await fetch(`${API_BASE}/content/magazines?published_only=true&limit=100`, {
+                headers: getAuthHeaders()
+            });
+            if (!response.ok) throw new Error('Failed to fetch magazines');
+            return await response.json();
+        } catch (err) {
+            setError(err.message);
+            console.error('Error fetching magazines:', err);
+            return [];
+        }
+    };
+
+    const refreshMagazines = async (force = false) => {
+        try {
+            const url = `${API_BASE}/content/magazines/refresh-monthly${force ? '?force=true' : ''}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: getAuthHeaders()
+            });
+            if (!response.ok) throw new Error('Failed to refresh magazines');
+            return await response.json();
+        } catch (err) {
+            setError(err.message);
+            console.error('Error refreshing magazines:', err);
+            throw err;
+        }
+    };
+
     return {
         stats,
         users,
@@ -226,6 +256,8 @@ export const useAdmin = () => {
         upgradeUser,
         deleteUser,
         updateUser,
-        resetPassword
+        resetPassword,
+        fetchMagazines,
+        refreshMagazines
     };
 };

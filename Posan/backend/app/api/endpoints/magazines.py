@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import extract
 from typing import List, Optional
 from datetime import datetime
@@ -47,7 +47,7 @@ def get_magazines(
     if age_group:
         query = query.filter(Magazine.age_group == age_group)
     
-    magazines = query.offset(skip).limit(limit).all()
+    magazines = query.order_by(Magazine.publication_date.desc()).offset(skip).limit(limit).all()
     return magazines
 
 
@@ -59,7 +59,7 @@ def get_current_month_magazines(db: Session = Depends(get_db)):
         Magazine.is_published == True,
         extract("month", Magazine.publication_date) == now.month,
         extract("year", Magazine.publication_date) == now.year
-    ).all()
+    ).order_by(Magazine.publication_date.desc()).all()
     return magazines
 
 
@@ -185,7 +185,9 @@ def refresh_monthly_magazines(
 @router.get("/magazines/{magazine_id}", response_model=MagazineResponse)
 def get_magazine(magazine_id: int, db: Session = Depends(get_db)):
     """Get a specific magazine by ID."""
-    magazine = db.query(Magazine).filter(Magazine.id == magazine_id).first()
+    magazine = db.query(Magazine).options(
+        joinedload(Magazine.articles)
+    ).filter(Magazine.id == magazine_id).first()
     if not magazine:
         raise HTTPException(status_code=404, detail="Magazine not found")
     return magazine
