@@ -451,10 +451,22 @@
 @media (max-width: 768px) {
     .page-header-lib {
         padding: 1rem 0;
+        flex-wrap: wrap;
     }
 
     .page-title-lib {
         font-size: 1.5rem;
+    }
+
+    .header-buttons {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .store-btn,
+    .weekly-highlights-btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.8rem;
     }
 
     .featured-title {
