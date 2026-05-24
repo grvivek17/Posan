@@ -222,6 +222,176 @@ class OCRService:
         
         return red_mask
     
+    def _detect_tick_cross_shapes(self, red_mask: np.ndarray) -> List[Dict[str, any]]:
+        """
+        Detect tick marks and cross marks in the red ink mask using
+        contour shape analysis (convexity defects, solidity, circularity).
+        
+        Returns list of dicts: {type: 'correct'|'incorrect'|'unknown', y: int, x: int, area: int}
+        """
+        detections = []
+        
+        # Moderate dilation to connect thin red pen strokes into solid shapes
+        kernel_d = np.ones((3, 3), np.uint8)
+        dilated = cv2.dilate(red_mask, kernel_d, iterations=2)
+        
+        # Close small gaps between nearby fragments
+        kernel_c = np.ones((5, 5), np.uint8)
+        closed = cv2.morphologyEx(dilated, cv2.MORPH_CLOSE, kernel_c, iterations=2)
+        
+        # Remove tiny noise
+        kernel_o = np.ones((3, 3), np.uint8)
+        clean = cv2.morphologyEx(closed, cv2.MORPH_OPEN, kernel_o, iterations=1)
+        
+        # Find connected components
+        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(clean, connectivity=8)
+        
+        img_h, img_w = red_mask.shape[:2]
+        
+        for i in range(1, num_labels):  # Skip background (label 0)
+            area = stats[i, cv2.CC_STAT_AREA]
+            w = stats[i, cv2.CC_STAT_WIDTH]
+            h = stats[i, cv2.CC_STAT_HEIGHT]
+            cx, cy = centroids[i]
+            x0 = stats[i, cv2.CC_STAT_LEFT]
+            y0 = stats[i, cv2.CC_STAT_TOP]
+            
+            # Filter by bounding box dimensions (tick marks are roughly 15-120px)
+            min_bbox = 12
+            max_bbox = max(img_h, img_w) * 0.08
+            if min(w, h) < min_bbox or max(w, h) > max_bbox:
+                continue
+            
+            # Filter: reasonable aspect ratio
+            aspect = max(w, h) / (min(w, h) + 1)
+            if aspect > 4.0:
+                continue
+            
+            # Filter: not too solid (solid filled blobs aren't tick/cross marks)
+            fill_ratio = area / (w * h + 1)
+            if fill_ratio > 0.85:
+                continue
+            
+            # Extract this component's contour for shape analysis
+            comp_mask = (labels == i).astype(np.uint8) * 255
+            comp_crop = comp_mask[y0:y0+h, x0:x0+w]
+            
+            contours, _ = cv2.findContours(comp_crop, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            if not contours:
+                continue
+            cnt = max(contours, key=cv2.contourArea)
+            if len(cnt) < 5:
+                continue
+            
+            # Shape descriptors
+            hull = cv2.convexHull(cnt)
+            hull_area = cv2.contourArea(hull)
+            solidity = area / (hull_area + 1) if hull_area > 0 else 1.0
+            
+            perimeter = cv2.arcLength(cnt, True)
+            circularity = 4 * math.pi * cv2.contourArea(cnt) / (perimeter ** 2) if perimeter > 0 else 0
+            
+            # Convexity defects analysis
+            hull_idx = cv2.convexHull(cnt, returnPoints=False)
+            try:
+                defects = cv2.convexityDefects(cnt, hull_idx)
+            except cv2.error:
+                defects = None
+            
+            sig_defects = 0
+            max_defect_depth = 0
+            if defects is not None:
+                bbox_size = max(w, h)
+                for d in defects:
+                    depth_px = d[0][3] / 256.0
+                    # Significant defect: depth > 10% of bounding box
+                    if depth_px > bbox_size * 0.1:
+                        sig_defects += 1
+                    max_defect_depth = max(max_defect_depth, depth_px)
+            
+            # Classification using shape descriptors:
+            mark_type = "unknown"
+            
+            # Very compact/circular shapes are dots or filled circles, skip
+            if circularity > 0.75 and solidity > 0.85:
+                continue
+            
+            # Tick mark (checkmark ✓): open V-shape with 1-3 significant indents
+            # Low-to-medium solidity (0.3-0.75), has at least 1 deep concavity
+            if solidity < 0.75 and 1 <= sig_defects <= 3 and max_defect_depth > 5:
+                mark_type = "correct"
+            # Cross mark (✗): 4+ significant defects (one per quadrant between arms)
+            elif sig_defects >= 4:
+                mark_type = "incorrect"
+            # Small marks with moderate fill could still be ticks
+            elif solidity < 0.80 and max_defect_depth > max(w, h) * 0.15:
+                mark_type = "correct"
+            
+            if mark_type != "unknown":
+                detections.append({
+                    "type": mark_type,
+                    "y": int(cy),
+                    "x": int(cx),
+                    "area": int(area),
+                })
+        
+        # Sort by Y-coordinate (top to bottom, matching question order)
+        detections.sort(key=lambda d: d["y"])
+        
+        logger.info(f"Shape detection: found {len(detections)} marks "
+                     f"({sum(1 for d in detections if d['type']=='correct')} ticks, "
+                     f"{sum(1 for d in detections if d['type']=='incorrect')} crosses)")
+        
+        return detections
+    
+    def _skeletonize(self, binary_img: np.ndarray) -> np.ndarray:
+        """Morphological skeletonization of a binary image."""
+        skeleton = np.zeros_like(binary_img)
+        element = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+        img = binary_img.copy()
+        
+        while True:
+            eroded = cv2.erode(img, element)
+            temp = cv2.dilate(eroded, element)
+            temp = cv2.subtract(img, temp)
+            skeleton = cv2.bitwise_or(skeleton, temp)
+            img = eroded.copy()
+            if cv2.countNonZero(img) == 0:
+                break
+        
+        return skeleton
+    
+    def _count_skeleton_features(self, skeleton: np.ndarray) -> Tuple[int, int]:
+        """
+        Count endpoints and junction points in a skeleton image
+        using the 3x3 neighborhood pixel count.
+        - Endpoint: pixel with exactly 1 neighbor
+        - Junction: pixel with 3+ neighbors
+        """
+        if cv2.countNonZero(skeleton) == 0:
+            return 0, 0
+        
+        # Normalize skeleton to 0/1 (skeleton may contain 0/255)
+        binary = (skeleton > 0).astype(np.float32)
+        
+        # Pad to avoid boundary issues
+        padded = np.pad(binary, 1, mode='constant')
+        
+        # Use convolution for efficiency: count neighbors of each pixel
+        kernel = np.array([[1, 1, 1],
+                          [1, 0, 1],
+                          [1, 1, 1]], dtype=np.float32)
+        
+        neighbor_count = cv2.filter2D(padded, cv2.CV_32F, kernel)
+        
+        # Only count at skeleton pixel locations
+        skel_points = padded > 0
+        
+        endpoints = int(np.sum((neighbor_count == 1) & skel_points))
+        junctions = int(np.sum((neighbor_count >= 3) & skel_points))
+        
+        return endpoints, junctions
+
     def filter_red_ink(self, image: np.ndarray) -> np.ndarray:
         """
         Filter out red ink (teacher corrections/marks) 
@@ -375,7 +545,22 @@ class OCRService:
             if len(line) > 2:
                 result["comments"].append(line)
         
-        # Try to align tick/cross marks to questions by order
+        # ===== VISUAL SHAPE DETECTION (primary method for ticks/crosses) =====
+        # OCR often fails on handwritten tick/cross marks, so use contour shape analysis
+        try:
+            visual_detections = self._detect_tick_cross_shapes(red_mask)
+            
+            if visual_detections:
+                # Visual detections override OCR-based tick/cross since they're more reliable
+                result["tick_cross_marks"] = [
+                    {"type": d["type"], "text": f"visual_{d['type']}", "y": d["y"], "x": d["x"]}
+                    for d in visual_detections
+                ]
+                logger.info(f"Visual shape detection found {len(visual_detections)} tick/cross marks")
+        except Exception as e:
+            logger.warning(f"Visual shape detection failed: {e}")
+        
+        # Align tick/cross marks to questions by order
         tick_cross_aligned = {}
         for idx, mark in enumerate(result["tick_cross_marks"]):
             q_num = idx + 1
@@ -815,15 +1000,15 @@ class OCRService:
             
             # Detect question start - enhanced patterns for Indian school papers
             # Matches: "1.", "1)", "Q1:", "Q.1", "Question 1", "#1", "I.", "II.", "i.", "ii." etc.
-            # Tolerant of leading OCR noise characters
+            # Tolerant of leading OCR noise characters and missing spaces
             question_match = re.match(
                 r'^[^a-zA-Z0-9]*(?:'
                 r'(?:Q|Question)\s*[.:]?\s*(\d+)'  # Q1, Question 1
                 r'|#\s*(\d+)'                        # #1
-                r'|(\d{1,2})\s*[.,)]\s+'             # 1. or 1) or 1, followed by space
-                r'|([ivxlcIVXLC]+)\s*[.,)]\s+'       # Roman numerals (upper or lower)
+                r'|(\d{1,2})\s*[.,):]\s*'            # 1. or 1) or 1, or 1: (space optional)
+                r'|([ivxlcIVXLC]+)\s*[.,):]\s*'      # Roman numerals (upper or lower)
                 r')'
-                r'(.*)$',
+                r'(.+)$',
                 line, re.IGNORECASE
             )
             
@@ -1016,15 +1201,18 @@ class OCRService:
         try:
             # Extract text using OCR
             extracted_text = self.extract_text(file_path, file_extension)
+            logger.info(f"[DEBUG] OCR extracted {len(extracted_text)} chars. First 500 chars:\n{extracted_text[:500]}")
             
             # Parse scores and information
             parsed_data = self.parse_test_scores(extracted_text)
+            logger.info(f"[DEBUG] Parsed scores: total_score={parsed_data.get('total_score')}, max_score={parsed_data.get('max_score')}, confidence={parsed_data.get('confidence')}")
             
             # Use provided subject or detected subject
             final_subject = subject or parsed_data.get("detected_subject", "General")
             
             # Parse question-answer pairs for detailed analysis
             question_answers = self.parse_question_answers(extracted_text, final_subject)
+            logger.info(f"[DEBUG] Parsed {len(question_answers)} question-answer pairs")
             
             # Extract teacher corrections from red ink (for image files)
             teacher_corrections = {

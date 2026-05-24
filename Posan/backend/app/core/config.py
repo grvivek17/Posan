@@ -53,6 +53,6 @@ settings = Settings()
 
 # Log if HuggingFace token is loaded (for debugging)
 if settings.HUGGINGFACE_TOKEN:
-    print(f"✅ HuggingFace token loaded: {settings.HUGGINGFACE_TOKEN[:10]}...")
+    print(f"[OK] HuggingFace token loaded: {settings.HUGGINGFACE_TOKEN[:10]}...")
 else:
-    print("⚠️  WARNING: HUGGINGFACE_TOKEN not set - AI features may not work")
+    print("[WARNING] HUGGINGFACE_TOKEN not set - AI features may not work")

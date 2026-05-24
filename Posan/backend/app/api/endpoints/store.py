@@ -686,6 +686,7 @@ async def get_all_orders(
             {
                 "id": order.id,
                 "user_id": order.user_id,
+                "user_email": order.user.email if order.user else "Unknown",
                 "total_amount": order.total_amount,
                 "status": order.status.value,
                 "shipping_address": order.shipping_address,
@@ -694,7 +695,7 @@ async def get_all_orders(
                 "item_count": len(order.items),
                 "items": [
                     {
-                        "product_name": item.product.name,
+                        "name": item.product.name,
                         "quantity": item.quantity,
                         "price": item.price
                     }
@@ -709,7 +710,7 @@ async def get_all_orders(
 @router.put("/admin/orders/{order_id}/status")
 async def update_order_status(
     order_id: int,
-    new_status: str,
+    status: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -722,11 +723,11 @@ async def update_order_status(
         raise HTTPException(status_code=404, detail="Order not found")
     
     try:
-        order.status = OrderStatus(new_status)
+        order.status = OrderStatus(status)
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid status")
+        raise HTTPException(status_code=400, detail=f"Invalid status: {status}")
     
     db.commit()
     
-    return {"message": f"Order status updated to {new_status}"}
+    return {"message": f"Order status updated to {status}"}
 

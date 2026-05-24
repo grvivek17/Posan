@@ -10,15 +10,23 @@ from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 import tempfile
 import os
+import logging
 from pathlib import Path
 
+from sqlalchemy.orm import Session
+
 from app.models.user import User
+from app.models.exam import Exam, ExamAnswer, Assignment
 from app.agents.ingestion_agent import ingestion_agent
 from app.agents.retrieval_agent import retrieval_agent
 from app.agents.question_generator_agent import question_generator_agent
 from app.agents.exam_analysis_agent import exam_analysis_agent
 from app.agents import coordinator
+from app.core.database import get_db
 from app.core.subscription_deps import require_pro_subscription
+from app.services.material_service import material_service, agent_log_service
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -150,19 +158,35 @@ async def upload_material_v2(
 @router.get("/materials/{material_id}/chunks")
 async def get_material_chunks(
     material_id: str,
-    limit: int = Query(default=10, ge=1, le=100, description="Number of chunks to return")
+    limit: int = Query(default=10, ge=1, le=100, description="Number of chunks to return"),
+    db: Session = Depends(get_db)
 ):
     """
-    Get chunks for a specific material.
-    
-    This is a placeholder - in production, chunks would be stored in a database.
-    For now, it demonstrates the structure of chunk data.
+    Get chunks for a specific material from the database.
     """
-    # TODO: Implement database storage and retrieval
+    material = material_service.get_material(db, material_id)
+    if not material:
+        raise HTTPException(status_code=404, detail=f"Material '{material_id}' not found")
+
+    chunks = material_service.get_material_chunks(db, material_id, limit=limit)
+
     return {
         "material_id": material_id,
-        "message": "Chunk storage not yet implemented. Chunks are currently returned in the upload response.",
-        "note": "Next phase will add vector database integration for chunk storage and retrieval."
+        "title": material.title,
+        "subject": material.subject,
+        "total_chunks": material.total_chunks,
+        "chunks": [
+            {
+                "id": chunk.id,
+                "chunk_index": chunk.chunk_index,
+                "text": chunk.text,
+                "tokens": chunk.tokens,
+                "heading": chunk.heading,
+                "topic": chunk.topic,
+                "metadata": chunk.metadata_json
+            }
+            for chunk in chunks
+        ]
     }
 
 
@@ -899,13 +923,180 @@ async def material_to_practice_workflow(
                 print(f"Warning: Could not delete temp file: {e}")
 
 
+# ============= BULK UPLOAD WORKFLOW ENDPOINT =============
+
+@router.post("/workflow/bulk-material-to-practice")
+async def bulk_material_to_practice_workflow(
+    files: List[UploadFile] = File(..., description="Multiple study materials (PDF or images)"),
+    subject: str = Form(..., description="Subject area"),
+    grade: int = Form(..., description="Grade level (1-8)"),
+    topic: Optional[str] = Form(None, description="Specific topic (optional)"),
+    question_count: int = Form(default=5, description="Questions per file"),
+    question_types: str = Form(default="mcq,short_answer", description="Question types"),
+    difficulty: str = Form(default="medium", description="Difficulty level"),
+    user_id: str = Form(..., description="User ID"),
+    current_user: User = Depends(require_pro_subscription)
+):
+    """
+    **Bulk Upload Workflow: Upload Multiple Materials -> Generate Practice Questions**
+
+    Processes multiple study material files in sequence. Each file goes through:
+    1. **Ingestion Agent**: Process and chunk the material
+    2. **Retrieval Agent**: Create searchable index
+    3. **Question Generator**: Create practice questions
+
+    Returns combined results with per-file summaries and a merged question set.
+    """
+    if not files or len(files) == 0:
+        raise HTTPException(status_code=400, detail="No files provided")
+
+    if len(files) > 10:
+        raise HTTPException(status_code=400, detail="Maximum 10 files allowed per bulk upload")
+
+    all_questions = []
+    file_results = []
+    all_topics = []
+    total_chunks = 0
+    failed_files = []
+
+    for file in files:
+        file_extension = Path(file.filename).suffix.lower()
+        temp_file_path = None
+
+        try:
+            # Save uploaded file
+            with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as temp_file:
+                content = await file.read()
+                if len(content) > 10 * 1024 * 1024:
+                    failed_files.append({
+                        "filename": file.filename,
+                        "error": "File exceeds 10MB limit"
+                    })
+                    continue
+                temp_file.write(content)
+                temp_file_path = temp_file.name
+
+            import uuid
+            material_id = str(uuid.uuid4())
+            index_name = f"material_{material_id[:8]}"
+
+            workflow = [
+                {
+                    "agent": "ingestion",
+                    "input": {
+                        "file_path": temp_file_path,
+                        "file_extension": file_extension,
+                        "material_id": material_id,
+                        "subject": subject,
+                        "grade": grade
+                    },
+                    "output_key": "ingestion_result"
+                },
+                {
+                    "agent": "retrieval",
+                    "input": {
+                        "operation": "create_index",
+                        "index_name": index_name,
+                        "chunks": "${ingestion_result}[chunks]",
+                        "force_recreate": True
+                    },
+                    "output_key": "index_result"
+                },
+                {
+                    "agent": "question_generator",
+                    "input": {
+                        "operation": "generate_practice_set",
+                        "title": f"{subject} Practice - {file.filename}",
+                        "chunks": "${ingestion_result}[chunks]",
+                        "grade": grade,
+                        "subject": subject,
+                        "question_types": question_types.split(","),
+                        "count": question_count,
+                        "difficulty": difficulty
+                    },
+                    "output_key": "questions_result"
+                }
+            ]
+
+            result = coordinator.execute_workflow(workflow, user_id=user_id)
+
+            if result["status"] != "success":
+                failed_files.append({
+                    "filename": file.filename,
+                    "error": f"Workflow failed: {result.get('error', 'Unknown error')}"
+                })
+                continue
+
+            ingestion = result["results"].get("ingestion_result", {})
+            questions = result["results"].get("questions_result", {})
+
+            file_questions = questions.get("questions", [])
+            file_topics = ingestion.get("topics", [])
+            file_chunks = ingestion.get("total_chunks", 0)
+
+            all_questions.extend(file_questions)
+            all_topics.extend(file_topics)
+            total_chunks += file_chunks
+
+            file_results.append({
+                "filename": file.filename,
+                "material_id": material_id,
+                "index_name": index_name,
+                "chunks_created": file_chunks,
+                "topics": file_topics,
+                "questions_generated": len(file_questions),
+                "status": "success"
+            })
+
+        except Exception as e:
+            logger.error(f"Error processing file {file.filename}: {str(e)}")
+            failed_files.append({
+                "filename": file.filename,
+                "error": str(e)
+            })
+        finally:
+            if temp_file_path and os.path.exists(temp_file_path):
+                try:
+                    os.unlink(temp_file_path)
+                except Exception:
+                    pass
+
+    if not file_results and failed_files:
+        raise HTTPException(
+            status_code=500,
+            detail=f"All files failed to process: {failed_files}"
+        )
+
+    unique_topics = list(dict.fromkeys(all_topics))
+
+    return {
+        "success": True,
+        "files_processed": len(file_results),
+        "files_failed": len(failed_files),
+        "total_chunks": total_chunks,
+        "topics": unique_topics,
+        "questions": all_questions,
+        "question_count": len(all_questions),
+        "file_results": file_results,
+        "failed_files": failed_files,
+        "metadata": {
+            "subject": subject,
+            "grade": grade,
+            "difficulty": difficulty,
+            "questions_per_file": question_count
+        }
+    }
+
+
 # ============= EXAM GRADING ENDPOINTS (Phase 4) =============
 
 @router.post("/exams/grade")
 async def grade_exam(
     questions: str = Form(..., description="JSON array of questions with student answers"),
     student_id: Optional[str] = Form(None, description="Student ID"),
-    exam_id: Optional[str] = Form(None, description="Exam ID")
+    exam_id: Optional[str] = Form(None, description="Exam ID"),
+    subject: Optional[str] = Form(None, description="Subject for persistence"),
+    db: Session = Depends(get_db)
 ):
     """
     Auto-grade an exam with student answers.
@@ -961,11 +1152,60 @@ async def grade_exam(
                 detail=f"Grading failed: {output.error}"
             )
         
+        result = output.result
+
+        # Persist exam results to database
+        try:
+            import json as json_mod
+            recommendations_text = ""
+            if isinstance(result.get("recommendations"), list):
+                recommendations_text = "\n".join(result["recommendations"])
+            elif isinstance(result.get("recommendations"), str):
+                recommendations_text = result["recommendations"]
+
+            exam_record = Exam(
+                user_id=student_id or "guest",
+                title=f"Practice Exam - {subject or 'General'}",
+                subject=subject,
+                total_score=result.get("total_score"),
+                max_score=result.get("max_score"),
+                percentage=result.get("percentage"),
+                letter_grade=result.get("grade"),
+                feedback=result.get("feedback"),
+                recommendations=recommendations_text,
+                knowledge_gaps_json=result.get("knowledge_gaps"),
+                source_type="practice"
+            )
+            db.add(exam_record)
+            db.flush()
+
+            for idx, gq in enumerate(result.get("graded_questions", [])):
+                answer_record = ExamAnswer(
+                    exam_id=exam_record.id,
+                    question_number=idx + 1,
+                    question_type=gq.get("type"),
+                    question_text=gq.get("question"),
+                    student_answer=gq.get("student_answer"),
+                    correct_answer=gq.get("correct_answer") or gq.get("expected_answer"),
+                    score=gq.get("score"),
+                    max_score=gq.get("max_score"),
+                    is_correct=gq.get("is_correct"),
+                    feedback=gq.get("feedback"),
+                    similarity=gq.get("similarity")
+                )
+                db.add(answer_record)
+
+            db.commit()
+            result["exam_record_id"] = exam_record.id
+        except Exception as persist_err:
+            logger.warning(f"Failed to persist exam results: {persist_err}")
+            db.rollback()
+
         return {
             "success": True,
             "task_id": output.task_id,
             "processing_time_ms": output.execution_time_ms,
-            **output.result
+            **result
         }
         
     except json.JSONDecodeError as e:
@@ -1088,6 +1328,257 @@ async def get_grading_info():
             "Personalized recommendations",
             "Performance metrics"
         ]
+    }
+
+
+# ============= EXAM HISTORY ENDPOINTS =============
+
+@router.get("/exams/history")
+async def get_exam_history(
+    user_id: str = Query(..., description="User ID"),
+    limit: int = Query(default=20, ge=1, le=100),
+    db: Session = Depends(get_db)
+):
+    """Get exam history for a user."""
+    exams = db.query(Exam)\
+        .filter(Exam.user_id == user_id)\
+        .order_by(Exam.created_at.desc())\
+        .limit(limit)\
+        .all()
+
+    return {
+        "total": len(exams),
+        "exams": [
+            {
+                "id": exam.id,
+                "title": exam.title,
+                "subject": exam.subject,
+                "total_score": exam.total_score,
+                "max_score": exam.max_score,
+                "percentage": exam.percentage,
+                "letter_grade": exam.letter_grade,
+                "source_type": exam.source_type,
+                "created_at": exam.created_at.isoformat() if exam.created_at else None
+            }
+            for exam in exams
+        ]
+    }
+
+
+@router.get("/exams/{exam_id}/details")
+async def get_exam_details(
+    exam_id: str,
+    db: Session = Depends(get_db)
+):
+    """Get detailed exam results including all answers."""
+    exam = db.query(Exam).filter(Exam.id == exam_id).first()
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    return {
+        "id": exam.id,
+        "title": exam.title,
+        "subject": exam.subject,
+        "total_score": exam.total_score,
+        "max_score": exam.max_score,
+        "percentage": exam.percentage,
+        "letter_grade": exam.letter_grade,
+        "feedback": exam.feedback,
+        "recommendations": exam.recommendations,
+        "knowledge_gaps": exam.knowledge_gaps_json,
+        "source_type": exam.source_type,
+        "created_at": exam.created_at.isoformat() if exam.created_at else None,
+        "answers": [
+            {
+                "question_number": a.question_number,
+                "question_type": a.question_type,
+                "question_text": a.question_text,
+                "student_answer": a.student_answer,
+                "correct_answer": a.correct_answer,
+                "score": a.score,
+                "max_score": a.max_score,
+                "is_correct": a.is_correct,
+                "feedback": a.feedback
+            }
+            for a in sorted(exam.answers, key=lambda x: x.question_number or 0)
+        ]
+    }
+
+
+# ============= ASSIGNMENT CRUD ENDPOINTS =============
+
+@router.get("/assignments")
+async def get_assignments(
+    user_id: str = Query(..., description="User ID"),
+    status: Optional[str] = Query(None, description="Filter by status"),
+    db: Session = Depends(get_db)
+):
+    """Get assignments for a user."""
+    query = db.query(Assignment).filter(Assignment.user_id == user_id)
+    if status:
+        query = query.filter(Assignment.status == status)
+    assignments = query.order_by(Assignment.due_date.asc()).all()
+
+    return {
+        "total": len(assignments),
+        "assignments": [
+            {
+                "id": a.id,
+                "title": a.title,
+                "subject": a.subject,
+                "description": a.description,
+                "due_date": a.due_date.isoformat() if a.due_date else None,
+                "status": a.status,
+                "file_name": a.file_name,
+                "created_at": a.created_at.isoformat() if a.created_at else None
+            }
+            for a in assignments
+        ]
+    }
+
+
+@router.post("/assignments")
+async def create_assignment(
+    title: str = Form(..., description="Assignment title"),
+    subject: Optional[str] = Form(None),
+    description: Optional[str] = Form(None),
+    due_date: Optional[str] = Form(None, description="ISO date string"),
+    user_id: str = Form(...),
+    file: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db)
+):
+    """Create a new assignment."""
+    from datetime import datetime as dt
+    import uuid
+
+    file_url = None
+    file_name = None
+    if file:
+        os.makedirs("static/assignments", exist_ok=True)
+        ext = Path(file.filename).suffix.lower()
+        file_name = file.filename
+        saved_name = f"{uuid.uuid4()}{ext}"
+        file_url = f"static/assignments/{saved_name}"
+        content = await file.read()
+        with open(file_url, "wb") as f:
+            f.write(content)
+
+    parsed_due = None
+    if due_date:
+        try:
+            parsed_due = dt.fromisoformat(due_date)
+        except ValueError:
+            pass
+
+    assignment = Assignment(
+        user_id=user_id,
+        title=title,
+        subject=subject,
+        description=description,
+        due_date=parsed_due,
+        file_url=file_url,
+        file_name=file_name
+    )
+    db.add(assignment)
+    db.commit()
+    db.refresh(assignment)
+
+    return {
+        "success": True,
+        "assignment": {
+            "id": assignment.id,
+            "title": assignment.title,
+            "subject": assignment.subject,
+            "due_date": assignment.due_date.isoformat() if assignment.due_date else None,
+            "status": assignment.status
+        }
+    }
+
+
+@router.put("/assignments/{assignment_id}/status")
+async def update_assignment_status(
+    assignment_id: str,
+    status: str = Form(..., description="New status: pending, in_progress, completed"),
+    db: Session = Depends(get_db)
+):
+    """Update assignment status."""
+    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    if status not in ("pending", "in_progress", "completed"):
+        raise HTTPException(status_code=400, detail="Invalid status")
+
+    assignment.status = status
+    db.commit()
+
+    return {"success": True, "status": assignment.status}
+
+
+@router.delete("/assignments/{assignment_id}")
+async def delete_assignment(
+    assignment_id: str,
+    db: Session = Depends(get_db)
+):
+    """Delete an assignment."""
+    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    if assignment.file_url and os.path.exists(assignment.file_url):
+        try:
+            os.unlink(assignment.file_url)
+        except Exception:
+            pass
+
+    db.delete(assignment)
+    db.commit()
+
+    return {"success": True}
+
+
+# ============= PROGRESS / STATS ENDPOINT =============
+
+@router.get("/stats")
+async def get_homework_stats(
+    user_id: str = Query(..., description="User ID"),
+    db: Session = Depends(get_db)
+):
+    """Get homework stats for progress widget."""
+    from datetime import datetime as dt, timedelta
+    week_ago = dt.utcnow() - timedelta(days=7)
+
+    total_exams = db.query(Exam).filter(
+        Exam.user_id == user_id,
+        Exam.created_at >= week_ago
+    ).count()
+
+    total_assignments = db.query(Assignment).filter(Assignment.user_id == user_id).count()
+    completed_assignments = db.query(Assignment).filter(
+        Assignment.user_id == user_id,
+        Assignment.status == "completed"
+    ).count()
+
+    recent_exams = db.query(Exam).filter(
+        Exam.user_id == user_id
+    ).order_by(Exam.created_at.desc()).limit(5).all()
+
+    avg_score = 0
+    if recent_exams:
+        scores = [e.percentage for e in recent_exams if e.percentage is not None]
+        avg_score = sum(scores) / len(scores) if scores else 0
+
+    total_questions = db.query(ExamAnswer).join(Exam).filter(
+        Exam.user_id == user_id
+    ).count()
+
+    return {
+        "weekly_exams": total_exams,
+        "total_assignments": total_assignments,
+        "completed_assignments": completed_assignments,
+        "average_score": round(avg_score, 1),
+        "total_questions_answered": total_questions,
+        "tests_analyzed": db.query(Exam).filter(Exam.user_id == user_id).count()
     }
 
 

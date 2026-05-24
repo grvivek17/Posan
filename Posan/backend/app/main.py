@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.core.database import engine, Base
 from app.api.endpoints import auth, users, magazines, puzzles, gamification, ai_content, homework_agents, gamification_v2, podcasts, email, calculator, subscription, admin, store, promotional_email
+import app.models.exam  # Ensure exam/assignment tables are created
 import os
 
 # Create database tables

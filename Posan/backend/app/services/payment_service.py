@@ -20,7 +20,7 @@ class RazorpayService:
             self.client = razorpay.Client(
                 auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
             )
-            print("✅ Razorpay client initialized")
+            print("[OK] Razorpay client initialized")
     
     def create_order(
         self, 

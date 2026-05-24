@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSubscription } from '../hooks/useSubscription';
+import { homeworkAPI } from '../services/api';
 import ProBadge from '../components/subscription/ProBadge';
 import UpgradeModal from '../components/subscription/UpgradeModal';
 import TestAnalysis from '../components/homework/TestAnalysis';
@@ -14,6 +15,106 @@ const HomeworkPage = () => {
     const [quizAnswer, setQuizAnswer] = useState(null);
     const [isAIModalOpen, setIsAIModalOpen] = useState(false);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+    // Dynamic data state
+    const [searchQuery, setSearchQuery] = useState('');
+    const [assignments, setAssignments] = useState([]);
+    const [stats, setStats] = useState(null);
+    const [newAssignment, setNewAssignment] = useState({ title: '', subject: '', dueDate: '' });
+    const [showAddAssignment, setShowAddAssignment] = useState(false);
+    const [assignmentFile, setAssignmentFile] = useState(null);
+
+    const userId = localStorage.getItem('user_id') || 'guest';
+
+    // Load assignments and stats on mount
+    useEffect(() => {
+        loadAssignments();
+        loadStats();
+    }, []);
+
+    const loadAssignments = async () => {
+        try {
+            const res = await homeworkAPI.getAssignments(userId);
+            setAssignments(res.data.assignments || []);
+        } catch (err) {
+            console.error('Failed to load assignments:', err);
+        }
+    };
+
+    const loadStats = async () => {
+        try {
+            const res = await homeworkAPI.getHomeworkStats(userId);
+            setStats(res.data);
+        } catch (err) {
+            console.error('Failed to load stats:', err);
+        }
+    };
+
+    const handleCreateAssignment = async () => {
+        if (!newAssignment.title) return;
+        try {
+            const formData = new FormData();
+            formData.append('title', newAssignment.title);
+            formData.append('user_id', userId);
+            if (newAssignment.subject) formData.append('subject', newAssignment.subject);
+            if (newAssignment.dueDate) formData.append('due_date', newAssignment.dueDate);
+            if (assignmentFile) formData.append('file', assignmentFile);
+
+            await homeworkAPI.createAssignment(formData);
+            setNewAssignment({ title: '', subject: '', dueDate: '' });
+            setAssignmentFile(null);
+            setShowAddAssignment(false);
+            loadAssignments();
+        } catch (err) {
+            console.error('Failed to create assignment:', err);
+            alert('Failed to create assignment');
+        }
+    };
+
+    const handleToggleAssignmentStatus = async (id, currentStatus) => {
+        const nextStatus = currentStatus === 'completed' ? 'pending' : 'completed';
+        try {
+            await homeworkAPI.updateAssignmentStatus(id, nextStatus);
+            loadAssignments();
+            loadStats();
+        } catch (err) {
+            console.error('Failed to update assignment:', err);
+        }
+    };
+
+    const handleDeleteAssignment = async (id) => {
+        try {
+            await homeworkAPI.deleteAssignment(id);
+            loadAssignments();
+            loadStats();
+        } catch (err) {
+            console.error('Failed to delete assignment:', err);
+        }
+    };
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            setActiveTab('study');
+            setIsAIModalOpen(true);
+        }
+    };
+
+    const getSubjectIcon = (subject) => {
+        const icons = { 'Mathematics': '➗', 'Math': '➗', 'Science': '🔬', 'History': '🏛️', 'English': '📖', 'Geography': '🌍', 'Art': '🎨' };
+        return icons[subject] || '📝';
+    };
+
+    const formatDueDate = (dateStr) => {
+        if (!dateStr) return '';
+        const due = new Date(dateStr);
+        const now = new Date();
+        const diff = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
+        if (diff < 0) return 'Overdue';
+        if (diff === 0) return 'Due: Today';
+        if (diff === 1) return 'Due: Tomorrow';
+        return `Due: ${due.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}`;
+    };
 
     const grades = ['Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
 
@@ -98,14 +199,16 @@ const HomeworkPage = () => {
                 </div>
 
                 {/* Search Bar */}
-                <div className="search-bar-homework">
+                <form className="search-bar-homework" onSubmit={handleSearch}>
                     <span className="search-icon">🔍</span>
                     <input
                         type="text"
                         placeholder="Search for homework help..."
                         className="search-input-homework"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                </div>
+                </form>
 
                 {/* Main Content with Sidebar Layout */}
                 <div className="homework-layout">
@@ -251,11 +354,11 @@ const HomeworkPage = () => {
                                         </div>
                                         <div className="ai-stats">
                                             <div className="stat-item">
-                                                <span className="stat-number">24</span>
+                                                <span className="stat-number">{stats?.total_questions_answered || 0}</span>
                                                 <span className="stat-label">Questions Answered</span>
                                             </div>
                                             <div className="stat-item">
-                                                <span className="stat-number">5</span>
+                                                <span className="stat-number">{stats?.tests_analyzed || 0}</span>
                                                 <span className="stat-label">Tests Analyzed</span>
                                             </div>
                                         </div>
@@ -288,38 +391,85 @@ const HomeworkPage = () => {
                         <div className="sidebar-widget assignment-tracker-widget">
                             <div className="widget-header">
                                 <h3>📋 Assignment Tracker</h3>
+                                <button
+                                    className="add-assignment-btn"
+                                    onClick={() => setShowAddAssignment(!showAddAssignment)}
+                                    style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.2em', cursor: 'pointer' }}
+                                >
+                                    {showAddAssignment ? '✕' : '+'}
+                                </button>
                             </div>
                             <div className="widget-content">
-                                <div className="upload-section">
-                                    <div className="upload-area">
-                                        <div className="upload-icon">📁</div>
-                                        <p className="upload-text">Upload Assignment</p>
-                                        <p className="upload-subtext">Drag & drop or click to upload</p>
+                                {showAddAssignment && (
+                                    <div className="add-assignment-form" style={{ marginBottom: '12px', padding: '12px', background: '#f8f9fa', borderRadius: '8px' }}>
+                                        <input
+                                            type="text"
+                                            placeholder="Assignment title..."
+                                            value={newAssignment.title}
+                                            onChange={(e) => setNewAssignment({ ...newAssignment, title: e.target.value })}
+                                            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ddd', marginBottom: '8px', boxSizing: 'border-box' }}
+                                        />
+                                        <select
+                                            value={newAssignment.subject}
+                                            onChange={(e) => setNewAssignment({ ...newAssignment, subject: e.target.value })}
+                                            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ddd', marginBottom: '8px' }}
+                                        >
+                                            <option value="">Select Subject</option>
+                                            <option value="Mathematics">Mathematics</option>
+                                            <option value="Science">Science</option>
+                                            <option value="English">English</option>
+                                            <option value="History">History</option>
+                                        </select>
+                                        <input
+                                            type="date"
+                                            value={newAssignment.dueDate}
+                                            onChange={(e) => setNewAssignment({ ...newAssignment, dueDate: e.target.value })}
+                                            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ddd', marginBottom: '8px', boxSizing: 'border-box' }}
+                                        />
                                         <input
                                             type="file"
-                                            className="file-input"
                                             accept=".pdf,.doc,.docx,.jpg,.png"
+                                            onChange={(e) => setAssignmentFile(e.target.files[0] || null)}
+                                            style={{ width: '100%', marginBottom: '8px' }}
                                         />
+                                        <button
+                                            onClick={handleCreateAssignment}
+                                            disabled={!newAssignment.title}
+                                            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: 'none', background: '#6C5CE7', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}
+                                        >
+                                            Add Assignment
+                                        </button>
                                     </div>
-                                </div>
+                                )}
                                 <div className="assignments-list">
-                                    <h4 className="assignments-title">Upcoming</h4>
-                                    <div className="assignment-item">
-                                        <div className="assignment-icon math">➗</div>
-                                        <div className="assignment-details">
-                                            <p className="assignment-name">Math Worksheet</p>
-                                            <p className="assignment-due">Due: Tomorrow</p>
+                                    <h4 className="assignments-title">
+                                        {assignments.length > 0 ? `Assignments (${assignments.length})` : 'No assignments yet'}
+                                    </h4>
+                                    {assignments.map((a) => (
+                                        <div key={a.id} className="assignment-item">
+                                            <div
+                                                className={`assignment-icon ${a.subject?.toLowerCase() || ''}`}
+                                                onClick={() => handleToggleAssignmentStatus(a.id, a.status)}
+                                                style={{ cursor: 'pointer' }}
+                                            >
+                                                {a.status === 'completed' ? '✅' : getSubjectIcon(a.subject)}
+                                            </div>
+                                            <div className="assignment-details">
+                                                <p className="assignment-name" style={{ textDecoration: a.status === 'completed' ? 'line-through' : 'none' }}>
+                                                    {a.title}
+                                                </p>
+                                                <p className="assignment-due">{formatDueDate(a.due_date)}</p>
+                                            </div>
+                                            <span
+                                                className={`assignment-status ${a.status}`}
+                                                onClick={() => handleDeleteAssignment(a.id)}
+                                                style={{ cursor: 'pointer' }}
+                                                title="Delete"
+                                            >
+                                                {a.status === 'completed' ? '🗑️' : '⏳'}
+                                            </span>
                                         </div>
-                                        <span className="assignment-status pending">⏳</span>
-                                    </div>
-                                    <div className="assignment-item">
-                                        <div className="assignment-icon science">🔬</div>
-                                        <div className="assignment-details">
-                                            <p className="assignment-name">Science Project</p>
-                                            <p className="assignment-due">Due: Friday</p>
-                                        </div>
-                                        <span className="assignment-status pending">⏳</span>
-                                    </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
@@ -332,20 +482,26 @@ const HomeworkPage = () => {
                             <div className="widget-content">
                                 <div className="progress-stat">
                                     <div className="progress-label">
-                                        <span>Study Time</span>
-                                        <span className="progress-value">12h 30m</span>
+                                        <span>Avg Score</span>
+                                        <span className="progress-value">{stats?.average_score || 0}%</span>
                                     </div>
                                     <div className="progress-bar">
-                                        <div className="progress-fill" style={{ width: '75%' }}></div>
+                                        <div className="progress-fill" style={{ width: `${stats?.average_score || 0}%` }}></div>
                                     </div>
                                 </div>
                                 <div className="progress-stat">
                                     <div className="progress-label">
                                         <span>Assignments</span>
-                                        <span className="progress-value">4/6</span>
+                                        <span className="progress-value">{stats?.completed_assignments || 0}/{stats?.total_assignments || 0}</span>
                                     </div>
                                     <div className="progress-bar">
-                                        <div className="progress-fill" style={{ width: '66%' }}></div>
+                                        <div className="progress-fill" style={{ width: `${stats?.total_assignments ? (stats.completed_assignments / stats.total_assignments * 100) : 0}%` }}></div>
+                                    </div>
+                                </div>
+                                <div className="progress-stat">
+                                    <div className="progress-label">
+                                        <span>Weekly Exams</span>
+                                        <span className="progress-value">{stats?.weekly_exams || 0}</span>
                                     </div>
                                 </div>
                             </div>

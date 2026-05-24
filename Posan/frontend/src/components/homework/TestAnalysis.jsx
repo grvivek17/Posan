@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import './TestAnalysis.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
@@ -13,6 +13,12 @@ const TestAnalysis = () => {
     const [answerKeyRows, setAnswerKeyRows] = useState([
         { question_number: 1, answer: '', marks: 5 }
     ]);
+    // Bulk upload state
+    const [uploadType, setUploadType] = useState('single'); // 'single' or 'bulk'
+    const [bulkFiles, setBulkFiles] = useState([]);
+    const [bulkResults, setBulkResults] = useState(null);
+    const [bulkProgress, setBulkProgress] = useState('');
+    const bulkInputRef = useRef(null);
     const [formData, setFormData] = useState({
         studentName: '',
         subject: 'Mathematics',
@@ -109,6 +115,123 @@ const TestAnalysis = () => {
         }
 
         setUploadedFile(file);
+    };
+
+    // Bulk file handlers
+    const handleBulkFileSelect = (e) => {
+        const files = Array.from(e.target.files);
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+        const validFiles = files.filter(f => validTypes.includes(f.type) && f.size <= 10 * 1024 * 1024);
+        setBulkFiles(prev => [...prev, ...validFiles].slice(0, 10));
+        if (bulkInputRef.current) bulkInputRef.current.value = '';
+    };
+
+    const handleBulkDrop = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const files = Array.from(e.dataTransfer.files);
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+        const validFiles = files.filter(f => validTypes.includes(f.type) && f.size <= 10 * 1024 * 1024);
+        setBulkFiles(prev => [...prev, ...validFiles].slice(0, 10));
+    };
+
+    const removeBulkFile = (index) => {
+        setBulkFiles(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const clearBulkFiles = () => {
+        setBulkFiles([]);
+        setBulkResults(null);
+        setBulkProgress('');
+    };
+
+    const formatFileSize = (bytes) => {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    };
+
+    const getFileIcon = (name) => {
+        const ext = name.split('.').pop().toLowerCase();
+        if (ext === 'pdf') return '📄';
+        return '🖼️';
+    };
+
+    // Bulk analyze handler
+    const analyzeBulkTests = async () => {
+        if (bulkFiles.length === 0) return;
+        if (!formData.studentName || !formData.subject) {
+            alert('Please enter student name and subject!');
+            return;
+        }
+
+        setLoading(true);
+        setAnalysis(null);
+        setBulkResults(null);
+        setBulkProgress(`Processing ${bulkFiles.length} file(s)...`);
+
+        try {
+            const uploadFormData = new FormData();
+            bulkFiles.forEach(file => {
+                uploadFormData.append('files', file);
+            });
+
+            let url = `${API_BASE}/ai/analyze/test-bulk-upload?student_name=${encodeURIComponent(formData.studentName)}&subject=${encodeURIComponent(formData.subject)}&age_group=${encodeURIComponent(formData.ageGroup)}&grade=${formData.grade}`;
+
+            if (showAnswerKey && answerKeyRows.some(r => r.answer.trim())) {
+                const validAnswers = answerKeyRows.filter(r => r.answer.trim());
+                url += `&model_answers=${encodeURIComponent(JSON.stringify(validAnswers))}`;
+            }
+
+            setBulkProgress(`Uploading and analyzing ${bulkFiles.length} file(s) with OCR...`);
+
+            const response = await fetch(url, {
+                method: 'POST',
+                body: uploadFormData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to analyze test papers');
+            }
+
+            const data = await response.json();
+            setBulkResults(data);
+
+            if (data.analysis_type === 'structured_report') {
+                setAnalysis({
+                    type: 'structured',
+                    subject: data.subject,
+                    score: data.score,
+                    total: data.total,
+                    percentage: data.percentage,
+                    performance_level: data.performance_level,
+                    questions_found: data.total_questions_found || data.questions_found,
+                    correct_count: data.correct_count,
+                    incorrect_count: data.incorrect_count,
+                    strong_zones: data.strong_zones || [],
+                    weak_zones: data.weak_zones || [],
+                    focus_plan: data.focus_plan || {},
+                    teacher_insights: data.teacher_insights,
+                    encouragement: data.encouragement,
+                    student_name: data.student_name,
+                    grade: data.grade
+                });
+                setBulkProgress(`Done! Analyzed ${data.total_questions_found || 0} questions from ${data.files_processed} file(s).`);
+            } else {
+                alert(`Could not extract questions or score from the uploaded files.\n\n${data.message}\n\nPlease use manual entry mode or try clearer images.`);
+                setBulkProgress('');
+            }
+
+        } catch (err) {
+            let errorMessage = 'Error analyzing test papers. ';
+            errorMessage += err.message || 'Please try again!';
+            alert(errorMessage);
+            console.error(err);
+            setBulkProgress('');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const analyzeUploadedTest = async () => {
@@ -709,60 +832,185 @@ const TestAnalysis = () => {
                         )}
                     </div>
 
-                    <div
-                        className={`test-drop-zone ${isDragging ? 'dragging' : ''} ${uploadedFile ? 'has-file' : ''}`}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                    >
-                        {uploadedFile ? (
-                            <div className="file-preview-box">
-                                <div className="file-icon-large">
-                                    {uploadedFile.type.includes('pdf') ? '📄' : '🖼️'}
-                                </div>
-                                <div className="file-details">
-                                    <p className="file-name-large">{uploadedFile.name}</p>
-                                    <p className="file-size-large">
-                                        {(uploadedFile.size / 1024).toFixed(2)} KB
-                                    </p>
-                                    <p className="file-type">{uploadedFile.type}</p>
-                                </div>
-                                <button
-                                    type="button"
-                                    className="remove-file-large"
-                                    onClick={() => setUploadedFile(null)}
-                                >
-                                    ✕ Remove
-                                </button>
-                            </div>
-                        ) : (
-                            <>
-                                <div className="upload-icon">📋</div>
-                                <h3>Upload Test Paper</h3>
-                                <p className="upload-text">Drag & drop test paper here</p>
-                                <p className="upload-hint">or</p>
-                                <label htmlFor="testFileInput" className="upload-browse-btn">
-                                    📁 Browse Files
-                                </label>
-                                <p className="upload-formats">Supports: JPG, PNG, PDF (max 10MB)</p>
-                            </>
-                        )}
-                        <input
-                            type="file"
-                            id="testFileInput"
-                            onChange={handleFileSelect}
-                            accept=".pdf,.jpg,.jpeg,.png"
-                            style={{ display: 'none' }}
-                        />
+                    {/* Single / Bulk toggle */}
+                    <div className="upload-type-toggle">
+                        <button
+                            className={`upload-type-btn ${uploadType === 'single' ? 'active' : ''}`}
+                            onClick={() => setUploadType('single')}
+                        >
+                            📄 Single File
+                        </button>
+                        <button
+                            className={`upload-type-btn ${uploadType === 'bulk' ? 'active' : ''}`}
+                            onClick={() => setUploadType('bulk')}
+                        >
+                            📚 Bulk Upload
+                        </button>
                     </div>
 
-                    <button
-                        className="analyze-btn"
-                        onClick={analyzeUploadedTest}
-                        disabled={loading || !uploadedFile}
-                    >
-                        {loading ? '🤖 AI is reading and analyzing...' : '🎯 Analyze Test Paper with AI'}
-                    </button>
+                    {uploadType === 'single' ? (
+                        <>
+                            <div
+                                className={`test-drop-zone ${isDragging ? 'dragging' : ''} ${uploadedFile ? 'has-file' : ''}`}
+                                onDragOver={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                                onDrop={handleDrop}
+                            >
+                                {uploadedFile ? (
+                                    <div className="file-preview-box">
+                                        <div className="file-icon-large">
+                                            {uploadedFile.type.includes('pdf') ? '📄' : '🖼️'}
+                                        </div>
+                                        <div className="file-details">
+                                            <p className="file-name-large">{uploadedFile.name}</p>
+                                            <p className="file-size-large">
+                                                {(uploadedFile.size / 1024).toFixed(2)} KB
+                                            </p>
+                                            <p className="file-type">{uploadedFile.type}</p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="remove-file-large"
+                                            onClick={() => setUploadedFile(null)}
+                                        >
+                                            ✕ Remove
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="upload-icon">📋</div>
+                                        <h3>Upload Test Paper</h3>
+                                        <p className="upload-text">Drag & drop test paper here</p>
+                                        <p className="upload-hint">or</p>
+                                        <label htmlFor="testFileInput" className="upload-browse-btn">
+                                            📁 Browse Files
+                                        </label>
+                                        <p className="upload-formats">Supports: JPG, PNG, PDF (max 10MB)</p>
+                                    </>
+                                )}
+                                <input
+                                    type="file"
+                                    id="testFileInput"
+                                    onChange={handleFileSelect}
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    style={{ display: 'none' }}
+                                />
+                            </div>
+
+                            <button
+                                className="analyze-btn"
+                                onClick={analyzeUploadedTest}
+                                disabled={loading || !uploadedFile}
+                            >
+                                {loading ? '🤖 AI is reading and analyzing...' : '🎯 Analyze Test Paper with AI'}
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            {/* Bulk upload drop zone */}
+                            <div
+                                className={`test-drop-zone bulk-drop-zone ${isDragging ? 'dragging' : ''} ${bulkFiles.length > 0 ? 'has-file' : ''}`}
+                                onDragOver={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                                onDrop={handleBulkDrop}
+                            >
+                                <input
+                                    type="file"
+                                    id="bulkTestInput"
+                                    ref={bulkInputRef}
+                                    multiple
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    onChange={handleBulkFileSelect}
+                                    style={{ display: 'none' }}
+                                />
+                                <div className="upload-icon">📚</div>
+                                <h3>Upload Multiple Test Pages</h3>
+                                <p className="upload-text">Drag & drop multiple pages/files here</p>
+                                <p className="upload-hint">or</p>
+                                <label htmlFor="bulkTestInput" className="upload-browse-btn">
+                                    📁 Browse Files
+                                </label>
+                                <p className="upload-formats">Up to 10 files (JPG, PNG, PDF, max 10MB each)</p>
+                            </div>
+
+                            {/* Bulk file list */}
+                            {bulkFiles.length > 0 && (
+                                <div className="bulk-file-list">
+                                    <div className="bulk-file-header">
+                                        <span className="bulk-file-count">
+                                            {bulkFiles.length} file{bulkFiles.length !== 1 ? 's' : ''} selected
+                                        </span>
+                                        <button className="bulk-clear-btn" onClick={clearBulkFiles}>
+                                            Clear All
+                                        </button>
+                                    </div>
+                                    {bulkFiles.map((file, idx) => (
+                                        <div key={idx} className="bulk-file-item">
+                                            <span className="bulk-file-icon">{getFileIcon(file.name)}</span>
+                                            <div className="bulk-file-info">
+                                                <span className="bulk-file-name">{file.name}</span>
+                                                <span className="bulk-file-size">{formatFileSize(file.size)}</span>
+                                            </div>
+                                            <button
+                                                className="bulk-remove-btn"
+                                                onClick={() => removeBulkFile(idx)}
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Bulk progress */}
+                            {bulkProgress && (
+                                <div className="bulk-progress-banner">
+                                    {loading && <div className="loading-spinner-small"></div>}
+                                    <span>{bulkProgress}</span>
+                                </div>
+                            )}
+
+                            {/* Per-file results breakdown */}
+                            {bulkResults && bulkResults.file_results && (
+                                <div className="bulk-results-breakdown">
+                                    <h4>Per-File Results</h4>
+                                    {bulkResults.file_results.map((fr, idx) => (
+                                        <div key={idx} className="bulk-result-item">
+                                            <span className="bulk-result-icon">{getFileIcon(fr.filename)}</span>
+                                            <div className="bulk-result-info">
+                                                <span className="bulk-result-name">{fr.filename}</span>
+                                                <span className="bulk-result-meta">
+                                                    {fr.questions_found} questions found
+                                                    {fr.has_corrections ? ' | Teacher marks detected' : ''}
+                                                </span>
+                                            </div>
+                                            <span className={`bulk-result-status ${fr.status}`}>
+                                                {fr.status === 'success' ? '✓' : '✗'}
+                                            </span>
+                                        </div>
+                                    ))}
+                                    {bulkResults.failed_files?.length > 0 && (
+                                        <div className="bulk-failed-notice">
+                                            <strong>Failed files:</strong>
+                                            {bulkResults.failed_files.map((ff, idx) => (
+                                                <p key={idx}>{ff.filename}: {ff.error}</p>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            <button
+                                className="analyze-btn"
+                                onClick={analyzeBulkTests}
+                                disabled={bulkFiles.length === 0 || loading}
+                            >
+                                {loading
+                                    ? '🤖 AI is reading and analyzing all pages...'
+                                    : `🎯 Analyze ${bulkFiles.length} File${bulkFiles.length !== 1 ? 's' : ''} with AI`}
+                            </button>
+                        </>
+                    )}
 
                     <div className="info-box">
                         <div className="info-icon">ℹ️</div>

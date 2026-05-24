@@ -307,6 +307,245 @@
 
 /* ===== ANSWER KEY SECTION ===== */
 
+/* Upload Type Toggle (Single / Bulk) */
+.upload-type-toggle {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.upload-type-btn {
+    padding: 8px 20px;
+    border: 2px solid #e0e0e0;
+    background: white;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #666;
+}
+
+.upload-type-btn:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.upload-type-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+}
+
+/* Bulk Upload Styles */
+.bulk-drop-zone {
+    border-style: dashed;
+}
+
+.bulk-file-list {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.bulk-file-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f0f3ff;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.bulk-file-count {
+    font-weight: 600;
+    color: #667eea;
+    font-size: 0.9rem;
+}
+
+.bulk-clear-btn {
+    padding: 4px 12px;
+    background: transparent;
+    border: 1px solid #f44336;
+    color: #f44336;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.bulk-clear-btn:hover {
+    background: #f44336;
+    color: white;
+}
+
+.bulk-file-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s ease;
+}
+
+.bulk-file-item:last-child {
+    border-bottom: none;
+}
+
+.bulk-file-item:hover {
+    background: #fafbfc;
+}
+
+.bulk-file-icon {
+    font-size: 1.3rem;
+}
+
+.bulk-file-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.bulk-file-name {
+    font-weight: 500;
+    color: #2c3e50;
+    font-size: 0.9rem;
+}
+
+.bulk-file-size {
+    color: #999;
+    font-size: 0.8rem;
+}
+
+.bulk-remove-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: #ffebee;
+    color: #f44336;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.bulk-remove-btn:hover {
+    background: #f44336;
+    color: white;
+}
+
+/* Bulk progress banner */
+.bulk-progress-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border-radius: 10px;
+    font-weight: 500;
+    color: #1565c0;
+    font-size: 0.95rem;
+}
+
+.loading-spinner-small {
+    width: 22px;
+    height: 22px;
+    border: 3px solid #bbdefb;
+    border-top: 3px solid #1565c0;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    flex-shrink: 0;
+}
+
+/* Bulk results breakdown */
+.bulk-results-breakdown {
+    background: #fafbfc;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.bulk-results-breakdown h4 {
+    margin: 0;
+    padding: 12px 16px;
+    background: #f0f3ff;
+    color: #667eea;
+    font-size: 0.95rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.bulk-result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.bulk-result-item:last-child {
+    border-bottom: none;
+}
+
+.bulk-result-icon {
+    font-size: 1.2rem;
+}
+
+.bulk-result-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.bulk-result-name {
+    font-weight: 500;
+    color: #2c3e50;
+    font-size: 0.9rem;
+}
+
+.bulk-result-meta {
+    color: #888;
+    font-size: 0.8rem;
+}
+
+.bulk-result-status {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.bulk-result-status.success {
+    color: #4caf50;
+}
+
+.bulk-result-status.failed {
+    color: #f44336;
+}
+
+.bulk-failed-notice {
+    padding: 12px 16px;
+    background: #fff3e0;
+    border-top: 1px solid #ffe0b2;
+    font-size: 0.85rem;
+    color: #e65100;
+}
+
+.bulk-failed-notice strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.bulk-failed-notice p {
+    margin: 4px 0;
+}
+
 .answer-key-section {
     margin: 10px 0;
 }

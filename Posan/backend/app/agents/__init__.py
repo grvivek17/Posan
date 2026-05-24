@@ -149,6 +149,7 @@ class AgentBase:
                 )
                 
                 self.runs.append(agent_run)
+                self._persist_run(agent_run)
                 return output
                 
             except Exception as e:
@@ -175,6 +176,7 @@ class AgentBase:
                     agent_run.execution_time_ms = execution_time
                     
                     self.runs.append(agent_run)
+                    self._persist_run(agent_run)
                     return output
     
     def _execute_task(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -193,6 +195,19 @@ class AgentBase:
         raise NotImplementedError(
             f"Agent {self.name} must implement _execute_task method"
         )
+    
+    def _persist_run(self, agent_run: 'AgentRun'):
+        """Persist agent run to database (best-effort, non-blocking)."""
+        try:
+            from app.core.database import SessionLocal
+            from app.services.material_service import agent_log_service
+            db = SessionLocal()
+            try:
+                agent_log_service.log_agent_run(db, agent_run)
+            finally:
+                db.close()
+        except Exception as e:
+            self.logger.warning(f"Failed to persist agent run to DB: {e}")
     
     def get_runs(self, limit: int = 10) -> List[AgentRun]:
         """

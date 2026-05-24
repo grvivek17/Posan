@@ -33,7 +33,7 @@ class FirebaseService:
                     firebase_admin.initialize_app(cred, {
                         'storageBucket': os.getenv('FIREBASE_STORAGE_BUCKET', 'posan-study-assistant.appspot.com')
                     })
-                    logger.info("✅ Firebase initialized successfully")
+                    logger.info("[OK] Firebase initialized successfully")
                 else:
                     logger.warning(f"⚠️  Firebase credentials not found at {cred_path}")
                     logger.warning("Firebase features will be disabled")

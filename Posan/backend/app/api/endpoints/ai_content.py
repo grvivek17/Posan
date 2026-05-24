@@ -418,8 +418,50 @@ async def api_analyze_test_upload(
                 **ai_result
             }
         
-        # No score or questions found
+        # No structured questions or score detected - generate report from raw OCR text
         else:
+            # If we have meaningful extracted text, try generating a structured report
+            # by creating synthetic question entries from the raw text
+            if extracted_text and len(extracted_text.strip()) > 50:
+                # Create a minimal question entry so the structured report generator
+                # can produce useful strong/weak zone analysis from the text content
+                synthetic_qa = [{
+                    "question_number": 1,
+                    "question_text": "Test paper analysis",
+                    "student_answer": extracted_text[:500],
+                    "correct_answer": None,
+                    "marks_awarded": None,
+                    "max_marks": None,
+                    "is_correct": None,
+                    "feedback_marks": [],
+                    "options": [],
+                    "question_type": "unknown"
+                }]
+                
+                try:
+                    structured_report = content_generator.generate_structured_exam_report(
+                        subject=subject,
+                        grade=grade,
+                        question_answers=synthetic_qa,
+                        extracted_text=extracted_text,
+                        teacher_corrections=teacher_corrections,
+                        rubric_comparison=rubric_comparison,
+                        student_name=student_name
+                    )
+                    
+                    return {
+                        "ocr_success": True,
+                        "analysis_type": "structured_report",
+                        "message": "Score could not be auto-detected. Analysis generated from extracted text content. You may update the score manually for more accurate results.",
+                        "ocr_confidence": ocr_result.get("confidence", "low"),
+                        "extracted_text_preview": extracted_text[:200] if extracted_text else "",
+                        "questions_found": 0,
+                        "score_auto_detected": False,
+                        **structured_report
+                    }
+                except Exception:
+                    pass  # Fall through to the basic response below
+            
             return {
                 "ocr_success": True,
                 "score_detected": False,
@@ -450,6 +492,232 @@ async def api_analyze_test_upload(
                 # Log but don't fail if cleanup fails
                 print(f"Warning: Could not delete temp file: {e}")
 
+
+@router.post("/analyze/test-bulk-upload", summary="Bulk upload and analyze multiple test papers with OCR")
+async def api_analyze_test_bulk_upload(
+    files: List[UploadFile] = File(..., description="Multiple test paper images or PDFs"),
+    student_name: str = Query(..., description="Student's name"),
+    subject: str = Query(..., description="Subject of the test"),
+    age_group: str = Query(default="6-8", description="Student age group"),
+    grade: int = Query(default=3, ge=1, le=8, description="Student grade level (1-8)"),
+    model_answers: Optional[str] = Query(default=None, description="JSON string of model answers")
+):
+    """
+    Bulk upload multiple test paper pages/files and analyze them together.
+    
+    Processes each file through OCR, merges all extracted text and question-answer pairs,
+    then generates a single combined structured report.
+    
+    - **files**: Multiple test paper files (JPG, PNG, PDF, max 10 files, 10MB each)
+    - **student_name**: Student's name for personalized feedback
+    - **subject**: Subject of the test
+    - **grade**: Student grade level (1-8)
+    - **model_answers**: Optional JSON string of model answers for rubric comparison
+    """
+    import json
+
+    if not files or len(files) == 0:
+        raise HTTPException(status_code=400, detail="No files provided")
+
+    if len(files) > 10:
+        raise HTTPException(status_code=400, detail="Maximum 10 files allowed per bulk upload")
+
+    allowed_extensions = ['.jpg', '.jpeg', '.png', '.pdf']
+    max_size = 10 * 1024 * 1024
+
+    # Parse model answers if provided
+    parsed_model_answers = None
+    if model_answers:
+        try:
+            parsed_model_answers = json.loads(model_answers)
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=400, detail="Invalid model_answers JSON format")
+
+    # Process each file and collect results
+    all_question_answers = []
+    all_extracted_text = []
+    merged_teacher_corrections = {
+        "has_corrections": False,
+        "raw_text": "",
+        "marks_per_question": {},
+        "tick_cross_marks": [],
+        "comments": [],
+        "total_awarded": None
+    }
+    all_rubric_comparisons = []
+    file_results = []
+    failed_files = []
+    temp_files = []
+
+    for file in files:
+        file_extension = Path(file.filename).suffix.lower()
+        if file_extension not in allowed_extensions:
+            failed_files.append({
+                "filename": file.filename,
+                "error": f"Invalid file type: {file_extension}"
+            })
+            continue
+
+        temp_file_path = None
+        try:
+            content = await file.read()
+            if len(content) > max_size:
+                failed_files.append({
+                    "filename": file.filename,
+                    "error": "File exceeds 10MB limit"
+                })
+                continue
+
+            with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as tmp:
+                tmp.write(content)
+                temp_file_path = tmp.name
+                temp_files.append(temp_file_path)
+
+            # Process with OCR service
+            ocr_result = ocr_service.analyze_test_paper(
+                file_path=temp_file_path,
+                file_extension=file_extension,
+                student_name=student_name,
+                subject=subject,
+                model_answers=parsed_model_answers
+            )
+
+            if not ocr_result.get("success"):
+                failed_files.append({
+                    "filename": file.filename,
+                    "error": ocr_result.get("error", "OCR processing failed")
+                })
+                continue
+
+            qa = ocr_result.get("question_answers", [])
+            text = ocr_result.get("extracted_text", "")
+            tc = ocr_result.get("teacher_corrections", {})
+            rc = ocr_result.get("rubric_comparison", [])
+
+            all_question_answers.extend(qa)
+            all_extracted_text.append(text)
+            all_rubric_comparisons.extend(rc)
+
+            # Merge teacher corrections
+            if tc.get("has_corrections"):
+                merged_teacher_corrections["has_corrections"] = True
+                merged_teacher_corrections["raw_text"] += (" " + tc.get("raw_text", ""))
+                merged_teacher_corrections["marks_per_question"].update(tc.get("marks_per_question", {}))
+                merged_teacher_corrections["tick_cross_marks"].extend(tc.get("tick_cross_marks", []))
+                merged_teacher_corrections["comments"].extend(tc.get("comments", []))
+                if tc.get("total_awarded") and merged_teacher_corrections["total_awarded"] is None:
+                    merged_teacher_corrections["total_awarded"] = tc["total_awarded"]
+
+            file_results.append({
+                "filename": file.filename,
+                "status": "success",
+                "questions_found": len(qa),
+                "text_length": len(text),
+                "score": ocr_result.get("score"),
+                "has_corrections": tc.get("has_corrections", False)
+            })
+
+        except Exception as e:
+            failed_files.append({
+                "filename": file.filename,
+                "error": str(e)
+            })
+
+    # Clean up all temp files
+    for tf in temp_files:
+        try:
+            if os.path.exists(tf):
+                os.unlink(tf)
+        except Exception:
+            pass
+
+    # Combine all extracted text
+    combined_text = "\n\n".join(all_extracted_text)
+
+    # Renumber questions sequentially across all files
+    for i, qa in enumerate(all_question_answers):
+        qa["question_number"] = i + 1
+
+    try:
+        # Generate combined structured report
+        if all_question_answers and len(all_question_answers) > 0:
+            structured_report = content_generator.generate_structured_exam_report(
+                subject=subject,
+                grade=grade,
+                question_answers=all_question_answers,
+                extracted_text=combined_text,
+                teacher_corrections=merged_teacher_corrections,
+                rubric_comparison=all_rubric_comparisons,
+                student_name=student_name
+            )
+
+            return {
+                "ocr_success": True,
+                "analysis_type": "structured_report",
+                "message": f"Analyzed {len(all_question_answers)} questions from {len(file_results)} file(s)",
+                "files_processed": len(file_results),
+                "files_failed": len(failed_files),
+                "file_results": file_results,
+                "failed_files": failed_files,
+                "total_questions_found": len(all_question_answers),
+                **structured_report
+            }
+
+        # Fallback: generate report from raw text
+        elif combined_text and len(combined_text.strip()) > 50:
+            synthetic_qa = [{
+                "question_number": 1,
+                "question_text": "Test paper analysis",
+                "student_answer": combined_text[:500],
+                "correct_answer": None,
+                "marks_awarded": None,
+                "max_marks": None,
+                "is_correct": None,
+                "feedback_marks": [],
+                "options": [],
+                "question_type": "unknown"
+            }]
+
+            structured_report = content_generator.generate_structured_exam_report(
+                subject=subject,
+                grade=grade,
+                question_answers=synthetic_qa,
+                extracted_text=combined_text,
+                teacher_corrections=merged_teacher_corrections,
+                rubric_comparison=all_rubric_comparisons,
+                student_name=student_name
+            )
+
+            return {
+                "ocr_success": True,
+                "analysis_type": "structured_report",
+                "message": "Score could not be auto-detected. Analysis generated from extracted text content.",
+                "files_processed": len(file_results),
+                "files_failed": len(failed_files),
+                "file_results": file_results,
+                "failed_files": failed_files,
+                "total_questions_found": 0,
+                "score_auto_detected": False,
+                **structured_report
+            }
+
+        else:
+            return {
+                "ocr_success": len(file_results) > 0,
+                "analysis_type": "none",
+                "message": "Could not extract questions or text from the uploaded files.",
+                "files_processed": len(file_results),
+                "files_failed": len(failed_files),
+                "file_results": file_results,
+                "failed_files": failed_files,
+                "total_questions_found": 0
+            }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error generating combined report: {str(e)}"
+        )
 
 
 @router.get("/topics/suggestions", summary="Get suggested content topics")

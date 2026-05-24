@@ -332,3 +332,325 @@
         text-align: center;
     }
 }
+
+/* Hint styles */
+.hint-section {
+    margin-top: 8px;
+}
+
+.hint-btn {
+    background: none;
+    border: 1px dashed #6C5CE7;
+    color: #6C5CE7;
+    padding: 4px 12px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: all 0.2s;
+}
+
+.hint-btn:hover {
+    background: #F1F0FF;
+}
+
+.hint-text {
+    margin-top: 6px;
+    padding: 8px 12px;
+    background: #FFF9DB;
+    border-left: 3px solid #F0C040;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #555;
+    font-style: italic;
+}
+
+/* Expected answer in review */
+.rev-expected {
+    color: #2196f3;
+    font-size: 0.9em;
+    margin-top: 4px;
+}
+
+/* Upload progress bar */
+.upload-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.upload-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50, #8bc34a);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+/* Upload mode toggle */
+.upload-mode-toggle {
+    display: flex;
+    background: #F0F0F0;
+    border-radius: 50px;
+    padding: 4px;
+    gap: 4px;
+    width: fit-content;
+}
+
+.mode-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 50px;
+    background: transparent;
+    color: #636E72;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.mode-btn.active {
+    background: #6C5CE7;
+    color: white;
+    box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3);
+}
+
+.mode-btn:hover:not(.active) {
+    background: #E0E0E0;
+}
+
+/* Bulk drop zone */
+.bulk-drop-zone {
+    min-height: 120px;
+}
+
+.bulk-drop-zone.dragging {
+    border-color: #6C5CE7;
+    background: #F1F0FF;
+    transform: scale(1.01);
+}
+
+/* Bulk file list */
+.bulk-file-list {
+    width: 100%;
+    background: #FAFAFA;
+    border-radius: 16px;
+    border: 1px solid #E0E0E0;
+    overflow: hidden;
+}
+
+.bulk-file-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: #F0F0F0;
+    border-bottom: 1px solid #E0E0E0;
+}
+
+.bulk-file-count {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #2D3436;
+}
+
+.bulk-clear-btn {
+    background: none;
+    border: none;
+    color: #E74C3C;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.bulk-clear-btn:hover {
+    background: #FDEDEC;
+}
+
+.bulk-file-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #F0F0F0;
+    transition: background 0.15s;
+}
+
+.bulk-file-item:last-child {
+    border-bottom: none;
+}
+
+.bulk-file-item:hover {
+    background: #F5F5F5;
+}
+
+.bulk-file-icon {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.bulk-file-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.bulk-file-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #2D3436;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bulk-file-size {
+    font-size: 0.75rem;
+    color: #B2BEC3;
+}
+
+.bulk-remove-btn {
+    background: none;
+    border: 1px solid #E0E0E0;
+    color: #B2BEC3;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.bulk-remove-btn:hover {
+    background: #FDEDEC;
+    border-color: #E74C3C;
+    color: #E74C3C;
+}
+
+/* Bulk results breakdown */
+.bulk-results-breakdown {
+    background: #F8F9FA;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.bulk-results-breakdown h3 {
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+    color: #2D3436;
+}
+
+.bulk-result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #E8E8E8;
+}
+
+.bulk-result-item:last-child {
+    border-bottom: none;
+}
+
+.bulk-result-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.bulk-result-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.bulk-result-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #2D3436;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bulk-result-meta {
+    font-size: 0.8rem;
+    color: #636E72;
+}
+
+.bulk-result-status {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 50px;
+    flex-shrink: 0;
+}
+
+.bulk-result-status.success {
+    background: #EAFAF1;
+    color: #27AE60;
+}
+
+.bulk-result-status.failed {
+    background: #FDEDEC;
+    color: #E74C3C;
+}
+
+/* Bulk failed notice */
+.bulk-failed-notice {
+    background: #FFF3E0;
+    border-left: 4px solid #FF9800;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+}
+
+.bulk-failed-notice h4 {
+    color: #E65100;
+    margin-bottom: 8px;
+}
+
+.bulk-failed-notice p {
+    font-size: 0.9rem;
+    color: #5D4037;
+    margin-bottom: 4px;
+}
+
+/* Bulk practice banner */
+.bulk-practice-banner {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Responsive adjustments for bulk upload */
+@media (max-width: 600px) {
+    .upload-mode-toggle {
+        width: 100%;
+    }
+
+    .mode-btn {
+        flex: 1;
+        text-align: center;
+        padding: 8px 12px;
+    }
+
+    .bulk-file-name {
+        max-width: 150px;
+    }
+}

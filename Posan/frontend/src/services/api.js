@@ -84,7 +84,7 @@ export const gamificationAPI = {
 // Homework / AI Study API - Multi-Agent System
 export const homeworkAPI = {
     // NEW: Multi-Agent Workflow (One-click: Upload → Questions → Grading)
-    uploadAndGeneratePractice: (formData, subject, grade, questionCount = 10) => {
+    uploadAndGeneratePractice: (formData, subject, grade, questionCount = 10, onUploadProgress = null) => {
         formData.append('subject', subject);
         formData.append('grade', grade);
         formData.append('question_count', questionCount);
@@ -95,6 +95,7 @@ export const homeworkAPI = {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
+            ...(onUploadProgress && { onUploadProgress }),
         });
     },
 
@@ -187,8 +188,60 @@ export const homeworkAPI = {
     // NEW: List all agents
     listAgents: () => api.get('/homework-agents/agents/list'),
 
+    // Bulk Upload: Upload multiple files and generate practice questions
+    bulkUploadAndGeneratePractice: (formData, subject, grade, questionCountPerFile = 5, onUploadProgress = null) => {
+        formData.append('subject', subject);
+        formData.append('grade', grade);
+        formData.append('question_count', questionCountPerFile);
+        formData.append('question_types', 'mcq,short_answer');
+        formData.append('difficulty', 'medium');
+        formData.append('user_id', localStorage.getItem('user_id') || 'guest');
+        return api.post('/homework-agents/workflow/bulk-material-to-practice', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+            ...(onUploadProgress && { onUploadProgress }),
+        });
+    },
+
     // LEGACY: Keep old endpoints for backward compatibility
     analyzeTestUpload: (formData, params) => api.post('/ai/analyze/test-upload', formData, { params }),
+
+    // Bulk Test Analysis: Upload multiple test paper pages and get combined report
+    bulkAnalyzeTestUpload: (formData, params) => api.post('/ai/analyze/test-bulk-upload', formData, { params }),
+
+    // Assignment CRUD
+    getAssignments: (userId, status = null) => {
+        const params = { user_id: userId };
+        if (status) params.status = status;
+        return api.get('/homework-agents/assignments', { params });
+    },
+
+    createAssignment: (formData) => {
+        return api.post('/homework-agents/assignments', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+    },
+
+    updateAssignmentStatus: (assignmentId, status) => {
+        const formData = new FormData();
+        formData.append('status', status);
+        return api.put(`/homework-agents/assignments/${assignmentId}/status`, formData);
+    },
+
+    deleteAssignment: (assignmentId) =>
+        api.delete(`/homework-agents/assignments/${assignmentId}`),
+
+    // Exam history
+    getExamHistory: (userId, limit = 20) =>
+        api.get(`/homework-agents/exams/history?user_id=${userId}&limit=${limit}`),
+
+    getExamDetails: (examId) =>
+        api.get(`/homework-agents/exams/${examId}/details`),
+
+    // Stats for progress widget
+    getHomeworkStats: (userId) =>
+        api.get(`/homework-agents/stats?user_id=${userId}`),
 };
 
 export default api;

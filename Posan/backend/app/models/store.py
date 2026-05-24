@@ -23,6 +23,7 @@ class OrderStatus(enum.Enum):
     """Order status"""
     PENDING = "pending"
     PAID = "paid"
+    PROCESSING = "processing"
     SHIPPED = "shipped"
     DELIVERED = "delivered"
     CANCELLED = "cancelled"

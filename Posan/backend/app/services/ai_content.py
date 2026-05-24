@@ -43,7 +43,7 @@ class ContentGenerator:
             "sentiment": "distilbert-base-uncased-finetuned-sst-2-english",
         }
         
-        print("✅ Educational AI models loaded:")
+        print("[OK] Educational AI models loaded:")
         for name, model in self.education_models.items():
             print(f"   - {name}: {model}")
     
@@ -72,16 +72,16 @@ class ContentGenerator:
                 )
                 content = response.choices[0].message.content
                 if content and len(content.strip()) > 10:
-                    print(f"✅ Success with model: {model}")
+                    print(f"[OK] Success with model: {model}")
                     print(f"Response preview: {content[:150]}...")
                     print(f"{'='*60}\n")
                     return content.strip()
             except Exception as e:
-                print(f"❌ Model {model} failed: {e}")
+                print(f"[FAIL] Model {model} failed: {e}")
                 continue
         
         # If all models fail, return fallback content
-        print("⚠️  All models failed, using fallback content")
+        print("[WARN] All models failed, using fallback content")
         print(f"{'='*60}\n")
         return self._get_fallback_content(prompt)
     
@@ -732,8 +732,8 @@ Keep the tone positive, encouraging, and age-appropriate. Focus on growth mindse
         unclear_count = sum(1 for q in question_answers if q.get("is_correct") is None and q.get("student_answer"))
         
         # Calculate score
-        total_marks = sum(q.get("marks_awarded", 0) for q in question_answers if q.get("marks_awarded") is not None)
-        max_marks = sum(q.get("max_marks", 10) for q in question_answers)  # Default 10 marks per question
+        total_marks = sum(q.get("marks_awarded") or 0 for q in question_answers)
+        max_marks = sum(q.get("max_marks") or 10 for q in question_answers)  # Default 10 marks per question
         
         if max_marks == 0:
             max_marks = total_questions * 10
@@ -1129,8 +1129,8 @@ Keep the tone warm, supportive, and focused on growth. Be specific about their a
         incorrect_count = len(incorrect_questions)
         
         # Calculate score
-        total_marks = sum(q.get("marks_awarded", 0) for q in question_answers if q.get("marks_awarded") is not None)
-        max_marks = sum(q.get("max_marks", 10) for q in question_answers)
+        total_marks = sum(q.get("marks_awarded") or 0 for q in question_answers)
+        max_marks = sum(q.get("max_marks") or 10 for q in question_answers)
         if max_marks == 0:
             max_marks = total_questions * 10
         if total_marks == 0 and (correct_count > 0 or incorrect_count > 0):
