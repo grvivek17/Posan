@@ -1,4 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
+import {
+    speak,
+    stopSpeaking,
+    pauseSpeaking,
+    resumeSpeaking,
+    isNative,
+} from '../../services/voiceService';
 import './AudioPlayer.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
@@ -13,72 +20,65 @@ const AudioPlayer = ({ script, podcastId, topic }) => {
     const [error, setError] = useState('');
 
     const audioRef = useRef(null);
-    const synthRef = useRef(window.speechSynthesis);
 
-    // Browser TTS functions
-    const speakWithBrowserTTS = () => {
-        if (!script) return;
-
-        // Cancel any ongoing speech
-        synthRef.current.cancel();
-
-        // Clean script for TTS
-        const cleanText = script
-            .replace(/\[.*?\]/g, '')  // Remove section markers
-            .replace(/\*.*?\*/g, '')  // Remove sound effects
-            .replace(/[🎙️📚🌟✨🎉📖🔬🌍🎨🎯🚀💡🏆⭐🎧📅]/g, '');  // Remove emojis
-
-        const utterance = new SpeechSynthesisUtterance(cleanText);
-        utterance.rate = 0.9;  // Slightly slower for kids
-        utterance.pitch = 1.1;  // Slightly higher pitch
-        utterance.volume = 1.0;
-
-        // Get kid-friendly voice if available
-        const voices = synthRef.current.getVoices();
-        const preferredVoice = voices.find(v =>
-            v.name.includes('Google') ||
-            v.name.includes('Female') ||
-            v.name.includes('Samantha')
-        );
-        if (preferredVoice) {
-            utterance.voice = preferredVoice;
-        }
-
-        utterance.onstart = () => {
-            setIsPlaying(true);
-            setIsPaused(false);
-        };
-
-        utterance.onend = () => {
-            setIsPlaying(false);
-            setIsPaused(false);
-        };
-
-        utterance.onerror = (event) => {
-            console.error('Speech synthesis error:', event);
-            setError('Failed to play audio. Please try again.');
-            setIsPlaying(false);
-        };
-
-        synthRef.current.speak(utterance);
+    // Clean script for TTS
+    const cleanScript = (text) => {
+        if (!text) return '';
+        return text
+            .replace(/\[.*?\]/g, '')
+            .replace(/\*.*?\*/g, '')
+            .replace(/[🎙️📚🌟✨🎉📖🔬🌍🎨🎯🚀💡🏆⭐🎧📅]/g, '');
     };
 
-    const pauseBrowserTTS = () => {
-        if (synthRef.current.speaking) {
-            synthRef.current.pause();
+    // Platform-aware TTS (uses native on Android, browser on web)
+    const speakWithTTS = () => {
+        if (!script) return;
+        const text = cleanScript(script);
+
+        speak(text, {
+            rate: 0.9,
+            pitch: 1.1,
+            volume: 1.0,
+            onStart: () => {
+                setIsPlaying(true);
+                setIsPaused(false);
+            },
+            onEnd: () => {
+                setIsPlaying(false);
+                setIsPaused(false);
+            },
+            onError: (e) => {
+                console.error('TTS error:', e);
+                setError('Failed to play audio. Please try again.');
+                setIsPlaying(false);
+            },
+        });
+    };
+
+    const pauseTTS = () => {
+        if (isNative) {
+            // Native TTS has no pause; stop it instead
+            stopSpeaking();
+            setIsPlaying(false);
+            setIsPaused(false);
+        } else {
+            pauseSpeaking();
             setIsPaused(true);
         }
     };
 
-    const resumeBrowserTTS = () => {
-        if (synthRef.current.paused) {
-            synthRef.current.resume();
+    const resumeTTS = () => {
+        if (isNative) {
+            // Re-speak from beginning on native (no pause support)
+            speakWithTTS();
+        } else {
+            resumeSpeaking();
             setIsPaused(false);
         }
     };
 
-    const stopBrowserTTS = () => {
-        synthRef.current.cancel();
+    const stopTTS = () => {
+        stopSpeaking();
         setIsPlaying(false);
         setIsPaused(false);
     };
@@ -145,7 +145,7 @@ const AudioPlayer = ({ script, podcastId, topic }) => {
     // Main play function
     const handlePlay = async () => {
         if (useBrowserTTS) {
-            speakWithBrowserTTS();
+            speakWithTTS();
         } else if (audioUrl) {
             playAudioFile();
         } else {
@@ -155,7 +155,7 @@ const AudioPlayer = ({ script, podcastId, topic }) => {
 
     const handlePause = () => {
         if (useBrowserTTS) {
-            pauseBrowserTTS();
+            pauseTTS();
         } else {
             pauseAudioFile();
         }
@@ -163,7 +163,7 @@ const AudioPlayer = ({ script, podcastId, topic }) => {
 
     const handleResume = () => {
         if (useBrowserTTS) {
-            resumeBrowserTTS();
+            resumeTTS();
         } else {
             playAudioFile();
         }
@@ -171,7 +171,7 @@ const AudioPlayer = ({ script, podcastId, topic }) => {
 
     const handleStop = () => {
         if (useBrowserTTS) {
-            stopBrowserTTS();
+            stopTTS();
         } else {
             stopAudioFile();
         }
@@ -187,7 +187,7 @@ const AudioPlayer = ({ script, podcastId, topic }) => {
     // Cleanup on unmount
     useEffect(() => {
         return () => {
-            synthRef.current.cancel();
+            stopSpeaking();
             if (audioRef.current) {
                 audioRef.current.pause();
             }
@@ -270,7 +270,7 @@ const AudioPlayer = ({ script, podcastId, topic }) => {
 
             {useBrowserTTS && (
                 <div className="tts-info">
-                    <small>🔊 Using browser's built-in voice</small>
+                    <small>{isNative ? '🔊 Using device voice' : '🔊 Using browser\'s built-in voice'}</small>
                 </div>
             )}
         </div>

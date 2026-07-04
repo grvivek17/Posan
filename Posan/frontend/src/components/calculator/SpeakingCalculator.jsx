@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import VoiceRecorder from './VoiceRecorder';
+import { speak, stopSpeaking } from '../../services/voiceService';
 import './SpeakingCalculator.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
@@ -24,32 +25,10 @@ const SpeakingCalculator = () => {
     }, []); // Empty dependency array - runs only once on mount
 
     const playWelcomeMessage = () => {
-        // Use browser's built-in speech synthesis for instant playback
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(
-                "Hello! Tell me what you want to calculate. For example, what is twelve times seven?"
-            );
-
-            // Configure voice for kids
-            utterance.rate = 0.9; // Slightly slower
-            utterance.pitch = 1.1; // Slightly higher pitch
-            utterance.volume = 1.0;
-
-            // Try to use a friendly voice if available
-            const voices = window.speechSynthesis.getVoices();
-            const friendlyVoice = voices.find(voice =>
-                voice.name.includes('Female') ||
-                voice.name.includes('Jenny') ||
-                voice.name.includes('Samantha') ||
-                voice.lang.startsWith('en')
-            );
-
-            if (friendlyVoice) {
-                utterance.voice = friendlyVoice;
-            }
-
-            window.speechSynthesis.speak(utterance);
-        }
+        speak(
+            "Hello! Tell me what you want to calculate. For example, what is twelve times seven?",
+            { rate: 0.9, pitch: 1.1, volume: 1.0 }
+        );
     };
 
     const handleVoiceRecording = async (transcribedText) => {
@@ -91,38 +70,15 @@ const SpeakingCalculator = () => {
     };
 
     const speakResponse = (text) => {
-        // Use browser's built-in speech synthesis for instant playback
-        if ('speechSynthesis' in window) {
-            // Cancel any ongoing speech
-            window.speechSynthesis.cancel();
-
-            const utterance = new SpeechSynthesisUtterance(text);
-
-            // Configure voice for kids
-            utterance.rate = 0.9; // Slightly slower
-            utterance.pitch = 1.1; // Slightly higher pitch
-            utterance.volume = 1.0;
-
-            // Try to use a friendly voice if available
-            const voices = window.speechSynthesis.getVoices();
-            const friendlyVoice = voices.find(voice =>
-                voice.name.includes('Female') ||
-                voice.name.includes('Jenny') ||
-                voice.name.includes('Samantha') ||
-                voice.lang.startsWith('en')
-            );
-
-            if (friendlyVoice) {
-                utterance.voice = friendlyVoice;
-            }
-
-            // Track speaking state for UI feedback
-            utterance.onstart = () => setIsSpeaking(true);
-            utterance.onend = () => setIsSpeaking(false);
-            utterance.onerror = () => setIsSpeaking(false);
-
-            window.speechSynthesis.speak(utterance);
-        }
+        stopSpeaking();
+        speak(text, {
+            rate: 0.9,
+            pitch: 1.1,
+            volume: 1.0,
+            onStart: () => setIsSpeaking(true),
+            onEnd: () => setIsSpeaking(false),
+            onError: () => setIsSpeaking(false),
+        });
     };
 
     const handleTextCalculation = async (e) => {
