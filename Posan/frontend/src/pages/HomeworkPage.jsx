@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '../hooks/useSubscription';
 import { homeworkAPI } from '../services/api';
 import ProBadge from '../components/subscription/ProBadge';
@@ -13,8 +14,12 @@ const HomeworkPage = () => {
     const [selectedGrade, setSelectedGrade] = useState('Grade 4');
     const [activeTab, setActiveTab] = useState('study'); // 'study' or 'test'
     const [quizAnswer, setQuizAnswer] = useState(null);
+    const [quizQuestion, setQuizQuestion] = useState({ question: '', correctAnswer: 0, wrongAnswer: 0 });
     const [isAIModalOpen, setIsAIModalOpen] = useState(false);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+    const navigate = useNavigate();
+    const username = localStorage.getItem('username') || 'Explorer';
 
     // Dynamic data state
     const [searchQuery, setSearchQuery] = useState('');
@@ -30,6 +35,21 @@ const HomeworkPage = () => {
     useEffect(() => {
         loadAssignments();
         loadStats();
+    }, []);
+
+    // Generate random daily challenge quiz
+    useEffect(() => {
+        const ops = [
+            { symbol: 'x', fn: (a, b) => a * b },
+            { symbol: '+', fn: (a, b) => a + b }
+        ];
+        const op = ops[Math.floor(Math.random() * ops.length)];
+        const a = Math.floor(Math.random() * 10) + 2;
+        const b = Math.floor(Math.random() * 10) + 2;
+        const correct = op.fn(a, b);
+        let wrong = correct + (Math.random() < 0.5 ? Math.floor(Math.random() * 5) + 1 : -(Math.floor(Math.random() * 5) + 1));
+        if (wrong === correct) wrong = correct + 3;
+        setQuizQuestion({ question: `What is ${a} ${op.symbol} ${b}?`, correctAnswer: correct, wrongAnswer: wrong });
     }, []);
 
     const loadAssignments = async () => {
@@ -183,7 +203,7 @@ const HomeworkPage = () => {
                         <div>
                             <p className="greeting-text">Good Morning,</p>
                             <h1 className="user-name">
-                                Alex!
+                                {username}!
                                 {isPro() && <ProBadge variant="inline" style={{ marginLeft: '10px', fontSize: '0.5em' }} />}
                             </h1>
                             {subscription && (
@@ -193,7 +213,7 @@ const HomeworkPage = () => {
                             )}
                         </div>
                     </div>
-                    <button className="notification-btn">
+                    <button className="notification-btn" onClick={() => navigate('/achievements')}>
                         <span className="notification-icon">🔔</span>
                     </button>
                 </div>
@@ -264,25 +284,25 @@ const HomeworkPage = () => {
                             </div>
 
                             <div className="quiz-box">
-                                <p className="quiz-question">What is 5 x 6?</p>
+                                <p className="quiz-question">{quizQuestion.question}</p>
                                 <div className="quiz-answers">
                                     <button
-                                        className={`quiz-answer ${quizAnswer === 25 ? 'incorrect' : ''}`}
-                                        onClick={() => checkAnswer(25)}
+                                        className={`quiz-answer ${quizAnswer === quizQuestion.wrongAnswer ? 'incorrect' : ''}`}
+                                        onClick={() => checkAnswer(quizQuestion.wrongAnswer)}
                                     >
-                                        25
+                                        {quizQuestion.wrongAnswer}
                                     </button>
                                     <button
-                                        className={`quiz-answer ${quizAnswer === 30 ? 'correct' : ''}`}
-                                        onClick={() => checkAnswer(30)}
+                                        className={`quiz-answer ${quizAnswer === quizQuestion.correctAnswer ? 'correct' : ''}`}
+                                        onClick={() => checkAnswer(quizQuestion.correctAnswer)}
                                     >
-                                        30
+                                        {quizQuestion.correctAnswer}
                                     </button>
                                 </div>
-                                {quizAnswer === 30 && (
+                                {quizAnswer === quizQuestion.correctAnswer && (
                                     <p className="quiz-feedback correct">✅ Correct! Great job!</p>
                                 )}
-                                {quizAnswer === 25 && (
+                                {quizAnswer === quizQuestion.wrongAnswer && (
                                     <p className="quiz-feedback incorrect">❌ Try again!</p>
                                 )}
                             </div>
@@ -292,12 +312,12 @@ const HomeworkPage = () => {
                         <section className="fun-resources">
                             <div className="section-header-hw">
                                 <h2 className="section-title-hw">Fun Resources</h2>
-                                <button className="view-all-btn">View all</button>
+                                <button className="view-all-btn" onClick={() => navigate('/magazines')}>View all</button>
                             </div>
 
                             <div className="resources-list">
                                 {funResources.map((resource) => (
-                                    <div key={resource.id} className="resource-item">
+                                    <div key={resource.id} className="resource-item" onClick={() => navigate('/magazines')} style={{ cursor: 'pointer' }}>
                                         <div
                                             className="resource-icon-circle"
                                             style={{ backgroundColor: resource.color }}
@@ -309,14 +329,14 @@ const HomeworkPage = () => {
                                             <h4 className="resource-title">{resource.title}</h4>
                                             <span className="resource-time">{resource.time}</span>
                                         </div>
-                                        <button className="resource-arrow">→</button>
+                                        <button className="resource-arrow" onClick={(e) => { e.stopPropagation(); navigate('/magazines'); }}>→</button>
                                     </div>
                                 ))}
                             </div>
                         </section>
 
                         {/* Stuck on a problem? */}
-                        <div className="help-banner">
+                        <div className="help-banner" onClick={() => { setActiveTab('study'); setIsAIModalOpen(true); }} style={{ cursor: 'pointer' }}>
                             <div className="help-content">
                                 <span className="help-icon">📸</span>
                                 <div>
@@ -324,7 +344,7 @@ const HomeworkPage = () => {
                                     <p className="help-subtitle">Snap a photo to get help!</p>
                                 </div>
                             </div>
-                            <button className="help-arrow">→</button>
+                            <button className="help-arrow" onClick={(e) => { e.stopPropagation(); setActiveTab('study'); setIsAIModalOpen(true); }}>→</button>
                         </div>
                     </div>
 

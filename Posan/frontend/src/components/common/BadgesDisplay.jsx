@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './BadgesDisplay.css';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+
 const BadgesDisplay = () => {
     const [badges, setBadges] = useState([]);
     const [userBadges, setUserBadges] = useState([]);
@@ -23,11 +25,11 @@ const BadgesDisplay = () => {
             }
 
             // Fetch all available badges
-            const badgesResponse = await axios.get('http://localhost:8000/api/v1/gamification/badges');
+            const badgesResponse = await axios.get(`${API_BASE}/gamification/badges`);
 
             // Fetch user's earned badges
             const userBadgesResponse = await axios.get(
-                `http://localhost:8000/api/v1/gamification/achievements/${userId}`
+                `${API_BASE}/gamification/achievements/${userId}`
             );
 
             setBadges(badgesResponse.data || []);

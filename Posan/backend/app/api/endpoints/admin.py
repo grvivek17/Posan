@@ -205,6 +205,21 @@ async def get_overview_stats(
         User.created_at >= seven_days_ago
     ).scalar()
     
+    # Calculate growth rate from real data
+    fourteen_days_ago = datetime.utcnow() - timedelta(days=14)
+    prev_week_signups = db.query(func.count(User.id)).filter(
+        User.created_at >= fourteen_days_ago,
+        User.created_at < seven_days_ago
+    ).scalar()
+    
+    if prev_week_signups and prev_week_signups > 0:
+        growth_pct = round(((recent_signups - prev_week_signups) / prev_week_signups) * 100, 1)
+        growth_rate = f"+{growth_pct}%" if growth_pct >= 0 else f"{growth_pct}%"
+    elif recent_signups > 0:
+        growth_rate = "+100%"
+    else:
+        growth_rate = "0%"
+    
     # Puzzle generation stats
     total_puzzles = db.query(func.count(DailyPuzzleGeneration.id)).scalar()
     today_puzzles = db.query(func.count(DailyPuzzleGeneration.id)).filter(
@@ -215,7 +230,7 @@ async def get_overview_stats(
         "users": {
             "total": total_users,
             "recent_signups": recent_signups,
-            "growth_rate": "+12%"  # Mock data - calculate from real data
+            "growth_rate": growth_rate
         },
         "subscriptions": {
             "total_active": active_subs,

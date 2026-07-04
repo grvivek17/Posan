@@ -3,6 +3,8 @@ import axios from 'axios';
 import AudioPlayer from '../components/podcasts/AudioPlayer';
 import './PodcastsPage.css';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+
 const PodcastsPage = () => {
     const [activeTab, setActiveTab] = useState('request'); // request, weekly, library
     const [topic, setTopic] = useState('');
@@ -24,7 +26,7 @@ const PodcastsPage = () => {
 
     const fetchSuggestions = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/api/v1/podcasts/suggestions');
+            const response = await axios.get(`${API_BASE}/podcasts/suggestions`);
             setSuggestions(response.data.suggestions);
         } catch (err) {
             console.error('Error fetching suggestions:', err);
@@ -33,7 +35,7 @@ const PodcastsPage = () => {
 
     const fetchExamples = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/api/v1/podcasts/examples');
+            const response = await axios.get(`${API_BASE}/podcasts/examples`);
             setExamples(response.data.examples);
         } catch (err) {
             console.error('Error fetching examples:', err);
@@ -63,7 +65,7 @@ const PodcastsPage = () => {
         setError('');
 
         try {
-            const response = await axios.post('http://localhost:8000/api/v1/podcasts/generate', {
+            const response = await axios.post(`${API_BASE}/podcasts/generate`, {
                 topic,
                 age_group: ageGroup,
                 duration,
@@ -91,7 +93,7 @@ const PodcastsPage = () => {
         setError('');
 
         try {
-            const response = await axios.post('http://localhost:8000/api/v1/podcasts/weekly-highlights', {
+            const response = await axios.post(`${API_BASE}/podcasts/weekly-highlights`, {
                 topics: null // Will use default topics
             });
 

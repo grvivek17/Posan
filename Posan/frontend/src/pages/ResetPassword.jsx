@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import './ResetPassword.css';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+
 function ResetPassword() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
@@ -30,7 +32,7 @@ function ResetPassword() {
     const verifyToken = async (tokenToVerify) => {
         try {
             const response = await axios.post(
-                'http://localhost:8000/api/v1/auth/verify-reset-token',
+                `${API_BASE}/auth/verify-reset-token`,
                 null,
                 { params: { token: tokenToVerify } }
             );
@@ -74,7 +76,7 @@ function ResetPassword() {
             console.log('New password length:', newPassword.length);
 
             const response = await axios.post(
-                'http://localhost:8000/api/v1/auth/reset-password',
+                `${API_BASE}/auth/reset-password`,
                 null,
                 { params: { token, new_password: newPassword } }
             );

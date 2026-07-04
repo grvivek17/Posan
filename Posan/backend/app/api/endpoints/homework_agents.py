@@ -202,11 +202,11 @@ async def get_agent_status(
     
     Available agents:
     - ingestion: Material processing and chunking
-    - retrieval: Vector search (coming soon)
-    - question_generator: Practice question generation (coming soon)
-    - exam_analysis: Exam grading (coming soon)
-    - planner: Study plan generation (coming soon)
-    - safety: Content filtering (coming soon)
+    - retrieval: Vector search and semantic retrieval
+    - question_generator: Practice question generation
+    - exam_analysis: Exam grading and analysis
+    - planner: Study plan generation (planned)
+    - safety: Content filtering (planned)
     """
     # Get agent from coordinator
     agent = coordinator.get_agent(agent_name)
@@ -293,8 +293,27 @@ async def demo_material_to_practice_workflow(
                     "grade": grade
                 },
                 "output_key": "ingestion_result"
+            },
+            {
+                "agent": "retrieval",
+                "input": {
+                    "material_id": material_id,
+                    "action": "create_index",
+                    "index_name": f"material_{material_id}"
+                },
+                "output_key": "retrieval_result"
+            },
+            {
+                "agent": "question_generator",
+                "input": {
+                    "material_id": material_id,
+                    "subject": subject,
+                    "grade": grade,
+                    "num_questions": 5,
+                    "question_types": ["mcq", "short_answer", "fill_blank"]
+                },
+                "output_key": "questions_result"
             }
-            # TODO: Add retrieval and question generation steps
         ]
         
         # Execute workflow
@@ -304,7 +323,8 @@ async def demo_material_to_practice_workflow(
             "workflow_status": result["status"],
             "material_id": material_id,
             "ingestion": result["results"].get("ingestion_result"),
-            "note": "Question generation step coming in next phase"
+            "retrieval": result["results"].get("retrieval_result"),
+            "questions": result["results"].get("questions_result")
         }
         
     finally:

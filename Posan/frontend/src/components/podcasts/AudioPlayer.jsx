@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './AudioPlayer.css';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+const API_HOST = API_BASE.replace(/\/api\/v1$/, '');
+
 const AudioPlayer = ({ script, podcastId, topic }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
@@ -86,7 +89,7 @@ const AudioPlayer = ({ script, podcastId, topic }) => {
         setError('');
 
         try {
-            const response = await fetch('http://localhost:8000/api/v1/podcasts/generate-audio', {
+            const response = await fetch(`${API_BASE}/podcasts/generate-audio`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -100,7 +103,7 @@ const AudioPlayer = ({ script, podcastId, topic }) => {
             const data = await response.json();
 
             if (data.success && data.audio_url) {
-                setAudioUrl(`http://localhost:8000${data.audio_url}`);
+                setAudioUrl(`${API_HOST}${data.audio_url}`);
                 setUseBrowserTTS(false);
             } else {
                 // Fallback to browser TTS

@@ -1693,7 +1693,7 @@ Format: one tip per line, starting with a number."""
         else:  # fallback
             return {
                 "title": f"{topic.title()} Puzzle",
-                "description": "Puzzle coming soon!",
+                "description": f"A {difficulty} {puzzle_type} puzzle about {topic} for ages {age_group}.",
                 "puzzle_type": puzzle_type,
                 "difficulty": difficulty,
                 "age_group": age_group,

@@ -99,7 +99,8 @@ function MagazinePage() {
     const generateWeeklyHighlights = async () => {
         setWeeklyLoading(true);
         try {
-            const response = await axios.post('http://localhost:8000/api/v1/podcasts/weekly-highlights', {
+            const magazineApiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+            const response = await axios.post(`${magazineApiBase}/podcasts/weekly-highlights`, {
                 topics: null
             });
 

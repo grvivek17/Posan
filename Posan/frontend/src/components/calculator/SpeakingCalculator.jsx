@@ -173,7 +173,7 @@ const SpeakingCalculator = () => {
             // Construct full URL
             const fullUrl = audioUrl.startsWith('http')
                 ? audioUrl
-                : `http://localhost:8000${audioUrl}`;
+                : `${API_BASE.replace(/\/api\/v1$/, '')}${audioUrl}`;
 
             audioRef.current.src = fullUrl;
             audioRef.current.play().catch(err => {

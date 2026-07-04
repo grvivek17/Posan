@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './PointsDisplay.css';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+
 const PointsDisplay = ({ compact = false }) => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -24,7 +26,7 @@ const PointsDisplay = ({ compact = false }) => {
                 return;
             }
 
-            const response = await axios.get('http://localhost:8000/api/v1/gamification-v2/stats', {
+            const response = await axios.get(`${API_BASE}/gamification-v2/stats`, {
                 params: { user_id: parseInt(userId) },
                 headers: { Authorization: `Bearer ${token}` }
             });
