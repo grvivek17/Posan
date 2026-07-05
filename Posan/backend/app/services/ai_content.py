@@ -85,38 +85,65 @@ class ContentGenerator:
         print(f"{'='*60}\n")
         return self._get_fallback_content(prompt)
     
-    def _get_fallback_content(self, prompt: str) -> str:
-        """Return fallback content when AI generation fails."""
-        # Provide sample content based on keywords in the prompt
+    def _extract_topic_from_prompt(self, prompt: str) -> str:
+        """Extract the topic from an AI prompt string."""
         prompt_lower = prompt.lower()
+        # Match patterns like "story about TOPIC", "article about TOPIC", etc.
+        for pattern in [r"(?:story|article|content|quiz|riddle|word.?search)\s+about\s+(.+?)(?:\.\s|\.\n|,|\n|featuring| for kids| for children)", 
+                        r"about\s+(.+?)(?:\.\s|\.\n|,|\n| for kids| for children)"]:
+            match = re.search(pattern, prompt_lower)
+            if match:
+                return match.group(1).strip()
+        return ""
+
+    def _get_fallback_content(self, prompt: str) -> str:
+        """Return topic-aware fallback content when AI generation fails."""
+        prompt_lower = prompt.lower()
+        topic = self._extract_topic_from_prompt(prompt)
+        topic_title = topic.title() if topic else "Amazing Things"
         
-        if "story" in prompt_lower:
-            return """Once upon a time, in a magical land far away, there lived a curious young explorer named Sam. 
-Sam loved discovering new things about the world. One sunny morning, Sam decided to go on an adventure.
-Along the way, Sam met new friends and learned that kindness and curiosity are the greatest treasures of all.
-And they all lived happily ever after, ready for their next adventure together!"""
+        if ("title" in prompt_lower or "just the title" in prompt_lower) and len(prompt) < 200:
+            # Title generation fallback - return just a title, not full content
+            return f"The Amazing Adventure of {topic_title}"
+        
+        elif "story" in prompt_lower:
+            return f"""Once upon a time, there was a young explorer who was very curious about {topic or 'the world'}.
+
+Every day, they would learn something new and exciting about {topic or 'amazing things'}. They read books, asked questions, and went on adventures to discover more.
+
+One special day, they made a wonderful discovery about {topic or 'something magical'}! They couldn't wait to share what they learned with all their friends.
+
+"The more you learn about {topic or 'the world'}," they said, "the more amazing it becomes!"
+
+And so the adventure continued, with new things to discover about {topic or 'the world'} every single day."""
         
         elif "article" in prompt_lower or "fact" in prompt_lower:
-            return """Did you know? The world is full of amazing wonders waiting to be discovered!
-Every day, scientists learn new things about our planet, space, and the creatures that live with us.
-Learning is an adventure that never ends. What will you discover today?
-Fun Activity: Try to find three new facts about your favorite animal!"""
+            return f"""Did you know? There are so many amazing things to learn about {topic or 'our world'}!
+
+Scientists and explorers have been studying {topic or 'the world around us'} for many years, and they keep making exciting new discoveries.
+
+Here are some cool things about {topic or 'this subject'}:
+- {topic_title} is a fascinating topic that people of all ages enjoy learning about.
+- There are many books, videos, and websites where you can explore more about {topic or 'this topic'}.
+- Every day, we learn something new about {topic or 'amazing things'}.
+
+Fun Activity: Try to find three new facts about {topic or 'your favorite subject'}!"""
         
         elif "quiz" in prompt_lower or "question" in prompt_lower:
-            return """Q: What makes learning fun?
-A) Reading books
-B) Asking questions
-C) Exploring new places
+            return f"""Q: What is one interesting thing about {topic or 'learning'}?
+A) It helps us understand the world
+B) It makes us smarter
+C) It is fun to explore
 D) All of the above!
 Answer: D
-Explanation: Learning is fun when we stay curious and try new things!"""
+Explanation: Learning about {topic or 'new things'} is always an adventure because there is so much to discover!"""
         
         elif "word" in prompt_lower:
             return "LEARN\nDISCOVER\nEXPLORE\nWONDER\nCURIOUS"
         
         elif "riddle" in prompt_lower:
-            return """Riddle: I have pages but I'm not a tree. I have words but I can't speak. What am I?
-Answer: A book!"""
+            return f"""Riddle: I am something you can always learn more about. The more you study me, the more interesting I become. I am related to {topic or 'knowledge'}. What am I?
+Answer: {topic_title}!"""
         
         else:
             return "Content is being generated. Please try again in a moment!"
@@ -357,13 +384,15 @@ Practice Questions:"""
         char_text = f" featuring characters named {', '.join(characters)}" if characters else ""
         
         prompt = f"""Write a {word_count}-word children's story about {topic}{char_text}.
+The story MUST be specifically about {topic} - include details, facts, or scenarios directly related to {topic}.
 
 Target age: {age_group} years old
 Style: {age_descriptions.get(age_group, age_descriptions['6-8'])}
 
 Requirements:
+- The story must be centered on the topic: {topic}
 - Kid-friendly and appropriate
-- Educational value
+- Educational value related to {topic}
 - Positive message
 - Engaging and fun
 
