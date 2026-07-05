@@ -10,6 +10,22 @@ import os
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
+# Auto-seed badges if empty
+def _seed_badges_on_startup():
+    """Seed default badges on first startup."""
+    try:
+        from app.core.database import SessionLocal
+        from app.models.gamification import Badge
+        db = SessionLocal()
+        if db.query(Badge).count() == 0:
+            from seed_badges import seed_badges
+            seed_badges()
+        db.close()
+    except Exception as e:
+        print(f"Badge seeding skipped: {e}")
+
+_seed_badges_on_startup()
+
 # Initialize FastAPI app
 app = FastAPI(
     title=settings.APP_NAME,

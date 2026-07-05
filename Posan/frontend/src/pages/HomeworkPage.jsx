@@ -28,6 +28,8 @@ const HomeworkPage = () => {
     const [newAssignment, setNewAssignment] = useState({ title: '', subject: '', dueDate: '' });
     const [showAddAssignment, setShowAddAssignment] = useState(false);
     const [assignmentFile, setAssignmentFile] = useState(null);
+    const [examHistory, setExamHistory] = useState([]);
+    const [performanceData, setPerformanceData] = useState(null);
 
     const userId = localStorage.getItem('user_id') || 'guest';
 
@@ -35,6 +37,8 @@ const HomeworkPage = () => {
     useEffect(() => {
         loadAssignments();
         loadStats();
+        loadExamHistory();
+        loadPerformanceAnalysis();
     }, []);
 
     // Generate random daily challenge quiz
@@ -67,6 +71,24 @@ const HomeworkPage = () => {
             setStats(res.data);
         } catch (err) {
             console.error('Failed to load stats:', err);
+        }
+    };
+
+    const loadExamHistory = async () => {
+        try {
+            const res = await homeworkAPI.getExamHistory(userId, 10);
+            setExamHistory(res.data.exams || []);
+        } catch (err) {
+            console.error('Failed to load exam history:', err);
+        }
+    };
+
+    const loadPerformanceAnalysis = async () => {
+        try {
+            const res = await homeworkAPI.getPerformanceAnalysis(userId);
+            setPerformanceData(res.data);
+        } catch (err) {
+            console.error('Failed to load performance analysis:', err);
         }
     };
 
@@ -526,6 +548,118 @@ const HomeworkPage = () => {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Performance Analysis Widget */}
+                        {performanceData && performanceData.summary && performanceData.summary.total_exams > 0 && (
+                            <div className="sidebar-widget performance-widget">
+                                <div className="widget-header">
+                                    <h3>📈 Performance Analysis</h3>
+                                </div>
+                                <div className="widget-content">
+                                    <div className="performance-summary">
+                                        <div className="perf-stat-row">
+                                            <span className="perf-label">Overall Trend</span>
+                                            <span className={`perf-trend ${performanceData.summary.overall_trend}`}>
+                                                {performanceData.summary.overall_trend === 'improving' ? '📈 Improving' :
+                                                 performanceData.summary.overall_trend === 'declining' ? '📉 Declining' :
+                                                 performanceData.summary.overall_trend === 'stable' ? '➡️ Stable' : '🆕 Just Started'}
+                                            </span>
+                                        </div>
+                                        <div className="perf-stat-row">
+                                            <span className="perf-label">Avg Score</span>
+                                            <span className="perf-value">{performanceData.summary.average_score}%</span>
+                                        </div>
+                                        <div className="perf-stat-row">
+                                            <span className="perf-label">Best / Lowest</span>
+                                            <span className="perf-value">{performanceData.summary.highest_score}% / {performanceData.summary.lowest_score}%</span>
+                                        </div>
+                                        <div className="perf-stat-row">
+                                            <span className="perf-label">Consistency</span>
+                                            <div className="progress-bar" style={{ flex: 1, marginLeft: '8px' }}>
+                                                <div className="progress-fill" style={{ width: `${(performanceData.summary.consistency || 0) * 100}%` }}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Subject breakdown */}
+                                    {Object.keys(performanceData.by_subject || {}).length > 0 && (
+                                        <div className="subject-breakdown">
+                                            <h4 style={{ fontSize: '0.85em', marginBottom: '8px', color: '#666' }}>By Subject</h4>
+                                            {Object.entries(performanceData.by_subject).map(([subj, data]) => (
+                                                <div key={subj} className="perf-stat-row" style={{ marginBottom: '6px' }}>
+                                                    <span className="perf-label">{subj}</span>
+                                                    <span className="perf-value" style={{ fontSize: '0.85em' }}>
+                                                        {data.average}%
+                                                        <span style={{ fontSize: '0.75em', marginLeft: '4px', color: data.trend === 'improving' ? '#10B981' : data.trend === 'declining' ? '#EF4444' : '#6B7280' }}>
+                                                            {data.trend === 'improving' ? '↑' : data.trend === 'declining' ? '↓' : '→'}
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Knowledge gaps */}
+                                    {performanceData.knowledge_gaps?.critical?.length > 0 && (
+                                        <div style={{ marginTop: '10px', padding: '8px', background: '#FEF2F2', borderRadius: '8px', fontSize: '0.85em' }}>
+                                            <strong style={{ color: '#DC2626' }}>Focus Areas:</strong>
+                                            <span style={{ marginLeft: '6px', color: '#7F1D1D' }}>
+                                                {performanceData.knowledge_gaps.critical.join(', ')}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* Recommendations */}
+                                    {performanceData.recommendations?.length > 0 && (
+                                        <div style={{ marginTop: '10px' }}>
+                                            <h4 style={{ fontSize: '0.85em', marginBottom: '6px', color: '#666' }}>Tips</h4>
+                                            {performanceData.recommendations.slice(0, 3).map((rec, i) => (
+                                                <p key={i} style={{ fontSize: '0.8em', color: '#555', marginBottom: '4px', lineHeight: '1.4' }}>
+                                                    💡 {rec}
+                                                </p>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Exam History Widget */}
+                        {examHistory.length > 0 && (
+                            <div className="sidebar-widget exam-history-widget">
+                                <div className="widget-header">
+                                    <h3>📝 Recent Exams</h3>
+                                </div>
+                                <div className="widget-content">
+                                    {examHistory.slice(0, 5).map((exam) => (
+                                        <div key={exam.id} className="exam-history-item" style={{
+                                            display: 'flex', alignItems: 'center', gap: '10px',
+                                            padding: '10px', background: '#f8f9fa', borderRadius: '8px', marginBottom: '8px'
+                                        }}>
+                                            <div style={{
+                                                width: '40px', height: '40px', borderRadius: '50%', display: 'flex',
+                                                alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.9em',
+                                                background: exam.percentage >= 80 ? '#D1FAE5' : exam.percentage >= 60 ? '#FEF3C7' : '#FEE2E2',
+                                                color: exam.percentage >= 80 ? '#065F46' : exam.percentage >= 60 ? '#92400E' : '#991B1B'
+                                            }}>
+                                                {exam.letter_grade || '-'}
+                                            </div>
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <p style={{ fontSize: '0.85em', fontWeight: '600', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {exam.subject || 'Practice'}
+                                                </p>
+                                                <p style={{ fontSize: '0.75em', color: '#888', margin: 0 }}>
+                                                    {exam.created_at ? new Date(exam.created_at).toLocaleDateString() : ''}
+                                                </p>
+                                            </div>
+                                            <div style={{ fontWeight: 'bold', fontSize: '0.9em', color: '#667eea' }}>
+                                                {exam.percentage ? `${Math.round(exam.percentage)}%` : '-'}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 

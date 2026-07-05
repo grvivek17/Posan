@@ -1602,6 +1602,60 @@ async def get_homework_stats(
     }
 
 
+# ============= PERFORMANCE ANALYSIS ENDPOINT =============
+
+@router.get("/exams/performance-analysis")
+async def get_performance_analysis(
+    user_id: str = Query(..., description="User ID"),
+    subject: Optional[str] = Query(None, description="Filter by subject"),
+    limit: int = Query(default=50, ge=1, le=200),
+    db: Session = Depends(get_db)
+):
+    """Get comprehensive performance analysis across all exams for a user."""
+    query = db.query(Exam).filter(Exam.user_id == user_id)
+    if subject:
+        query = query.filter(Exam.subject == subject)
+
+    exams = query.order_by(Exam.created_at.asc()).limit(limit).all()
+
+    # Serialize exams for the agent
+    exam_data = [
+        {
+            "id": e.id,
+            "subject": e.subject,
+            "percentage": e.percentage,
+            "letter_grade": e.letter_grade,
+            "knowledge_gaps_json": e.knowledge_gaps_json,
+            "created_at": e.created_at.isoformat() if e.created_at else None
+        }
+        for e in exams
+    ]
+
+    # Get all answers for these exams
+    exam_ids = [e.id for e in exams]
+    answers = []
+    if exam_ids:
+        answer_records = db.query(ExamAnswer).filter(ExamAnswer.exam_id.in_(exam_ids)).all()
+        answers = [
+            {
+                "question_type": a.question_type,
+                "is_correct": a.is_correct,
+                "score": a.score,
+                "max_score": a.max_score
+            }
+            for a in answer_records
+        ]
+
+    # Run through the analysis agent
+    result = exam_analysis_agent.execute({
+        "operation": "analyze_performance",
+        "exams": exam_data,
+        "answers": answers
+    })
+
+    return result.get("output", result)
+
+
 # Register agents with coordinator
 coordinator.register_agent(ingestion_agent)
 coordinator.register_agent(retrieval_agent)

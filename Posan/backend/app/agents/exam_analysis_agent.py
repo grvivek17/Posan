@@ -362,12 +362,185 @@ Feedback: [your feedback]"""
             return "F"
     
     def _analyze_performance(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Analyze performance trends over multiple exams"""
-        # This would analyze historical data
-        # For now, return a placeholder
+        """Analyze performance trends over multiple exams using real historical data."""
+        exams = input_data.get("exams", [])
+        answers = input_data.get("answers", [])
+
+        if not exams:
+            return {
+                "summary": {
+                    "total_exams": 0,
+                    "average_score": 0,
+                    "overall_trend": "no_data",
+                    "message": "No exam history found. Complete some practice exams to see your performance analysis."
+                },
+                "by_subject": {},
+                "by_question_type": {},
+                "knowledge_gaps": {"recurring": [], "improving": [], "critical": []},
+                "recommendations": ["Start with a practice exam to build your performance history."],
+                "score_timeline": []
+            }
+
+        # --- Score timeline (chronological) ---
+        sorted_exams = sorted(exams, key=lambda e: e.get("created_at", ""))
+        score_timeline = [
+            {
+                "date": e.get("created_at", ""),
+                "percentage": e.get("percentage", 0),
+                "subject": e.get("subject", "General"),
+                "grade": e.get("letter_grade", "")
+            }
+            for e in sorted_exams if e.get("percentage") is not None
+        ]
+
+        scores = [e.get("percentage", 0) for e in sorted_exams if e.get("percentage") is not None]
+        avg_score = sum(scores) / len(scores) if scores else 0
+        highest = max(scores) if scores else 0
+        lowest = min(scores) if scores else 0
+
+        # --- Overall trend ---
+        if len(scores) >= 3:
+            first_half = scores[:len(scores)//2]
+            second_half = scores[len(scores)//2:]
+            first_avg = sum(first_half) / len(first_half)
+            second_avg = sum(second_half) / len(second_half)
+            diff = second_avg - first_avg
+            if diff > 5:
+                overall_trend = "improving"
+            elif diff < -5:
+                overall_trend = "declining"
+            else:
+                overall_trend = "stable"
+        elif len(scores) == 2:
+            overall_trend = "improving" if scores[1] > scores[0] else ("declining" if scores[1] < scores[0] else "stable")
+        else:
+            overall_trend = "just_started"
+
+        # --- Consistency (coefficient of variation) ---
+        if len(scores) >= 2:
+            mean = avg_score
+            variance = sum((s - mean) ** 2 for s in scores) / len(scores)
+            std_dev = variance ** 0.5
+            consistency = max(0, round(1 - (std_dev / 100), 2))
+        else:
+            consistency = 1.0
+
+        # --- By subject analysis ---
+        subject_data = {}
+        for e in sorted_exams:
+            subj = e.get("subject") or "General"
+            if subj not in subject_data:
+                subject_data[subj] = []
+            if e.get("percentage") is not None:
+                subject_data[subj].append(e["percentage"])
+
+        by_subject = {}
+        for subj, subj_scores in subject_data.items():
+            subj_avg = sum(subj_scores) / len(subj_scores)
+            if len(subj_scores) >= 2:
+                subj_trend = "improving" if subj_scores[-1] > subj_scores[0] + 5 else (
+                    "declining" if subj_scores[-1] < subj_scores[0] - 5 else "stable"
+                )
+            else:
+                subj_trend = "just_started"
+            by_subject[subj] = {
+                "exams": len(subj_scores),
+                "average": round(subj_avg, 1),
+                "trend": subj_trend,
+                "latest_score": subj_scores[-1] if subj_scores else 0,
+                "best_score": max(subj_scores) if subj_scores else 0
+            }
+
+        strongest = max(by_subject.items(), key=lambda x: x[1]["average"])[0] if by_subject else None
+        weakest = min(by_subject.items(), key=lambda x: x[1]["average"])[0] if by_subject else None
+
+        # --- By question type analysis ---
+        type_stats = {}
+        for a in answers:
+            q_type = a.get("question_type", "unknown")
+            if q_type not in type_stats:
+                type_stats[q_type] = {"correct": 0, "total": 0}
+            type_stats[q_type]["total"] += 1
+            if a.get("is_correct"):
+                type_stats[q_type]["correct"] += 1
+
+        by_question_type = {}
+        for q_type, data in type_stats.items():
+            rate = (data["correct"] / data["total"]) if data["total"] > 0 else 0
+            by_question_type[q_type] = {
+                "success_rate": round(rate, 2),
+                "total_attempted": data["total"],
+                "correct": data["correct"]
+            }
+
+        # --- Knowledge gap analysis ---
+        gap_frequency = {}
+        for e in sorted_exams:
+            gaps = e.get("knowledge_gaps_json") or []
+            if isinstance(gaps, list):
+                for gap in gaps:
+                    topic = gap.get("topic", "") if isinstance(gap, dict) else str(gap)
+                    if topic:
+                        if topic not in gap_frequency:
+                            gap_frequency[topic] = {"appearances": 0, "first_seen": e.get("created_at", ""), "last_seen": ""}
+                        gap_frequency[topic]["appearances"] += 1
+                        gap_frequency[topic]["last_seen"] = e.get("created_at", "")
+
+        recurring = [t for t, d in gap_frequency.items() if d["appearances"] >= 2]
+        recent_gaps = [t for t, d in gap_frequency.items() if d["last_seen"] == sorted_exams[-1].get("created_at", "")] if sorted_exams else []
+        older_gaps = [t for t in gap_frequency if t not in recent_gaps]
+        improving = [t for t in older_gaps if gap_frequency[t]["appearances"] >= 2]
+        critical = [t for t in recurring if t in recent_gaps]
+
+        # --- Recommendations ---
+        recommendations = []
+        if overall_trend == "improving":
+            recommendations.append("Great progress! Your scores are trending upward.")
+        elif overall_trend == "declining":
+            recommendations.append("Your recent scores have dipped. Consider reviewing fundamentals.")
+        elif overall_trend == "stable":
+            recommendations.append("Your performance is consistent. Try challenging yourself with harder material.")
+
+        if weakest and strongest and weakest != strongest:
+            recommendations.append(f"Your strongest subject is {strongest}. Focus more on {weakest} to balance out.")
+
+        if critical:
+            recommendations.append(f"Critical areas to review: {', '.join(critical[:3])}")
+        elif recurring:
+            recommendations.append(f"Recurring weak areas: {', '.join(recurring[:3])}. Extra practice recommended.")
+
+        best_type = max(by_question_type.items(), key=lambda x: x[1]["success_rate"])[0] if by_question_type else None
+        worst_type = min(by_question_type.items(), key=lambda x: x[1]["success_rate"])[0] if by_question_type else None
+        if best_type and worst_type and best_type != worst_type:
+            recommendations.append(f"You excel at {best_type} questions. Practice more {worst_type} questions.")
+
+        if avg_score >= 80:
+            recommendations.append("Excellent overall performance! Consider advancing to harder material.")
+        elif avg_score >= 60:
+            recommendations.append("Good work! Regular practice will push you to the next level.")
+        else:
+            recommendations.append("Keep practicing! Review study materials and try the questions again.")
+
         return {
-            "message": "Performance analysis across multiple exams",
-            "note": "This feature requires historical exam data"
+            "summary": {
+                "total_exams": len(exams),
+                "average_score": round(avg_score, 1),
+                "highest_score": round(highest, 1),
+                "lowest_score": round(lowest, 1),
+                "overall_trend": overall_trend,
+                "consistency": consistency
+            },
+            "by_subject": by_subject,
+            "by_question_type": by_question_type,
+            "knowledge_gaps": {
+                "recurring": recurring[:5],
+                "improving": improving[:5],
+                "critical": critical[:5]
+            },
+            "recommendations": recommendations,
+            "score_timeline": score_timeline,
+            "strongest_subject": strongest,
+            "weakest_subject": weakest
         }
 
 

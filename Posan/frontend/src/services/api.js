@@ -244,6 +244,13 @@ export const homeworkAPI = {
     // Stats for progress widget
     getHomeworkStats: (userId) =>
         api.get(`/homework-agents/stats?user_id=${userId}`),
+
+    // Performance analysis across all exams
+    getPerformanceAnalysis: (userId, subject = null) => {
+        let url = `/homework-agents/exams/performance-analysis?user_id=${userId}`;
+        if (subject) url += `&subject=${encodeURIComponent(subject)}`;
+        return api.get(url);
+    },
 };
 
 export default api;

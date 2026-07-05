@@ -426,3 +426,71 @@
         padding: 0 1rem 1rem;
     }
 }
+
+/* Performance Analysis Widget */
+.performance-widget .widget-header {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+.performance-summary {
+    margin-bottom: 10px;
+}
+
+.perf-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.perf-stat-row:last-child {
+    border-bottom: none;
+}
+
+.perf-label {
+    font-size: 0.85em;
+    color: #666;
+}
+
+.perf-value {
+    font-weight: 600;
+    color: #333;
+}
+
+.perf-trend {
+    font-size: 0.85em;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.perf-trend.improving {
+    color: #065F46;
+    background: #D1FAE5;
+}
+
+.perf-trend.declining {
+    color: #991B1B;
+    background: #FEE2E2;
+}
+
+.perf-trend.stable {
+    color: #92400E;
+    background: #FEF3C7;
+}
+
+.subject-breakdown {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+/* Exam History Widget */
+.exam-history-widget .widget-header {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+}
+
+.exam-history-item:last-child {
+    margin-bottom: 0 !important;
+}
