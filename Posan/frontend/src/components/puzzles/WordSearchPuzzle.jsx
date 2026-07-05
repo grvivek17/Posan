@@ -15,6 +15,10 @@ const WordSearchPuzzle = ({ words = [], grid = [], title = "" }) => {
         if (words.length > 0 && grid.length > 0) {
             // Use props if provided (AI mode)
             setCurrentPuzzle({ words, grid, title });
+            setFoundWords([]);
+            setFoundCells([]);
+            setSelectedCells([]);
+            setCompleted(false);
         } else {
             // Load random puzzle
             loadRandomPuzzle();

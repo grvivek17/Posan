@@ -26,6 +26,7 @@ const PuzzleZone = () => {
 
     const generateAIPuzzle = useCallback(async () => {
         setGenerating(true);
+        setAiPuzzleData(null); // Clear old puzzle immediately so user sees fresh state
         try {
             const puzzleTypeMap = {
                 'word-search': 'word_search',
@@ -126,6 +127,7 @@ const PuzzleZone = () => {
             <div className="puzzle-container">
                 {aiPuzzleData && activePuzzle === 'word-search' && (
                     <WordSearchPuzzle
+                        key={`ai-ws-${selectedTopic}`}
                         words={aiPuzzleData.puzzle_data?.words || []}
                         grid={aiPuzzleData.puzzle_data?.grid || []}
                         title={aiPuzzleData.title || 'AI Word Search'}
@@ -133,20 +135,22 @@ const PuzzleZone = () => {
                 )}
                 {aiPuzzleData && activePuzzle === 'crossword' && (
                     <CrosswordPuzzle
+                        key={`ai-cw-${selectedTopic}`}
                         clues={aiPuzzleData.puzzle_data?.clues || []}
                         title={aiPuzzleData.title || 'AI Crossword'}
                     />
                 )}
                 {aiPuzzleData && activePuzzle === 'sudoku' && (
                     <SudokuPuzzle
+                        key={`ai-su-${selectedTopic}`}
                         puzzle={aiPuzzleData.puzzle_data?.puzzle || null}
                         solution={aiPuzzleData.puzzle_data?.solution || null}
                     />
                 )}
                 {aiPuzzleData && activePuzzle === 'jigsaw' && (
-                    <JigsawPuzzle />
+                    <JigsawPuzzle key={`ai-jig-${selectedTopic}`} />
                 )}
-                {!aiPuzzleData && ActiveComponent && <ActiveComponent />}
+                {!aiPuzzleData && ActiveComponent && <ActiveComponent key={`fallback-${activePuzzle}-${selectedTopic}`} />}
             </div>
 
             <div className="puzzle-zone-footer">
