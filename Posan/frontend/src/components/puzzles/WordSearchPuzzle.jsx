@@ -39,11 +39,6 @@ const WordSearchPuzzle = ({ words = [], grid = [], title = "" }) => {
     const checkWord = () => {
         if (!currentGrid.length) return;
 
-        // 1. Get letters from selected cells
-        // Note: In a robust implementation, we'd check if cells are contiguous and linear.
-        // For now, we'll assume the user selected them in order or sort them if needed.
-        // But users usually click in order. Let's build the string based on selection order.
-
         const selectedLetters = selectedCells.map(key => {
             const [r, c] = key.split('-').map(Number);
             return currentGrid[r][c];
@@ -106,8 +101,31 @@ const WordSearchPuzzle = ({ words = [], grid = [], title = "" }) => {
         }
 
         // Prevent selecting already found cells or adding duplicates
-        if (!foundCells.includes(cellKey) && !selectedCells.includes(cellKey)) {
-            setSelectedCells([...selectedCells, cellKey]);
+        if (foundCells.includes(cellKey) || selectedCells.includes(cellKey)) return;
+
+        if (selectedCells.length === 0) {
+            // First cell - always valid
+            setSelectedCells([cellKey]);
+        } else if (selectedCells.length === 1) {
+            // Second cell - must be adjacent to first
+            const [r0, c0] = selectedCells[0].split('-').map(Number);
+            if (Math.abs(row - r0) <= 1 && Math.abs(col - c0) <= 1) {
+                setSelectedCells([...selectedCells, cellKey]);
+            }
+        } else {
+            // Subsequent cells - must continue in same direction and be adjacent to last
+            const [r0, c0] = selectedCells[0].split('-').map(Number);
+            const [r1, c1] = selectedCells[1].split('-').map(Number);
+            const dr = Math.sign(r1 - r0);
+            const dc = Math.sign(c1 - c0);
+
+            const [rLast, cLast] = selectedCells[selectedCells.length - 1].split('-').map(Number);
+            const expectedRow = rLast + dr;
+            const expectedCol = cLast + dc;
+
+            if (row === expectedRow && col === expectedCol) {
+                setSelectedCells([...selectedCells, cellKey]);
+            }
         }
     };
 
