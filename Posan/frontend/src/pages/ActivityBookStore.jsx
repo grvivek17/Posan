@@ -363,7 +363,7 @@ const ActivityBookStore = () => {
                                         onClick={() => addToCart(product.id)}
                                         disabled={addingToCart === product.id}
                                     >
-                                        {addingToCart === product.id ? '✓' : '🛒'}
+                                        {addingToCart === product.id ? '✓ Added' : '🛒 Add'}
                                     </button>
                                 </div>
                             </div>

@@ -5,6 +5,7 @@
     right: 0;
     background: var(--text-primary);
     padding: 0.75rem 0;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     display: none;
@@ -87,7 +88,8 @@
     .home,
     .magazine-page,
     .homework-page-new,
-    .profile-page-new {
+    .profile-page-new,
+    .activity-book-store {
         padding-bottom: 80px;
     }
 }
