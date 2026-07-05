@@ -57,10 +57,10 @@ const JigsawPuzzle = ({ title = "Jigsaw Puzzle" }) => {
             setCompleted(true);
             setTimeout(async () => {
                 try {
-                    await gamificationService.addPoints('puzzle_complete', {
+                    await gamificationService.addPoints('puzzle_solved', {
                         puzzle_type: 'jigsaw'
                     });
-                    alert('🎉 Congratulations! Puzzle completed! +50 points!');
+                    alert('🎉 Congratulations! Puzzle completed! Points awarded!');
                 } catch (error) {
                     alert('🎉 Congratulations! Puzzle completed!');
                 }

@@ -102,10 +102,10 @@ const SudokuPuzzle = ({ initialGrid = null, title = "Sudoku" }) => {
                 setTimeout(async () => {
                     // Award points
                     try {
-                        await gamificationService.addPoints('puzzle_complete', {
+                        await gamificationService.addPoints('puzzle_solved', {
                             puzzle_type: 'sudoku'
                         });
-                        alert('🎉 Congratulations! You solved the Sudoku! +50 points!');
+                        alert('🎉 Congratulations! You solved the Sudoku! Points awarded!');
                     } catch (error) {
                         alert('🎉 Congratulations! You solved the Sudoku!');
                     }
@@ -123,10 +123,10 @@ const SudokuPuzzle = ({ initialGrid = null, title = "Sudoku" }) => {
         if (isCorrect) {
             if (!completed) {
                 setCompleted(true);
-                gamificationService.addPoints('puzzle_complete', {
+                gamificationService.addPoints('puzzle_solved', {
                     puzzle_type: 'sudoku'
                 }).then(() => {
-                    alert('🎉 Congratulations! You solved it! +50 points!');
+                    alert('🎉 Congratulations! You solved it! Points awarded!');
                 }).catch(() => {
                     alert('🎉 Congratulations! You solved it!');
                 });

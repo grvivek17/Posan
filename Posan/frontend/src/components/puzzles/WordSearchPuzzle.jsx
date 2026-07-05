@@ -77,10 +77,10 @@ const WordSearchPuzzle = ({ words = [], grid = [], title = "" }) => {
             setTimeout(async () => {
                 try {
                     await gamificationService.addPoints(
-                        'puzzle_complete',
+                        'puzzle_solved',
                         { puzzle_type: 'word_search' }
                     );
-                    alert('🎉 Congratulations! You found all the words! +50 points!');
+                    alert('🎉 Congratulations! You found all the words! Points awarded!');
                 } catch (error) {
                     console.error('Error awarding points:', error);
                     alert('🎉 Congratulations! You found all the words!');

@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import './CrosswordPuzzle.css';
 import { getRandomCrossword } from '../../data/puzzleData';
+import { gamificationService } from '../../services/gamificationService';
 
 const CrosswordPuzzle = ({ clues: aiClues = [], title = "Crossword" }) => {
     const [currentPuzzle, setCurrentPuzzle] = useState(null);
     const [userAnswers, setUserAnswers] = useState({});
     const [grid, setGrid] = useState([]);
     const [gridSize, setGridSize] = useState({ rows: 0, cols: 0 });
+    const [completed, setCompleted] = useState(false);
 
     // Load a random puzzle on component mount if no AI clues provided
     useEffect(() => {
@@ -115,13 +117,12 @@ const CrosswordPuzzle = ({ clues: aiClues = [], title = "Crossword" }) => {
         }
     };
 
-    const checkAnswers = () => {
+    const checkAnswers = async () => {
         let correct = 0;
         let total = 0;
 
         displayClues.forEach((clue, clueIndex) => {
             const word = (clue.answer || '').toUpperCase();
-            let wordCorrect = true;
 
             for (let i = 0; i < word.length; i++) {
                 const key = `${clueIndex}-${i}`;
@@ -130,13 +131,22 @@ const CrosswordPuzzle = ({ clues: aiClues = [], title = "Crossword" }) => {
 
                 if (userLetter === word[i]) {
                     correct++;
-                } else {
-                    wordCorrect = false;
                 }
             }
         });
 
-        alert(`You got ${correct} out of ${total} letters correct! ${correct === total ? '🎉 Perfect!' : 'Keep trying! 💪'}`);
+        if (correct === total && !completed) {
+            setCompleted(true);
+            try {
+                await gamificationService.addPoints('puzzle_solved', {
+                    puzzle_type: 'crossword'
+                });
+            } catch (error) {
+                console.error('Error awarding points:', error);
+            }
+        }
+
+        alert(`You got ${correct} out of ${total} letters correct! ${correct === total ? '🎉 Perfect! Points awarded!' : 'Keep trying! 💪'}`);
     };
 
     const getCellValue = (row, col) => {
