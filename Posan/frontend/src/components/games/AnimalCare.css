@@ -1,0 +1,319 @@
+.animal-care-game {
+  background: linear-gradient(180deg, var(--animal-bg, #FFE0B2) 0%, #FFF8F0 100%);
+  border-radius: 24px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 8px 32px rgba(255, 183, 77, 0.25);
+  transition: background 0.5s ease;
+}
+
+.ac-header {
+  text-align: center;
+}
+
+.ac-header h2 {
+  font-size: 1.8rem;
+  color: #8D6E63;
+  margin: 0 0 4px;
+}
+
+.ac-hint {
+  color: #A1887F;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.ac-animal-picker {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ac-animal-option {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  background: var(--option-color, #FFE0B2);
+  cursor: pointer;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.ac-animal-option.active {
+  border-color: #8D6E63;
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(141, 110, 99, 0.3);
+}
+
+.ac-animal-option:hover {
+  transform: scale(1.1);
+}
+
+.ac-main-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.ac-pet-display {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.ac-pet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.3s ease;
+}
+
+.ac-pet.bouncing {
+  animation: petBounce 0.5s ease;
+}
+
+@keyframes petBounce {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-16px); }
+  50% { transform: translateY(-8px); }
+  70% { transform: translateY(-12px); }
+}
+
+.ac-pet-emoji {
+  font-size: 5rem;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.ac-pet-mood {
+  font-size: 1.5rem;
+  animation: moodPulse 2s ease-in-out infinite;
+}
+
+@keyframes moodPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.ac-pet-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #6D4C41;
+  margin-top: 4px;
+}
+
+.ac-floating-heart {
+  position: absolute;
+  font-size: 1.4rem;
+  animation: heartFloat 1.2s ease-out forwards;
+  pointer-events: none;
+  z-index: 5;
+}
+
+@keyframes heartFloat {
+  0% { opacity: 1; transform: translateY(0) scale(0.5); }
+  50% { opacity: 1; transform: translateY(-30px) scale(1.2); }
+  100% { opacity: 0; transform: translateY(-60px) scale(0.8); }
+}
+
+.ac-action-bubble {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border-radius: 16px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  animation: bubbleIn 0.3s ease;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+@keyframes bubbleIn {
+  0% { opacity: 0; transform: translateX(-50%) translateY(10px) scale(0.8); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+.ac-ab-emoji {
+  font-size: 1.3rem;
+}
+
+.ac-ab-text {
+  font-size: 0.9rem;
+  color: #6D4C41;
+  font-weight: 600;
+}
+
+.ac-happiness-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.ac-hb-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #A1887F;
+  min-width: 60px;
+}
+
+.ac-hb-track {
+  flex: 1;
+  height: 14px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.ac-hb-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease, background 0.5s ease;
+}
+
+.ac-hb-emoji {
+  font-size: 1.3rem;
+}
+
+.ac-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  max-width: 400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.ac-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border: none;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.ac-action-btn:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ac-action-btn:active {
+  transform: translateY(0);
+}
+
+.ac-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ac-act-emoji {
+  font-size: 1.8rem;
+}
+
+.ac-act-label {
+  font-size: 0.75rem;
+  color: #8D6E63;
+  font-weight: 600;
+}
+
+.ac-badges-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ac-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 12px;
+  min-width: 60px;
+  transition: all 0.3s ease;
+}
+
+.ac-badge.earned {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 12px rgba(255, 183, 77, 0.3);
+  animation: badgeShine 0.5s ease;
+}
+
+.ac-badge.locked {
+  opacity: 0.4;
+}
+
+.ac-badge span:first-child {
+  font-size: 1.5rem;
+}
+
+.ac-badge-label {
+  font-size: 0.6rem;
+  color: #A1887F;
+  font-weight: 600;
+  text-align: center;
+}
+
+@keyframes badgeShine {
+  0% { transform: scale(0.5) rotate(-10deg); }
+  60% { transform: scale(1.15) rotate(5deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@media (max-width: 480px) {
+  .animal-care-game {
+    padding: 16px;
+  }
+
+  .ac-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .ac-pet-emoji {
+    font-size: 3.5rem;
+  }
+
+  .ac-pet-display {
+    height: 180px;
+  }
+
+  .ac-actions {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .ac-act-emoji {
+    font-size: 1.4rem;
+  }
+}
