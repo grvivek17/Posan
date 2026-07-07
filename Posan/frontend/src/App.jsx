@@ -31,6 +31,7 @@ import OrderHistoryPage from './pages/OrderHistoryPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
 import AdminPromotionalEmailPage from './pages/AdminPromotionalEmailPage';
 import PodcastsPage from './pages/PodcastsPage';
+import GamesPage from './pages/GamesPage';
 
 // Components
 import Header from './components/common/Header';
@@ -99,6 +100,10 @@ function App() {
                         <Route
                             path="/puzzle-zone"
                             element={isAuthenticated ? <PuzzleZone /> : <Navigate to="/login" />}
+                        />
+                        <Route
+                            path="/games"
+                            element={isAuthenticated ? <GamesPage /> : <Navigate to="/login" />}
                         />
                         <Route
                             path="/podcasts"

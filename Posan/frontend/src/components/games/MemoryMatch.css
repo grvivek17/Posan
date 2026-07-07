@@ -1,0 +1,249 @@
+.memory-game {
+  max-width: 700px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.memory-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.memory-header h2 {
+  font-size: 2rem;
+  color: #8B5CF6;
+  margin-bottom: 4px;
+}
+
+.memory-header p {
+  color: #666;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.memory-controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.control-group label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.control-group select {
+  padding: 8px 14px;
+  border-radius: 50px;
+  border: 2px solid #8B5CF6;
+  background: white;
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+  cursor: pointer;
+}
+
+.memory-reset-btn {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-primary);
+}
+
+.memory-reset-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+}
+
+.memory-stats {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  background: #F3F0FF;
+  padding: 8px 18px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-item.best {
+  background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #666;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #8B5CF6;
+}
+
+.stat-item.best .stat-value {
+  color: #D97706;
+}
+
+.memory-grid {
+  display: grid;
+  gap: 12px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.memory-card {
+  aspect-ratio: 1;
+  cursor: pointer;
+  perspective: 600px;
+}
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.5s ease;
+  transform-style: preserve-3d;
+}
+
+.memory-card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+}
+
+.card-front {
+  background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+  color: white;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.card-back {
+  background: white;
+  border: 3px solid #8B5CF6;
+  transform: rotateY(180deg);
+}
+
+.memory-card.matched .card-back {
+  border-color: #10B981;
+  background: #ECFDF5;
+  animation: matchPulse 0.5s ease;
+}
+
+@keyframes matchPulse {
+  0%, 100% { transform: rotateY(180deg) scale(1); }
+  50% { transform: rotateY(180deg) scale(1.1); }
+}
+
+.memory-win-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.win-modal {
+  background: white;
+  border-radius: 24px;
+  padding: 40px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: bounceIn 0.5s ease;
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.win-modal h2 {
+  font-size: 2rem;
+  color: #8B5CF6;
+  margin-bottom: 12px;
+}
+
+.win-modal p {
+  color: #555;
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+
+.new-record {
+  color: #D97706 !important;
+  font-weight: 700;
+  font-size: 1.2rem !important;
+}
+
+@media (max-width: 480px) {
+  .memory-game {
+    padding: 20px 16px;
+  }
+
+  .memory-grid {
+    gap: 8px;
+  }
+
+  .card-front,
+  .card-back {
+    font-size: 1.8rem;
+    border-radius: 12px;
+  }
+
+  .memory-controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

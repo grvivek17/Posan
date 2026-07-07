@@ -140,7 +140,7 @@ function Home() {
                             <h3 className="activity-title">Jokes</h3>
                         </div>
 
-                        <div className="activity-card pink-gradient" onClick={() => navigate('/puzzle-zone')}>
+                        <div className="activity-card pink-gradient" onClick={() => navigate('/games')}>
                             <div className="activity-icon">🎮</div>
                             <h3 className="activity-title">Games</h3>
                         </div>
