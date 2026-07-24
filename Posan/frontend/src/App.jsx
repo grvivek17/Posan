@@ -32,8 +32,6 @@ import AdminOrdersPage from './pages/AdminOrdersPage';
 import AdminPromotionalEmailPage from './pages/AdminPromotionalEmailPage';
 import PodcastsPage from './pages/PodcastsPage';
 import GamesPage from './pages/GamesPage';
-import PlannerPage from './pages/PlannerPage';
-
 // Components
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
@@ -117,10 +115,6 @@ function App() {
                         <Route
                             path="/achievements"
                             element={isAuthenticated ? <GamificationPage /> : <Navigate to="/login" />}
-                        />
-                        <Route
-                            path="/planner"
-                            element={isAuthenticated ? <PlannerPage /> : <Navigate to="/login" />}
                         />
                         <Route
                             path="/test-subscription"

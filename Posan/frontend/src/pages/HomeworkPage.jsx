@@ -9,6 +9,7 @@ import StudyMaterialAssistant from '../components/homework/StudyMaterialAssistan
 import AssignmentTracker from '../components/homework/AssignmentTracker';
 import PerformanceWidget from '../components/homework/PerformanceWidget';
 import ExamHistoryWidget from '../components/homework/ExamHistoryWidget';
+import PlannerTool from '../components/homework/PlannerTool';
 import './HomeworkPage.css';
 import './HomeworkPageSidebar.css';
 
@@ -359,6 +360,10 @@ const HomeworkPage = () => {
                                                 <span className="action-icon">🎯</span>
                                                 <span>Test Analysis</span>
                                             </button>
+                                            <button className="quick-action-btn open-ai-tool-btn" onClick={() => { setActiveTab('planner'); setIsAIModalOpen(true); }}>
+                                                <span className="action-icon">📅</span>
+                                                <span>Study Planner</span>
+                                            </button>
                                         </div>
                                         <div className="ai-stats">
                                             <div className="stat-item">
@@ -464,9 +469,17 @@ const HomeworkPage = () => {
                                 >
                                     🎯 Test Analysis
                                 </button>
+                                <button
+                                    className={`ai-tab-btn ${activeTab === 'planner' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('planner')}
+                                >
+                                    📅 Study Planner
+                                </button>
                             </div>
-                            <div className="ai-tool-container">
-                                {activeTab === 'study' ? <StudyMaterialAssistant /> : <TestAnalysis />}
+                            <div className="ai-tool-container" style={{ maxHeight: activeTab === 'planner' ? '80vh' : 'auto', overflowY: activeTab === 'planner' ? 'auto' : 'visible' }}>
+                                {activeTab === 'study' && <StudyMaterialAssistant />}
+                                {activeTab === 'test' && <TestAnalysis />}
+                                {activeTab === 'planner' && <PlannerTool />}
                             </div>
                         </div>
                     </div>

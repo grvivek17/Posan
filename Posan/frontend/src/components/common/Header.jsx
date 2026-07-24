@@ -68,7 +68,6 @@ function Header({ isAuthenticated, setIsAuthenticated }) {
                             <Link to="/puzzle-zone" className="nav-link">🧩 Puzzles</Link>
                             <Link to="/games" className="nav-link">🎮 Games</Link>
                             <Link to="/homework" className="nav-link">📝 Homework</Link>
-                            <Link to="/planner" className="nav-link">📅 Planner</Link>
                             <Link to="/ai-content" className="nav-link">🤖 AI Creator</Link>
                         </nav>
                     )}

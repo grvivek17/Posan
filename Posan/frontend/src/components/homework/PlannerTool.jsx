@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../styles/planner.css';
+import '../../styles/planner.css';
 
-const PlannerPage = () => {
+const PlannerTool = () => {
     const [gamification, setGamification] = useState({
         current_streak: 0,
         max_streak: 0,
@@ -24,7 +24,7 @@ const PlannerPage = () => {
     const fetchGamification = async () => {
         try {
             const token = localStorage.getItem('access_token');
-            const res = await axios.get('http://localhost:8000/api/v1/planner/gamification', {
+            const res = await axios.get('https://posan-backend-po1f.onrender.com/api/v1/planner/gamification', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setGamification(res.data);
@@ -36,7 +36,7 @@ const PlannerPage = () => {
     const fetchPlans = async () => {
         try {
             const token = localStorage.getItem('access_token');
-            const res = await axios.get('http://localhost:8000/api/v1/planner/plans', {
+            const res = await axios.get('https://posan-backend-po1f.onrender.com/api/v1/planner/plans', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setPlans(res.data.plans || []);
@@ -71,7 +71,7 @@ const PlannerPage = () => {
                 end_date: formData.end_date
             };
             
-            await axios.post('http://localhost:8000/api/v1/planner/generate', payload, {
+            await axios.post('https://posan-backend-po1f.onrender.com/api/v1/planner/generate', payload, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -88,7 +88,7 @@ const PlannerPage = () => {
     const handleCompleteSession = async (sessionId) => {
         try {
             const token = localStorage.getItem('access_token');
-            const res = await axios.post(`http://localhost:8000/api/v1/planner/sessions/${sessionId}/complete`, {}, {
+            await axios.post(`https://posan-backend-po1f.onrender.com/api/v1/planner/sessions/${sessionId}/complete`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -101,11 +101,9 @@ const PlannerPage = () => {
     };
 
     return (
-        <div className="planner-container">
-            <header className="planner-header">
-                <h1>Study Planner & Gamification</h1>
-                
-                <div className="gamification-stats">
+        <div className="planner-container" style={{ padding: '0', maxWidth: '100%' }}>
+            <header className="planner-header" style={{ marginBottom: '1.5rem' }}>
+                <div className="gamification-stats" style={{ padding: '1rem' }}>
                     <div className="stat-card">
                         <span className="stat-icon">🔥</span>
                         <span className="stat-value">{gamification.current_streak}</span>
@@ -124,9 +122,9 @@ const PlannerPage = () => {
                 </div>
             </header>
 
-            <div className="planner-content">
-                <section className="generator-section">
-                    <h2>Generate New Plan</h2>
+            <div className="planner-content" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem' }}>
+                <section className="generator-section" style={{ padding: '1.5rem' }}>
+                    <h2 style={{ fontSize: '1.25rem' }}>Generate New Plan</h2>
                     {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
                     <form onSubmit={handleGenerate}>
                         <div className="form-group">
@@ -148,6 +146,7 @@ const PlannerPage = () => {
                                 value={formData.topics}
                                 onChange={handleInputChange}
                                 required 
+                                style={{ minHeight: '80px' }}
                             />
                         </div>
                         <div className="form-group">
@@ -172,7 +171,7 @@ const PlannerPage = () => {
                         </div>
                         <button type="submit" className="btn-generate" disabled={loading}>
                             {loading ? (
-                                <><span className="loading-spinner"></span> Generating with AI...</>
+                                <><span className="loading-spinner"></span> Generating...</>
                             ) : (
                                 "Generate Study Plan"
                             )}
@@ -180,31 +179,32 @@ const PlannerPage = () => {
                     </form>
                 </section>
 
-                <section className="plans-section">
-                    <h2>Your Study Plans</h2>
+                <section className="plans-section" style={{ padding: '1.5rem', maxHeight: '60vh', overflowY: 'auto' }}>
+                    <h2 style={{ fontSize: '1.25rem' }}>Your Study Plans</h2>
                     {plans.length === 0 ? (
                         <div className="no-plans">No study plans yet. Generate one to get started!</div>
                     ) : (
                         plans.map(plan => (
-                            <div key={plan.id} className="plan-card">
+                            <div key={plan.id} className="plan-card" style={{ marginBottom: '1rem' }}>
                                 <div className="plan-header">
-                                    <h3>{plan.title}</h3>
+                                    <h3 style={{ fontSize: '1.1rem' }}>{plan.title}</h3>
                                     <span className="plan-meta">{plan.completed_sessions} / {plan.total_sessions} completed</span>
                                 </div>
                                 <div className="sessions-list">
                                     {plan.sessions.map(session => (
-                                        <div key={session.id} className={`session-item ${session.is_completed ? 'completed' : ''}`}>
+                                        <div key={session.id} className={`session-item ${session.is_completed ? 'completed' : ''}`} style={{ padding: '0.75rem' }}>
                                             <div className="session-info">
                                                 <div className="session-date">{new Date(session.date).toLocaleDateString()}</div>
-                                                <h4 className="session-topic">{session.topic}</h4>
+                                                <h4 className="session-topic" style={{ fontSize: '0.95rem' }}>{session.topic}</h4>
                                                 <div className="session-duration">⏱️ {session.duration_minutes} mins</div>
                                             </div>
                                             <div className="session-action">
                                                 {session.is_completed ? (
-                                                    <span className="completed-badge">✓ +{session.points_earned} pts</span>
+                                                    <span className="completed-badge" style={{ fontSize: '0.85rem' }}>✓ +{session.points_earned} pts</span>
                                                 ) : (
                                                     <button 
                                                         className="btn-complete" 
+                                                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
                                                         onClick={() => handleCompleteSession(session.id)}
                                                     >
                                                         Mark Complete
@@ -223,4 +223,4 @@ const PlannerPage = () => {
     );
 };
 
-export default PlannerPage;
+export default PlannerTool;
