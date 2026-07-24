@@ -10,12 +10,16 @@ const PuzzleZone = () => {
     const [activePuzzle, setActivePuzzle] = useState('word-search');
     const [generating, setGenerating] = useState(false);
     const [selectedTopic, setSelectedTopic] = useState('animals');
+    const [selectedDifficulty, setSelectedDifficulty] = useState('medium');
+    const [selectedAgeGroup, setSelectedAgeGroup] = useState('6-8');
     const [aiPuzzleData, setAiPuzzleData] = useState(null);
 
     const topics = [
         'animals', 'space', 'ocean', 'dinosaurs', 'sports',
         'food', 'science', 'history', 'nature', 'vehicles'
     ];
+    const difficulties = ['easy', 'medium', 'hard'];
+    const ageGroups = ['4-5', '6-8', '9-12', '13+'];
 
     const puzzles = [
         { id: 'word-search', name: 'Word Search', icon: '🔍', component: WordSearchPuzzle },
@@ -38,8 +42,8 @@ const PuzzleZone = () => {
             const response = await puzzlesAPI.generateAIPuzzle({
                 puzzle_type: puzzleTypeMap[activePuzzle],
                 topic: selectedTopic,
-                difficulty: 'medium',
-                age_group: '6-8',
+                difficulty: selectedDifficulty,
+                age_group: selectedAgeGroup,
                 save_to_db: false
             });
 
@@ -51,7 +55,7 @@ const PuzzleZone = () => {
         } finally {
             setGenerating(false);
         }
-    }, [activePuzzle, selectedTopic]);
+    }, [activePuzzle, selectedTopic, selectedDifficulty, selectedAgeGroup]);
 
     // Auto-generate puzzle on page load and when puzzle type or topic changes
     useEffect(() => {
@@ -89,6 +93,30 @@ const PuzzleZone = () => {
                         {topics.map(topic => (
                             <option key={topic} value={topic}>
                                 {topic.charAt(0).toUpperCase() + topic.slice(1)}
+                            </option>
+                        ))}
+                    </select>
+                    <select
+                        value={selectedDifficulty}
+                        onChange={(e) => setSelectedDifficulty(e.target.value)}
+                        className="topic-selector"
+                        disabled={generating}
+                    >
+                        {difficulties.map(diff => (
+                            <option key={diff} value={diff}>
+                                {diff.charAt(0).toUpperCase() + diff.slice(1)}
+                            </option>
+                        ))}
+                    </select>
+                    <select
+                        value={selectedAgeGroup}
+                        onChange={(e) => setSelectedAgeGroup(e.target.value)}
+                        className="topic-selector"
+                        disabled={generating}
+                    >
+                        {ageGroups.map(age => (
+                            <option key={age} value={age}>
+                                Age {age}
                             </option>
                         ))}
                     </select>

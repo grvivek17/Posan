@@ -21,7 +21,7 @@ from app.agents.ingestion_agent import ingestion_agent
 from app.agents.retrieval_agent import retrieval_agent
 from app.agents.question_generator_agent import question_generator_agent
 from app.agents.exam_analysis_agent import exam_analysis_agent
-from app.agents import coordinator
+from app.agents import coordinator, AgentStatus
 from app.core.database import get_db
 from app.core.subscription_deps import require_pro_subscription
 from app.services.material_service import material_service, agent_log_service
@@ -1647,13 +1647,16 @@ async def get_performance_analysis(
         ]
 
     # Run through the analysis agent
-    result = exam_analysis_agent.execute({
+    output = exam_analysis_agent.execute({
         "operation": "analyze_performance",
         "exams": exam_data,
         "answers": answers
     })
 
-    return result.get("output", result)
+    if output.status == AgentStatus.FAILURE:
+        raise HTTPException(status_code=500, detail=output.error or "Analysis failed")
+
+    return output.result
 
 
 # Register agents with coordinator

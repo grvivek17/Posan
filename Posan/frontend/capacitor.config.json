@@ -1,0 +1,13 @@
+{
+  "appId": "com.poshika.posan",
+  "appName": "POSAN",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}

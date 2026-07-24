@@ -421,3 +421,16 @@ class CoordinatorAgent(AgentBase):
 
 # Global coordinator instance
 coordinator = CoordinatorAgent()
+
+# Import and register agents
+from app.agents.ingestion_agent import ingestion_agent
+from app.agents.retrieval_agent import retrieval_agent
+from app.agents.question_generator_agent import question_generator_agent
+from app.agents.exam_analysis_agent import exam_analysis_agent
+from app.agents.planner_agent import planner_agent
+
+coordinator.register_agent(ingestion_agent)
+coordinator.register_agent(retrieval_agent)
+coordinator.register_agent(question_generator_agent)
+coordinator.register_agent(exam_analysis_agent)
+coordinator.register_agent(planner_agent)

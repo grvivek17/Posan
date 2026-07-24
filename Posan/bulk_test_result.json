@@ -1,0 +1,198 @@
+{
+  "success": true,
+  "files_processed": 4,
+  "files_failed": 0,
+  "total_chunks": 19,
+  "topics": [
+    "Cee MARKS :50",
+    "Circle the smalles Git number",
+    "Divide into two equal halves : .",
+    "Find the sum of the greatest 2 digit number and the smallest 1 digit number.___, 8",
+    "ICS DATE : 15.09.2025",
+    "ROLL NO: 4 [I VA",
+    "The (9) . pal mber 245",
+    "WF;",
+    "Whatis the s",
+    "Whichis greater? : 5000 + 25 or 6000 - 25 bg nD",
+    "Pf of",
+    "A box contains 85 pencils. How many pencils are there in 4 such boxes?",
+    "Find the product:",
+    "Senate",
+    "T °",
+    "Identify the shape of the following objects",
+    "Inaclass of 20 students, absentees ina particular week were shown in the following"
+  ],
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "What makes learning fun?",
+      "options": {
+        "A": "Reading books",
+        "B": "Asking questions",
+        "C": "Exploring new places",
+        "D": "All of the above!"
+      },
+      "correct_answer": "D",
+      "hint": "Think carefully about the question.",
+      "subject": "Mathematics",
+      "difficulty": "medium",
+      "id": "q_1",
+      "question_number": 1
+    },
+    {
+      "type": "short_answer",
+      "question": "What makes learning fun?\nA) Reading books\nB) Asking questions\nC) Exploring new places\nD) All of the above!",
+      "expected_answer": "D\nExplanation: Learning is fun when we stay curious and try new things!",
+      "hint": "Think about the key concepts.",
+      "subject": "Mathematics",
+      "difficulty": "medium",
+      "id": "q_2",
+      "question_number": 2
+    },
+    {
+      "type": "mcq",
+      "question": "What makes learning fun?",
+      "options": {
+        "A": "Reading books",
+        "B": "Asking questions",
+        "C": "Exploring new places",
+        "D": "All of the above!"
+      },
+      "correct_answer": "D",
+      "hint": "Think carefully about the question.",
+      "subject": "Mathematics",
+      "difficulty": "medium",
+      "id": "q_1",
+      "question_number": 1
+    },
+    {
+      "type": "short_answer",
+      "question": "What makes learning fun?\nA) Reading books\nB) Asking questions\nC) Exploring new places\nD) All of the above!",
+      "expected_answer": "D\nExplanation: Learning is fun when we stay curious and try new things!",
+      "hint": "Think about the key concepts.",
+      "subject": "Mathematics",
+      "difficulty": "medium",
+      "id": "q_2",
+      "question_number": 2
+    },
+    {
+      "type": "short_answer",
+      "question": "What makes learning fun?\nA) Reading books\nB) Asking questions\nC) Exploring new places\nD) All of the above!",
+      "expected_answer": "D\nExplanation: Learning is fun when we stay curious and try new things!",
+      "hint": "Think about the key concepts.",
+      "subject": "Mathematics",
+      "difficulty": "medium",
+      "id": "q_1",
+      "question_number": 1
+    },
+    {
+      "type": "mcq",
+      "question": "What makes learning fun?",
+      "options": {
+        "A": "Reading books",
+        "B": "Asking questions",
+        "C": "Exploring new places",
+        "D": "All of the above!"
+      },
+      "correct_answer": "D",
+      "hint": "Think carefully about the question.",
+      "subject": "Mathematics",
+      "difficulty": "medium",
+      "id": "q_2",
+      "question_number": 2
+    },
+    {
+      "type": "mcq",
+      "question": "What makes learning fun?",
+      "options": {
+        "A": "Reading books",
+        "B": "Asking questions",
+        "C": "Exploring new places",
+        "D": "All of the above!"
+      },
+      "correct_answer": "D",
+      "hint": "Think carefully about the question.",
+      "subject": "Mathematics",
+      "difficulty": "medium",
+      "id": "q_1",
+      "question_number": 1
+    },
+    {
+      "type": "short_answer",
+      "question": "What makes learning fun?\nA) Reading books\nB) Asking questions\nC) Exploring new places\nD) All of the above!",
+      "expected_answer": "D\nExplanation: Learning is fun when we stay curious and try new things!",
+      "hint": "Think about the key concepts.",
+      "subject": "Mathematics",
+      "difficulty": "medium",
+      "id": "q_2",
+      "question_number": 2
+    }
+  ],
+  "question_count": 8,
+  "file_results": [
+    {
+      "filename": "maths1.jpg",
+      "material_id": "1f477466-d385-429a-84f7-fa1ded28dbc1",
+      "index_name": "material_1f477466",
+      "chunks_created": 12,
+      "topics": [
+        "Cee MARKS :50",
+        "Circle the smalles Git number",
+        "Divide into two equal halves : .",
+        "Find the sum of the greatest 2 digit number and the smallest 1 digit number.___, 8",
+        "ICS DATE : 15.09.2025",
+        "ROLL NO: 4 [I VA",
+        "The (9) . pal mber 245",
+        "WF;",
+        "Whatis the s",
+        "Whichis greater? : 5000 + 25 or 6000 - 25 bg nD"
+      ],
+      "questions_generated": 2,
+      "status": "success"
+    },
+    {
+      "filename": "maths2.jpg",
+      "material_id": "ffedccdc-9a24-4607-84ce-dca50559c361",
+      "index_name": "material_ffedccdc",
+      "chunks_created": 1,
+      "topics": [
+        "Pf of"
+      ],
+      "questions_generated": 2,
+      "status": "success"
+    },
+    {
+      "filename": "maths3.jpg",
+      "material_id": "df8653d2-a89d-4f1e-9c3b-34d817052fb6",
+      "index_name": "material_df8653d2",
+      "chunks_created": 4,
+      "topics": [
+        "A box contains 85 pencils. How many pencils are there in 4 such boxes?",
+        "Find the product:",
+        "Senate",
+        "T °"
+      ],
+      "questions_generated": 2,
+      "status": "success"
+    },
+    {
+      "filename": "maths4.jpg",
+      "material_id": "e96329ff-32b0-4d72-b288-29d8c789bf7c",
+      "index_name": "material_e96329ff",
+      "chunks_created": 2,
+      "topics": [
+        "Identify the shape of the following objects",
+        "Inaclass of 20 students, absentees ina particular week were shown in the following"
+      ],
+      "questions_generated": 2,
+      "status": "success"
+    }
+  ],
+  "failed_files": [],
+  "metadata": {
+    "subject": "Mathematics",
+    "grade": 5,
+    "difficulty": "medium",
+    "questions_per_file": 3
+  }
+}

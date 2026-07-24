@@ -6,6 +6,9 @@ import ProBadge from '../components/subscription/ProBadge';
 import UpgradeModal from '../components/subscription/UpgradeModal';
 import TestAnalysis from '../components/homework/TestAnalysis';
 import StudyMaterialAssistant from '../components/homework/StudyMaterialAssistant';
+import AssignmentTracker from '../components/homework/AssignmentTracker';
+import PerformanceWidget from '../components/homework/PerformanceWidget';
+import ExamHistoryWidget from '../components/homework/ExamHistoryWidget';
 import './HomeworkPage.css';
 import './HomeworkPageSidebar.css';
 
@@ -92,46 +95,9 @@ const HomeworkPage = () => {
         }
     };
 
-    const handleCreateAssignment = async () => {
-        if (!newAssignment.title) return;
-        try {
-            const formData = new FormData();
-            formData.append('title', newAssignment.title);
-            formData.append('user_id', userId);
-            if (newAssignment.subject) formData.append('subject', newAssignment.subject);
-            if (newAssignment.dueDate) formData.append('due_date', newAssignment.dueDate);
-            if (assignmentFile) formData.append('file', assignmentFile);
-
-            await homeworkAPI.createAssignment(formData);
-            setNewAssignment({ title: '', subject: '', dueDate: '' });
-            setAssignmentFile(null);
-            setShowAddAssignment(false);
-            loadAssignments();
-        } catch (err) {
-            console.error('Failed to create assignment:', err);
-            alert('Failed to create assignment');
-        }
-    };
-
-    const handleToggleAssignmentStatus = async (id, currentStatus) => {
-        const nextStatus = currentStatus === 'completed' ? 'pending' : 'completed';
-        try {
-            await homeworkAPI.updateAssignmentStatus(id, nextStatus);
-            loadAssignments();
-            loadStats();
-        } catch (err) {
-            console.error('Failed to update assignment:', err);
-        }
-    };
-
-    const handleDeleteAssignment = async (id) => {
-        try {
-            await homeworkAPI.deleteAssignment(id);
-            loadAssignments();
-            loadStats();
-        } catch (err) {
-            console.error('Failed to delete assignment:', err);
-        }
+    const handleAssignmentsUpdated = () => {
+        loadAssignments();
+        loadStats();
     };
 
     const handleSearch = (e) => {
@@ -430,91 +396,11 @@ const HomeworkPage = () => {
                         </div>
 
                         {/* Assignment Tracker Widget */}
-                        <div className="sidebar-widget assignment-tracker-widget">
-                            <div className="widget-header">
-                                <h3>📋 Assignment Tracker</h3>
-                                <button
-                                    className="add-assignment-btn"
-                                    onClick={() => setShowAddAssignment(!showAddAssignment)}
-                                    style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.2em', cursor: 'pointer' }}
-                                >
-                                    {showAddAssignment ? '✕' : '+'}
-                                </button>
-                            </div>
-                            <div className="widget-content">
-                                {showAddAssignment && (
-                                    <div className="add-assignment-form" style={{ marginBottom: '12px', padding: '12px', background: '#f8f9fa', borderRadius: '8px' }}>
-                                        <input
-                                            type="text"
-                                            placeholder="Assignment title..."
-                                            value={newAssignment.title}
-                                            onChange={(e) => setNewAssignment({ ...newAssignment, title: e.target.value })}
-                                            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ddd', marginBottom: '8px', boxSizing: 'border-box' }}
-                                        />
-                                        <select
-                                            value={newAssignment.subject}
-                                            onChange={(e) => setNewAssignment({ ...newAssignment, subject: e.target.value })}
-                                            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ddd', marginBottom: '8px' }}
-                                        >
-                                            <option value="">Select Subject</option>
-                                            <option value="Mathematics">Mathematics</option>
-                                            <option value="Science">Science</option>
-                                            <option value="English">English</option>
-                                            <option value="History">History</option>
-                                        </select>
-                                        <input
-                                            type="date"
-                                            value={newAssignment.dueDate}
-                                            onChange={(e) => setNewAssignment({ ...newAssignment, dueDate: e.target.value })}
-                                            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ddd', marginBottom: '8px', boxSizing: 'border-box' }}
-                                        />
-                                        <input
-                                            type="file"
-                                            accept=".pdf,.doc,.docx,.jpg,.png"
-                                            onChange={(e) => setAssignmentFile(e.target.files[0] || null)}
-                                            style={{ width: '100%', marginBottom: '8px' }}
-                                        />
-                                        <button
-                                            onClick={handleCreateAssignment}
-                                            disabled={!newAssignment.title}
-                                            style={{ width: '100%', padding: '8px', borderRadius: '6px', border: 'none', background: '#6C5CE7', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}
-                                        >
-                                            Add Assignment
-                                        </button>
-                                    </div>
-                                )}
-                                <div className="assignments-list">
-                                    <h4 className="assignments-title">
-                                        {assignments.length > 0 ? `Assignments (${assignments.length})` : 'No assignments yet'}
-                                    </h4>
-                                    {assignments.map((a) => (
-                                        <div key={a.id} className="assignment-item">
-                                            <div
-                                                className={`assignment-icon ${a.subject?.toLowerCase() || ''}`}
-                                                onClick={() => handleToggleAssignmentStatus(a.id, a.status)}
-                                                style={{ cursor: 'pointer' }}
-                                            >
-                                                {a.status === 'completed' ? '✅' : getSubjectIcon(a.subject)}
-                                            </div>
-                                            <div className="assignment-details">
-                                                <p className="assignment-name" style={{ textDecoration: a.status === 'completed' ? 'line-through' : 'none' }}>
-                                                    {a.title}
-                                                </p>
-                                                <p className="assignment-due">{formatDueDate(a.due_date)}</p>
-                                            </div>
-                                            <span
-                                                className={`assignment-status ${a.status}`}
-                                                onClick={() => handleDeleteAssignment(a.id)}
-                                                style={{ cursor: 'pointer' }}
-                                                title="Delete"
-                                            >
-                                                {a.status === 'completed' ? '🗑️' : '⏳'}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
+                        <AssignmentTracker 
+                            userId={userId} 
+                            assignments={assignments} 
+                            onAssignmentsUpdated={handleAssignmentsUpdated} 
+                        />
 
                         {/* Progress Widget */}
                         <div className="sidebar-widget progress-widget">
@@ -550,116 +436,10 @@ const HomeworkPage = () => {
                         </div>
 
                         {/* Performance Analysis Widget */}
-                        {performanceData && performanceData.summary && performanceData.summary.total_exams > 0 && (
-                            <div className="sidebar-widget performance-widget">
-                                <div className="widget-header">
-                                    <h3>📈 Performance Analysis</h3>
-                                </div>
-                                <div className="widget-content">
-                                    <div className="performance-summary">
-                                        <div className="perf-stat-row">
-                                            <span className="perf-label">Overall Trend</span>
-                                            <span className={`perf-trend ${performanceData.summary.overall_trend}`}>
-                                                {performanceData.summary.overall_trend === 'improving' ? '📈 Improving' :
-                                                 performanceData.summary.overall_trend === 'declining' ? '📉 Declining' :
-                                                 performanceData.summary.overall_trend === 'stable' ? '➡️ Stable' : '🆕 Just Started'}
-                                            </span>
-                                        </div>
-                                        <div className="perf-stat-row">
-                                            <span className="perf-label">Avg Score</span>
-                                            <span className="perf-value">{performanceData.summary.average_score}%</span>
-                                        </div>
-                                        <div className="perf-stat-row">
-                                            <span className="perf-label">Best / Lowest</span>
-                                            <span className="perf-value">{performanceData.summary.highest_score}% / {performanceData.summary.lowest_score}%</span>
-                                        </div>
-                                        <div className="perf-stat-row">
-                                            <span className="perf-label">Consistency</span>
-                                            <div className="progress-bar" style={{ flex: 1, marginLeft: '8px' }}>
-                                                <div className="progress-fill" style={{ width: `${(performanceData.summary.consistency || 0) * 100}%` }}></div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Subject breakdown */}
-                                    {Object.keys(performanceData.by_subject || {}).length > 0 && (
-                                        <div className="subject-breakdown">
-                                            <h4 style={{ fontSize: '0.85em', marginBottom: '8px', color: '#666' }}>By Subject</h4>
-                                            {Object.entries(performanceData.by_subject).map(([subj, data]) => (
-                                                <div key={subj} className="perf-stat-row" style={{ marginBottom: '6px' }}>
-                                                    <span className="perf-label">{subj}</span>
-                                                    <span className="perf-value" style={{ fontSize: '0.85em' }}>
-                                                        {data.average}%
-                                                        <span style={{ fontSize: '0.75em', marginLeft: '4px', color: data.trend === 'improving' ? '#10B981' : data.trend === 'declining' ? '#EF4444' : '#6B7280' }}>
-                                                            {data.trend === 'improving' ? '↑' : data.trend === 'declining' ? '↓' : '→'}
-                                                        </span>
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {/* Knowledge gaps */}
-                                    {performanceData.knowledge_gaps?.critical?.length > 0 && (
-                                        <div style={{ marginTop: '10px', padding: '8px', background: '#FEF2F2', borderRadius: '8px', fontSize: '0.85em' }}>
-                                            <strong style={{ color: '#DC2626' }}>Focus Areas:</strong>
-                                            <span style={{ marginLeft: '6px', color: '#7F1D1D' }}>
-                                                {performanceData.knowledge_gaps.critical.join(', ')}
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    {/* Recommendations */}
-                                    {performanceData.recommendations?.length > 0 && (
-                                        <div style={{ marginTop: '10px' }}>
-                                            <h4 style={{ fontSize: '0.85em', marginBottom: '6px', color: '#666' }}>Tips</h4>
-                                            {performanceData.recommendations.slice(0, 3).map((rec, i) => (
-                                                <p key={i} style={{ fontSize: '0.8em', color: '#555', marginBottom: '4px', lineHeight: '1.4' }}>
-                                                    💡 {rec}
-                                                </p>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
+                        <PerformanceWidget performanceData={performanceData} />
 
                         {/* Exam History Widget */}
-                        {examHistory.length > 0 && (
-                            <div className="sidebar-widget exam-history-widget">
-                                <div className="widget-header">
-                                    <h3>📝 Recent Exams</h3>
-                                </div>
-                                <div className="widget-content">
-                                    {examHistory.slice(0, 5).map((exam) => (
-                                        <div key={exam.id} className="exam-history-item" style={{
-                                            display: 'flex', alignItems: 'center', gap: '10px',
-                                            padding: '10px', background: '#f8f9fa', borderRadius: '8px', marginBottom: '8px'
-                                        }}>
-                                            <div style={{
-                                                width: '40px', height: '40px', borderRadius: '50%', display: 'flex',
-                                                alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.9em',
-                                                background: exam.percentage >= 80 ? '#D1FAE5' : exam.percentage >= 60 ? '#FEF3C7' : '#FEE2E2',
-                                                color: exam.percentage >= 80 ? '#065F46' : exam.percentage >= 60 ? '#92400E' : '#991B1B'
-                                            }}>
-                                                {exam.letter_grade || '-'}
-                                            </div>
-                                            <div style={{ flex: 1, minWidth: 0 }}>
-                                                <p style={{ fontSize: '0.85em', fontWeight: '600', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                    {exam.subject || 'Practice'}
-                                                </p>
-                                                <p style={{ fontSize: '0.75em', color: '#888', margin: 0 }}>
-                                                    {exam.created_at ? new Date(exam.created_at).toLocaleDateString() : ''}
-                                                </p>
-                                            </div>
-                                            <div style={{ fontWeight: 'bold', fontSize: '0.9em', color: '#667eea' }}>
-                                                {exam.percentage ? `${Math.round(exam.percentage)}%` : '-'}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                        <ExamHistoryWidget examHistory={examHistory} />
                     </div>
                 </div>
 
