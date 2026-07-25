@@ -131,8 +131,8 @@ const AdminProductsPage = () => {
             };
 
             const url = editingProduct
-                ? `${API_BASE}/admin/products/${editingProduct.id}`
-                : `${API_BASE}/admin/products`;
+                ? `${API_BASE}/store/admin/products/${editingProduct.id}`
+                : `${API_BASE}/store/admin/products`;
 
             const method = editingProduct ? 'PUT' : 'POST';
 
@@ -161,7 +161,7 @@ const AdminProductsPage = () => {
         if (!confirm('Are you sure you want to delete this product?')) return;
 
         try {
-            const response = await fetch(`${API_BASE}/admin/products/${productId}`, {
+            const response = await fetch(`${API_BASE}/store/admin/products/${productId}`, {
                 method: 'DELETE',
                 headers: getAuthHeaders()
             });
