@@ -289,3 +289,11 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+/* Fix global input text color (override white text in inputs) */
+input, textarea, select {
+  color: #1e40af !important; /* Deep blue */
+}
+input::placeholder, textarea::placeholder {
+  color: #93c5fd !important; /* Light blue placeholder */
+}
