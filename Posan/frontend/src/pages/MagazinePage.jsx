@@ -131,10 +131,15 @@ function MagazinePage() {
         return matchesSearch && matchesCategory;
     });
 
-    // Featured magazine (first one or with special flag)
-    const featuredMagazine = magazines[0];
-    const newArrivals = filteredMagazines.slice(0, 3);
-    const exploreAll = filteredMagazines.slice(3);
+    // Featured magazine (first one or with special flag) only on default view
+    const featuredMagazine = (searchQuery === '' && activeCategory === 'All' && magazines.length > 0) ? magazines[0] : null;
+    
+    const remainingMagazines = featuredMagazine 
+        ? filteredMagazines.filter(m => m.id !== featuredMagazine.id) 
+        : filteredMagazines;
+        
+    const newArrivals = remainingMagazines.slice(0, 3);
+    const exploreAll = remainingMagazines.slice(3);
 
     if (loading) {
         return (
@@ -261,11 +266,11 @@ function MagazinePage() {
                 )}
 
                 {/* Explore All */}
-                {filteredMagazines.length > 0 && (
+                {exploreAll.length > 0 && (
                     <section className="explore-section">
                         <h2 className="section-title-lib">Explore All</h2>
                         <div className="explore-grid">
-                            {filteredMagazines.map((magazine, index) => (
+                            {exploreAll.map((magazine, index) => (
                                 <div
                                     key={magazine.id}
                                     className="explore-card"
