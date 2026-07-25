@@ -122,8 +122,19 @@ function MagazinePage() {
         navigate(`/magazines/${magazineId}`);
     };
 
+    // Thoroughly deduplicate magazines by title (and optionally id) since backend auto-refresh might cause identical copies
+    const uniqueMagazines = [];
+    const seenTitles = new Set();
+    
+    magazines.forEach(mag => {
+        if (!seenTitles.has(mag.title.toLowerCase())) {
+            seenTitles.add(mag.title.toLowerCase());
+            uniqueMagazines.push(mag);
+        }
+    });
+
     // Filter magazines based on search and category
-    const filteredMagazines = magazines.filter(magazine => {
+    const filteredMagazines = uniqueMagazines.filter(magazine => {
         const matchesSearch = magazine.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             magazine.description.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesCategory = activeCategory === 'All' ||
@@ -132,7 +143,7 @@ function MagazinePage() {
     });
 
     // Featured magazine (first one or with special flag) only on default view
-    const featuredMagazine = (searchQuery === '' && activeCategory === 'All' && magazines.length > 0) ? magazines[0] : null;
+    const featuredMagazine = (searchQuery === '' && activeCategory === 'All' && uniqueMagazines.length > 0) ? uniqueMagazines[0] : null;
     
     const remainingMagazines = featuredMagazine 
         ? filteredMagazines.filter(m => m.id !== featuredMagazine.id) 

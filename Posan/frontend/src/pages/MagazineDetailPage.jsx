@@ -14,9 +14,9 @@ function MagazineDetailPage() {
     const [selectedArticle, setSelectedArticle] = useState(null);
     const [isReadingAloud, setIsReadingAloud] = useState(false);
 
-    const renderEnrichedContent = (content) => {
+    const renderEnrichedContent = (content, articleId) => {
         const paragraphs = content.split('\n').filter(p => p.trim());
-        const emojis = ['🚀', '🦕', '🌟', '🎨', '🦁', '🔍', '🌈', '🧩', '⚡', '🦉'];
+        const emojis = ['🚀', '🦕', '🌟', '🎨', '🦁', '🔍', '🌈', '🧩', '⚡', '🦉', '✨', '🌍', '🦖', '🔭', '🎭'];
         
         return paragraphs.map((paragraph, idx) => {
             // Did you know block
@@ -43,7 +43,10 @@ function MagazineDetailPage() {
 
             // Insert illustration every 3 paragraphs
             if (idx > 0 && idx % 3 === 0) {
-                const randomEmoji = emojis[idx % emojis.length];
+                // Use articleId and idx to pseudo-randomly select an emoji so different articles get different sets
+                const pseudoRandomIndex = (articleId * 7 + idx * 13) % emojis.length;
+                const randomEmoji = emojis[pseudoRandomIndex];
+                
                 return (
                     <React.Fragment key={idx}>
                         <div className="illustration-box">
@@ -140,7 +143,7 @@ function MagazineDetailPage() {
                             </button>
                         </div>
                         <div className="article-reader-body enriched">
-                            {renderEnrichedContent(selectedArticle.content)}
+                            {renderEnrichedContent(selectedArticle.content, selectedArticle.id)}
                         </div>
                         <div className="article-reader-footer">
                             <button
