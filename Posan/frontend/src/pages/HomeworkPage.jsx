@@ -192,6 +192,12 @@ const HomeworkPage = () => {
     return (
         <div className="homework-page-new">
             <div className="container">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <h1 style={{ fontSize: '1.5rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        Homework
+                        <span style={{ fontSize: '0.6em', padding: '4px 10px', backgroundColor: '#6366f1', color: 'white', borderRadius: '12px', fontWeight: 'bold', letterSpacing: '0.5px' }}>BETA</span>
+                    </h1>
+                </div>
                 {/* Header with Greeting */}
                 <div className="homework-header-new">
                     <div className="user-greeting">
