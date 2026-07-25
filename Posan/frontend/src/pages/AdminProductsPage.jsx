@@ -50,7 +50,9 @@ const AdminProductsPage = () => {
 
     const fetchProducts = async () => {
         try {
-            const response = await fetch(`${API_BASE}/store/products?limit=100`);
+            const response = await fetch(`${API_BASE}/store/admin/products?limit=100`, {
+                headers: getAuthHeaders()
+            });
             const data = await response.json();
             setProducts(data.products || []);
         } catch (err) {

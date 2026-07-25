@@ -539,6 +539,44 @@ async def seed_products(
 
 # ==================== ADMIN: PRODUCT MANAGEMENT ====================
 
+@router.get("/admin/products")
+async def get_all_products_admin(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, le=500),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all products including hidden ones (admin only)"""
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    total = db.query(Product).count()
+    products = db.query(Product).order_by(desc(Product.created_at)).offset(skip).limit(limit).all()
+    
+    return {
+        "total": total,
+        "products": [
+            {
+                "id": p.id,
+                "name": p.name,
+                "description": p.description,
+                "price": p.price,
+                "original_price": p.original_price,
+                "image_url": p.image_url,
+                "category": p.category.value if p.category else None,
+                "age_range": p.age_range,
+                "pages": p.pages,
+                "is_bestseller": p.is_bestseller,
+                "is_new": p.is_new,
+                "is_available": p.is_available,
+                "stock": p.stock,
+                "rating": p.rating,
+                "reviews_count": p.reviews_count
+            }
+            for p in products
+        ]
+    }
+
 @router.post("/admin/products")
 async def create_product(
     product_data: dict,
