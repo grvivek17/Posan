@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../../styles/planner.css';
 
-const PlannerTool = () => {
+const PlannerTool = ({ initialSubject = '' }) => {
     const [gamification, setGamification] = useState({
         current_streak: 0,
         max_streak: 0,
@@ -12,11 +12,17 @@ const PlannerTool = () => {
     const [plans, setPlans] = useState([]);
     
     const [formData, setFormData] = useState({
-        subject: '',
+        subject: initialSubject,
         topics: '',
         start_date: '',
         end_date: ''
     });
+    
+    useEffect(() => {
+        if (initialSubject) {
+            setFormData(prev => ({ ...prev, subject: initialSubject }));
+        }
+    }, [initialSubject]);
     
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');

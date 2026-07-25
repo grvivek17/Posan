@@ -16,6 +16,7 @@ import './HomeworkPageSidebar.css';
 const HomeworkPage = () => {
     const { subscription, isPro, hasFeature } = useSubscription();
     const [selectedGrade, setSelectedGrade] = useState('Grade 4');
+    const [selectedSubject, setSelectedSubject] = useState('');
     const [activeTab, setActiveTab] = useState('study'); // 'study' or 'test'
     const [quizAnswer, setQuizAnswer] = useState(null);
     const [quizQuestion, setQuizQuestion] = useState({ question: '', correctAnswer: 0, wrongAnswer: 0 });
@@ -107,6 +108,12 @@ const HomeworkPage = () => {
             setActiveTab('study');
             setIsAIModalOpen(true);
         }
+    };
+
+    const handleSubjectClick = (subjectName) => {
+        setSelectedSubject(subjectName);
+        setActiveTab('planner');
+        setIsAIModalOpen(true);
     };
 
     const getSubjectIcon = (subject) => {
@@ -249,7 +256,7 @@ const HomeworkPage = () => {
                                         key={subject.name}
                                         className="subject-card"
                                         style={{ backgroundColor: subject.color }}
-                                        onClick={() => window.location.href = subject.url}
+                                        onClick={() => handleSubjectClick(subject.name)}
                                     >
                                         <div className="subject-icon-large">{subject.icon}</div>
                                         <div className="subject-info">
@@ -477,9 +484,9 @@ const HomeworkPage = () => {
                                 </button>
                             </div>
                             <div className="ai-tool-container" style={{ maxHeight: activeTab === 'planner' ? '80vh' : 'auto', overflowY: activeTab === 'planner' ? 'auto' : 'visible' }}>
-                                {activeTab === 'study' && <StudyMaterialAssistant />}
+                                {activeTab === 'study' && <StudyMaterialAssistant initialSubject={selectedSubject} />}
                                 {activeTab === 'test' && <TestAnalysis />}
-                                {activeTab === 'planner' && <PlannerTool />}
+                                {activeTab === 'planner' && <PlannerTool initialSubject={selectedSubject} />}
                             </div>
                         </div>
                     </div>

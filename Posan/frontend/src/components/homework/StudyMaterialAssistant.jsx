@@ -1,9 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { homeworkAPI } from '../../services/api';
 import './StudyMaterialAssistant.css';
 
-const StudyMaterialAssistant = () => {
+const StudyMaterialAssistant = ({ initialSubject = 'Mathematics' }) => {
     const [step, setStep] = useState('upload'); // upload, results, practice, evaluation
     const [loading, setLoading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -16,10 +16,16 @@ const StudyMaterialAssistant = () => {
     const [showHints, setShowHints] = useState({});
 
     // NEW: Multi-agent system fields
-    const [subject, setSubject] = useState('Mathematics');
+    const [subject, setSubject] = useState(initialSubject);
     const [grade, setGrade] = useState(5);
     const [materialId, setMaterialId] = useState(null);
     const [indexName, setIndexName] = useState(null);
+
+    useEffect(() => {
+        if (initialSubject) {
+            setSubject(initialSubject);
+        }
+    }, [initialSubject]);
 
     // Bulk upload state
     const [uploadMode, setUploadMode] = useState('single'); // 'single' or 'bulk'
