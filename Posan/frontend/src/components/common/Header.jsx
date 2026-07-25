@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useKeycloak } from '@react-keycloak/web';
 import PointsDisplay from './PointsDisplay';
 import './Header.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 function Header({ isAuthenticated, setIsAuthenticated }) {
+    const { keycloak } = useKeycloak();
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
-        // Get username from localStorage when component mounts or auth changes
+        // Get username from Keycloak or localStorage
         if (isAuthenticated) {
+            const kcUsername = keycloak?.tokenParsed?.preferred_username || keycloak?.tokenParsed?.name;
             const storedUsername = localStorage.getItem('username');
-            setUsername(storedUsername || 'User');
+            setUsername(kcUsername || storedUsername || 'User');
 
             // Check if user is admin
             const checkAdmin = async () => {
@@ -49,7 +52,11 @@ function Header({ isAuthenticated, setIsAuthenticated }) {
         setIsAuthenticated(false);
         setIsAdmin(false);
         setUsername('');
-        navigate('/');
+        if (keycloak && keycloak.authenticated) {
+            keycloak.logout();
+        } else {
+            navigate('/');
+        }
     };
 
     return (

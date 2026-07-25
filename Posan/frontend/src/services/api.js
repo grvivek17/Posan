@@ -11,12 +11,27 @@ const api = axios.create({
     },
 });
 
+import keycloak from '../keycloak';
+
 // Request interceptor to add auth token
 api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('access_token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+    async (config) => {
+        // Use Keycloak token if available
+        if (keycloak.token) {
+            // Check if token is expired, if so, update it
+            try {
+                await keycloak.updateToken(30); // Refresh if it expires in less than 30s
+                config.headers.Authorization = `Bearer ${keycloak.token}`;
+            } catch (error) {
+                console.error('Failed to refresh token', error);
+                keycloak.login();
+            }
+        } else {
+            // Fallback to local storage (for transition period)
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
         }
         return config;
     },
@@ -28,10 +43,12 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            // Clear tokens and redirect to login
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            window.location.href = '/login';
+            // Redirect to Keycloak login if unauthorized
+            if (keycloak.authenticated) {
+                keycloak.logout();
+            } else {
+                keycloak.login();
+            }
         }
         return Promise.reject(error);
     }

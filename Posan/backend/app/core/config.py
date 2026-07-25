@@ -20,6 +20,12 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     API_V1_PREFIX: str = "/api/v1"
     
+    # Keycloak SSO
+    KEYCLOAK_SERVER_URL: str = "http://localhost:8080"
+    KEYCLOAK_REALM_NAME: str = "posan-realm"
+    KEYCLOAK_CLIENT_ID: str = "posan-backend-client"
+    KEYCLOAK_CLIENT_SECRET: Optional[str] = None
+    
     # CORS
     ALLOWED_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
     

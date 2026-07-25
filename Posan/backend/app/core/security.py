@@ -61,20 +61,40 @@ def create_refresh_token(data: dict) -> str:
     return encoded_jwt
 
 
+import logging
+from keycloak import KeycloakOpenID
+from keycloak.exceptions import KeycloakError
+
+# Initialize Keycloak OpenID client
+keycloak_openid = KeycloakOpenID(
+    server_url=settings.KEYCLOAK_SERVER_URL,
+    client_id=settings.KEYCLOAK_CLIENT_ID,
+    realm_name=settings.KEYCLOAK_REALM_NAME,
+    client_secret_key=settings.KEYCLOAK_CLIENT_SECRET,
+)
+
 def decode_token(token: str) -> Optional[dict]:
     """
-    Decode and verify a JWT token.
-    
-    Args:
-        token: JWT token string
-        
-    Returns:
-        Decoded token payload or None if invalid
+    Decode and verify a Keycloak JWT token.
     """
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        # Get public key from Keycloak if you want local verification,
+        # but here we use Keycloak's introspection or decode locally if JWKS is fetched.
+        # The simplest way for now is just decode without verification if API Gateway handles it,
+        # but for security, we fetch the certs and verify:
+        KEYCLOAK_PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----\n" + keycloak_openid.public_key() + "\n-----END PUBLIC KEY-----"
+        options = {"verify_signature": True, "verify_aud": False, "exp": True}
+        payload = keycloak_openid.decode_token(
+            token,
+            key=KEYCLOAK_PUBLIC_KEY,
+            options=options
+        )
         return payload
-    except InvalidTokenError:
+    except KeycloakError as e:
+        logging.error(f"Keycloak error validating token: {e}")
+        return None
+    except Exception as e:
+        logging.error(f"Error validating token: {e}")
         return None
 
 from fastapi import Depends, HTTPException, status
@@ -90,20 +110,9 @@ def get_current_user(
     db: Session = Depends(get_db)
 ):
     """
-    Get current user from JWT token.
-    
-    Args:
-        credentials: HTTP Bearer credentials from Authorization header
-        db: Database session
-        
-    Returns:
-        User object
-        
-    Raises:
-        HTTPException: If token is invalid or user not found
+    Get current user from Keycloak JWT token with JIT provisioning.
     """
-    from app.core.database import get_db
-    from app.models.user import User
+    from app.models.user import User, UserRole
     
     token = credentials.credentials
     payload = decode_token(token)
@@ -115,20 +124,45 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    user_id: int = payload.get("sub")
-    if user_id is None:
+    # Keycloak uses 'sub' as the unique identifier
+    keycloak_id = payload.get("sub")
+    email = payload.get("email")
+    username = payload.get("preferred_username") or payload.get("name") or email
+    
+    if keycloak_id is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    user = db.query(User).filter(User.id == user_id).first()
+    # Try to find user by keycloak_id first
+    user = db.query(User).filter(User.keycloak_id == keycloak_id).first()
+    
+    # Fallback to email if keycloak_id is not set yet (migration scenario)
+    if user is None and email:
+        user = db.query(User).filter(User.email == email).first()
+        if user:
+            user.keycloak_id = keycloak_id
+            db.commit()
+            db.refresh(user)
+    
+    # JIT (Just-In-Time) Provisioning
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-            headers={"WWW-Authenticate": "Bearer"},
+        if not email:
+            email = f"{username}@posan.local" # Fallback if email is not provided in token
+        
+        user = User(
+            email=email,
+            username=username,
+            keycloak_id=keycloak_id,
+            hashed_password=None, # Managed by Keycloak
+            full_name=payload.get("name"),
+            role=UserRole.CHILD # Default role, can be mapped from Keycloak roles
         )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
     
     return user
+

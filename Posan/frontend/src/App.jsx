@@ -38,14 +38,17 @@ import Footer from './components/common/Footer';
 import ScrollToTop from './components/common/ScrollToTop';
 import BottomNav from './components/common/BottomNav';
 
-function App() {
-    const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+import { useKeycloak } from '@react-keycloak/web';
 
-    React.useEffect(() => {
-        // Check if user is authenticated
-        const token = localStorage.getItem('access_token');
-        setIsAuthenticated(!!token);
-    }, []);
+function App() {
+    const { keycloak, initialized } = useKeycloak();
+    
+    // Check if user is authenticated via Keycloak
+    const isAuthenticated = keycloak.authenticated;
+
+    if (!initialized) {
+        return <div className="loading-screen">Loading...</div>;
+    }
 
     return (
         <Router>
