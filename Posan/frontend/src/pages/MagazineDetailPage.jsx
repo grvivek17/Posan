@@ -12,6 +12,52 @@ function MagazineDetailPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [selectedArticle, setSelectedArticle] = useState(null);
+    const [isReadingAloud, setIsReadingAloud] = useState(false);
+
+    const renderEnrichedContent = (content) => {
+        const paragraphs = content.split('\n').filter(p => p.trim());
+        const emojis = ['🚀', '🦕', '🌟', '🎨', '🦁', '🔍', '🌈', '🧩', '⚡', '🦉'];
+        
+        return paragraphs.map((paragraph, idx) => {
+            // Did you know block
+            if (paragraph.toLowerCase().includes('did you know') || paragraph.toLowerCase().includes('fun fact')) {
+                return (
+                    <div key={idx} className="did-you-know">
+                        💡 {paragraph}
+                    </div>
+                );
+            }
+
+            // Drop cap for the first paragraph
+            let textElement = <p key={idx}>{paragraph}</p>;
+            if (idx === 0 && paragraph.length > 0) {
+                const firstChar = paragraph.charAt(0);
+                const rest = paragraph.slice(1);
+                textElement = (
+                    <p key={idx}>
+                        <span className="drop-cap">{firstChar}</span>
+                        {rest}
+                    </p>
+                );
+            }
+
+            // Insert illustration every 3 paragraphs
+            if (idx > 0 && idx % 3 === 0) {
+                const randomEmoji = emojis[idx % emojis.length];
+                return (
+                    <React.Fragment key={idx}>
+                        <div className="illustration-box">
+                            {randomEmoji}
+                            <div className="illustration-caption">Imagine this!</div>
+                        </div>
+                        {textElement}
+                    </React.Fragment>
+                );
+            }
+
+            return textElement;
+        });
+    };
 
     useEffect(() => {
         fetchMagazineAndArticles();
@@ -86,13 +132,15 @@ function MagazineDetailPage() {
                             {selectedArticle.author && (
                                 <p className="article-reader-author">By {selectedArticle.author}</p>
                             )}
+                            <button 
+                                className="read-aloud-btn"
+                                onClick={() => setIsReadingAloud(!isReadingAloud)}
+                            >
+                                {isReadingAloud ? '⏸️ Pause Reading' : '🔊 Read Aloud'}
+                            </button>
                         </div>
-                        <div className="article-reader-body">
-                            {selectedArticle.content.split('\n').map((paragraph, idx) => (
-                                paragraph.trim() ? (
-                                    <p key={idx}>{paragraph}</p>
-                                ) : null
-                            ))}
+                        <div className="article-reader-body enriched">
+                            {renderEnrichedContent(selectedArticle.content)}
                         </div>
                         <div className="article-reader-footer">
                             <button
