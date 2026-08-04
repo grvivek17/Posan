@@ -120,29 +120,49 @@ function Home() {
             </section>
 
             {/* What do you want to do? */}
-            <section className="activities-section">
+            <section className="activities-section home-activities-section">
                 <div className="container">
                     <h2 className="section-title">What do you want to do? 🎮</h2>
 
-                    <div className="activities-grid">
-                        <div className="activity-card purple-gradient" onClick={() => navigate('/puzzles')}>
-                            <div className="activity-icon">🧩</div>
-                            <h3 className="activity-title">Puzzles</h3>
+                    <div className="home-activities-grid">
+                        <div className="home-activity-card purple-theme" onClick={() => navigate('/puzzles')}>
+                            <div className="home-activity-icon-wrapper">
+                                <span className="home-activity-icon">🧩</span>
+                            </div>
+                            <div className="home-activity-info">
+                                <h3 className="home-activity-title">Puzzles</h3>
+                                <p className="home-activity-subtitle">Word search, crosswords & sudoku</p>
+                            </div>
                         </div>
 
-                        <div className="activity-card blue-gradient" onClick={() => navigate('/homework')}>
-                            <div className="activity-icon">📚</div>
-                            <h3 className="activity-title">Homework</h3>
+                        <div className="home-activity-card blue-theme" onClick={() => navigate('/homework')}>
+                            <div className="home-activity-icon-wrapper">
+                                <span className="home-activity-icon">📚</span>
+                            </div>
+                            <div className="home-activity-info">
+                                <h3 className="home-activity-title">Homework</h3>
+                                <p className="home-activity-subtitle">Practice tests & smart feedback</p>
+                            </div>
                         </div>
 
-                        <div className="activity-card orange-gradient" onClick={() => navigate('/ai-content')}>
-                            <div className="activity-icon">😄</div>
-                            <h3 className="activity-title">Jokes</h3>
+                        <div className="home-activity-card orange-theme" onClick={() => navigate('/ai-content')}>
+                            <div className="home-activity-icon-wrapper">
+                                <span className="home-activity-icon">😄</span>
+                            </div>
+                            <div className="home-activity-info">
+                                <h3 className="home-activity-title">Jokes</h3>
+                                <p className="home-activity-subtitle">Laugh with fun daily jokes</p>
+                            </div>
                         </div>
 
-                        <div className="activity-card pink-gradient" onClick={() => navigate('/games')}>
-                            <div className="activity-icon">🎮</div>
-                            <h3 className="activity-title">Games</h3>
+                        <div className="home-activity-card pink-theme" onClick={() => navigate('/games')}>
+                            <div className="home-activity-icon-wrapper">
+                                <span className="home-activity-icon">🎮</span>
+                            </div>
+                            <div className="home-activity-info">
+                                <h3 className="home-activity-title">Games</h3>
+                                <p className="home-activity-subtitle">Tic-Tac-Toe, Memory & more</p>
+                            </div>
                         </div>
                     </div>
 
