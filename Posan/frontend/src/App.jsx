@@ -38,17 +38,14 @@ import Footer from './components/common/Footer';
 import ScrollToTop from './components/common/ScrollToTop';
 import BottomNav from './components/common/BottomNav';
 
-import { useKeycloak } from '@react-keycloak/web';
-
 function App() {
-    const { keycloak, initialized } = useKeycloak();
-    
-    // Check if user is authenticated via Keycloak
-    const isAuthenticated = keycloak.authenticated;
+    const [isAuthenticated, setIsAuthenticated] = React.useState(false);
 
-    if (!initialized) {
-        return <div className="loading-screen">Loading...</div>;
-    }
+    React.useEffect(() => {
+        // Check if user is authenticated
+        const token = localStorage.getItem('access_token');
+        setIsAuthenticated(!!token);
+    }, []);
 
     return (
         <Router>
