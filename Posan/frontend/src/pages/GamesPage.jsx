@@ -9,6 +9,7 @@ import BubblePop from '../components/games/BubblePop';
 import GardenBuilder from '../components/games/GardenBuilder';
 import AnimalCare from '../components/games/AnimalCare';
 import ColoringCanvas from '../components/games/ColoringCanvas';
+import TicTacToe from '../components/games/TicTacToe';
 import './GamesPage.css';
 
 const RELAXING_GAMES = [
@@ -51,6 +52,15 @@ const RELAXING_GAMES = [
 ];
 
 const GAMES = [
+  {
+    id: 'tictactoe',
+    name: 'Tic-Tac-Toe',
+    icon: '❌⭕',
+    description: 'Play 3x3 or 4x4 vs Computer or with friends!',
+    color: '#6366F1',
+    gradient: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+    component: TicTacToe,
+  },
   {
     id: 'memory',
     name: 'Memory Match',
