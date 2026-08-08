@@ -3,6 +3,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import './styles/global.css';
 import './styles/animations.css';
 
+// Auto-redirect from legacy Vercel domain to self-hosted server
+if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    window.location.replace('http://129.225.82.229/magazines');
+}
+
 // Pages
 import Home from './pages/Home';
 import About from './pages/About';
