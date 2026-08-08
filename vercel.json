@@ -1,0 +1,14 @@
+{
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "http://129.225.82.229/magazines",
+      "permanent": false
+    },
+    {
+      "source": "/(.*)",
+      "destination": "http://129.225.82.229/$1",
+      "permanent": false
+    }
+  ]
+}
