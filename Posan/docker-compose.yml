@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: posan-backend
+    restart: always
+    env_file:
+      - ./backend/.env
+    environment:
+      - ALLOWED_ORIGINS=http://129.225.82.229,http://localhost
+    expose:
+      - "8000"
+    volumes:
+      - uploads_data:/app/uploads
+    networks:
+      - posan-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build: ./frontend
+    container_name: posan-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - posan-network
+
+volumes:
+  uploads_data:
+
+networks:
+  posan-network:
+    driver: bridge
