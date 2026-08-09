@@ -20,6 +20,7 @@ class ContentGenerator:
         
         # Primary chat models for content generation
         self.chat_models = [
+            "mistralai/Mistral-7B-Instruct-v0.3",
             "meta-llama/Llama-3.2-3B-Instruct",
             "meta-llama/Llama-3.2-1B-Instruct",
             "Qwen/Qwen2.5-1.5B-Instruct",
