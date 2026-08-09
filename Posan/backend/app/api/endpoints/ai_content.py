@@ -27,6 +27,7 @@ class StoryRequest(BaseModel):
     age_group: str = Field(default="6-8", description="Target age group: 3-5, 6-8, 9-11, 12-14")
     word_count: int = Field(default=300, ge=100, le=1000)
     characters: Optional[List[str]] = Field(default=None, description="Character names")
+    details: Optional[str] = Field(default=None, description="Optional story details or plot")
 
 
 class StoryResponse(BaseModel):
@@ -102,7 +103,8 @@ async def api_generate_story(request: StoryRequest):
             topic=request.topic,
             age_group=request.age_group,
             word_count=request.word_count,
-            characters=request.characters
+            characters=request.characters,
+            details=request.details
         )
         return StoryResponse(**result)
     except Exception as e:

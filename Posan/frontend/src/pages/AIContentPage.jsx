@@ -22,6 +22,7 @@ const AIContentPage = () => {
     const [topic, setTopic] = useState('');
     const [ageGroup, setAgeGroup] = useState('6-8');
     const [wordCount, setWordCount] = useState(200);
+    const [details, setDetails] = useState('');
     const [articleType, setArticleType] = useState('educational');
     const [numQuestions, setNumQuestions] = useState(5);
 
@@ -91,7 +92,7 @@ const AIContentPage = () => {
                     response = await fetch(`${API_BASE}/ai/generate/story`, {
                         method: 'POST',
                         headers,
-                        body: JSON.stringify({ topic, age_group: ageGroup, word_count: wordCount })
+                        body: JSON.stringify({ topic, age_group: ageGroup, word_count: wordCount, details: details })
                     });
                     break;
                 case 'article':
@@ -384,6 +385,17 @@ const AIContentPage = () => {
                                         onChange={(e) => setWordCount(Number(e.target.value))}
                                     />
                                     <span className="range-value">{wordCount} words</span>
+                                </div>
+                                <div className="form-group">
+                                    <label>Story Details / Plot (Optional)</label>
+                                    <textarea
+                                        value={details}
+                                        onChange={(e) => setDetails(e.target.value)}
+                                        placeholder="e.g., The main character is a brave dog named Max who finds a hidden treasure..."
+                                        disabled={loading}
+                                        rows={3}
+                                        maxLength={200}
+                                    />
                                 </div>
                                 <button
                                     className="generate-btn"

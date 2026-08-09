@@ -83,7 +83,7 @@ const minimax = (board, depth, isMaximizing, aiSymbol, humanSymbol) => {
     if (result.winner === humanSymbol) return depth - 10;
     if (result.winner === 'Draw') return 0;
   }
-  if (depth >= 6) return 0; // limit depth for responsiveness
+  if (depth >= 5) return 0; // limit depth for responsiveness
 
   const emptyIndices = board.map((val, idx) => (val === null ? idx : null)).filter(v => v !== null);
 
@@ -222,7 +222,7 @@ const TicTacToe = () => {
           makeMove(aiMove, 'O');
         }
         setIsAiThinking(false);
-      }, 450);
+      }, 50);
       return () => clearTimeout(timer);
     }
   }, [isXNext, gameMode, gameState, board, aiDifficulty, gridSize, isAiThinking]);

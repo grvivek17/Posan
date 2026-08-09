@@ -97,37 +97,70 @@ class ContentGenerator:
         return ""
 
     def _get_fallback_content(self, prompt: str) -> str:
-        """Return topic-aware fallback content when AI generation fails."""
+        """Return topic-aware fallback content when AI generation fails with randomized templates."""
+        import random
         prompt_lower = prompt.lower()
         topic = self._extract_topic_from_prompt(prompt)
         topic_title = topic.title() if topic else "Amazing Things"
         
         if ("title" in prompt_lower or "just the title" in prompt_lower) and len(prompt) < 200:
-            # Title generation fallback - return just a title, not full content
-            return f"The Amazing Adventure of {topic_title}"
+            # Title generation fallback
+            titles = [
+                f"The Amazing Adventure of {topic_title}",
+                f"Discovering {topic_title}",
+                f"The Secret World of {topic_title}",
+                f"{topic_title}: A Magical Journey"
+            ]
+            return random.choice(titles)
         
         elif "story" in prompt_lower:
-            return f"""Once upon a time, there was a young explorer who was very curious about {topic or 'the world'}.
-
+            story_templates = [
+                f"""Once upon a time, there was a young explorer who was very curious about {topic or 'the world'}.
 Every day, they would learn something new and exciting about {topic or 'amazing things'}. They read books, asked questions, and went on adventures to discover more.
-
 One special day, they made a wonderful discovery about {topic or 'something magical'}! They couldn't wait to share what they learned with all their friends.
-
 "The more you learn about {topic or 'the world'}," they said, "the more amazing it becomes!"
+And so the adventure continued, with new things to discover about {topic or 'the world'} every single day.""",
 
-And so the adventure continued, with new things to discover about {topic or 'the world'} every single day."""
+                f"""In a faraway land, a group of friends wanted to learn all about {topic or 'mysteries'}.
+They packed their bags and set out on a grand quest to find out the secrets of {topic or 'the unknown'}. Along the way, they met wise creatures who taught them amazing facts.
+"Wow! I never knew {topic or 'this'} was so fascinating," said one of the friends.
+By the end of their journey, they were experts in {topic or 'their favorite subject'} and shared their knowledge with everyone in their village.
+It was the best adventure ever!""",
+
+                f"""Have you ever wondered what it would be like to travel into the world of {topic or 'magic'}?
+One sunny morning, a brave child named Leo did just that! Leo discovered a magical portal that led straight to {topic or 'a wonderful place'}.
+Inside, everything was related to {topic or 'amazing wonders'}. Leo spent the whole day exploring and learning.
+When it was time to go home, Leo promised to never stop being curious about {topic or 'the universe'}.
+What a fantastic day it was!"""
+            ]
+            return random.choice(story_templates)
         
         elif "article" in prompt_lower or "fact" in prompt_lower:
-            return f"""Did you know? There are so many amazing things to learn about {topic or 'our world'}!
-
+            article_templates = [
+                f"""Did you know? There are so many amazing things to learn about {topic or 'our world'}!
 Scientists and explorers have been studying {topic or 'the world around us'} for many years, and they keep making exciting new discoveries.
-
 Here are some cool things about {topic or 'this subject'}:
 - {topic_title} is a fascinating topic that people of all ages enjoy learning about.
 - There are many books, videos, and websites where you can explore more about {topic or 'this topic'}.
 - Every day, we learn something new about {topic or 'amazing things'}.
+Fun Activity: Try to find three new facts about {topic or 'your favorite subject'}!""",
 
-Fun Activity: Try to find three new facts about {topic or 'your favorite subject'}!"""
+                f"""Let's dive into the fascinating world of {topic or 'science and nature'}!
+For centuries, humans have been amazed by {topic or 'these incredible phenomena'}. It is one of the most interesting subjects you can explore.
+Check out these facts about {topic or 'it'}:
+- Learning about {topic_title} can help us understand our world better.
+- Many experts dedicate their whole lives to studying {topic or 'this'}.
+- You can find examples of {topic or 'this'} almost everywhere if you look closely!
+Did You Know: {topic_title} has inspired many famous books and movies!""",
+
+                f"""Welcome to today's special feature on {topic_title}!
+If you love learning about {topic or 'new things'}, you are in for a treat. {topic_title} is full of surprises.
+- It is one of the most popular topics for young explorers.
+- There are museums and exhibits dedicated entirely to {topic or 'this subject'}.
+- Exploring {topic or 'this'} can spark your imagination and creativity!
+Fun Activity: Draw a picture of what you think {topic or 'this'} looks like!"""
+            ]
+            return random.choice(article_templates)
         
         elif "quiz" in prompt_lower or "question" in prompt_lower:
             return f"""Q: What is one interesting thing about {topic or 'learning'}?
@@ -146,7 +179,7 @@ Explanation: Learning about {topic or 'new things'} is always an adventure becau
 Answer: {topic_title}!"""
         
         else:
-            return "Content is being generated. Please try again in a moment!"
+            return f"Welcome to the amazing world of {topic_title}! Content is being generated, please try again in a moment."
     
     # ==================== Educational AI Methods ====================
     
@@ -363,7 +396,8 @@ Practice Questions:"""
         topic: str,
         age_group: str = "6-8",
         word_count: int = 300,
-        characters: Optional[List[str]] = None
+        characters: Optional[List[str]] = None,
+        details: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Generate a kid-friendly story.
@@ -373,6 +407,7 @@ Practice Questions:"""
             age_group: Target age group (3-5, 6-8, 9-11, 12-14)
             word_count: Approximate word count
             characters: Optional list of character names
+            details: Optional specific details or plot points
         """
         age_descriptions = {
             "3-5": "simple words, short sentences, happy themes, repetition",
@@ -382,9 +417,10 @@ Practice Questions:"""
         }
         
         char_text = f" featuring characters named {', '.join(characters)}" if characters else ""
+        details_text = f"\nSpecific Plot Details: {details}" if details else ""
         
         prompt = f"""Write a {word_count}-word children's story about {topic}{char_text}.
-The story MUST be specifically about {topic} - include details, facts, or scenarios directly related to {topic}.
+The story MUST be specifically about {topic} - include details, facts, or scenarios directly related to {topic}.{details_text}
 
 Target age: {age_group} years old
 Style: {age_descriptions.get(age_group, age_descriptions['6-8'])}
