@@ -13,24 +13,40 @@ function MagazineDetailPage() {
     const [error, setError] = useState('');
     const [selectedArticle, setSelectedArticle] = useState(null);
     const [isReadingAloud, setIsReadingAloud] = useState(false);
+    const [currentPage, setCurrentPage] = useState(0);
 
-    const renderEnrichedContent = (content, articleId) => {
+    const getPaginatedContent = (content, articleId) => {
         const paragraphs = content.split('\n').filter(p => p.trim());
         const emojis = ['🚀', '🦕', '🌟', '🎨', '🦁', '🔍', '🌈', '🧩', '⚡', '🦉', '✨', '🌍', '🦖', '🔭', '🎭'];
         
-        return paragraphs.map((paragraph, idx) => {
+        const blocks = [];
+        paragraphs.forEach((paragraph, idx) => {
+            // Handle markdown images
+            if (paragraph.startsWith('![') && paragraph.includes('](')) {
+                const match = paragraph.match(/!\[(.*?)\]\((.*?)\)/);
+                if (match) {
+                    blocks.push(
+                        <div key={idx} className="book-image-container">
+                            <img src={match[2]} alt={match[1]} className="book-image" />
+                        </div>
+                    );
+                    return;
+                }
+            }
+
             // Did you know block
             if (paragraph.toLowerCase().includes('did you know') || paragraph.toLowerCase().includes('fun fact')) {
-                return (
+                blocks.push(
                     <div key={idx} className="did-you-know">
                         💡 {paragraph}
                     </div>
                 );
+                return;
             }
 
             // Drop cap for the first paragraph
             let textElement = <p key={idx}>{paragraph}</p>;
-            if (idx === 0 && paragraph.length > 0) {
+            if (idx === 0 && paragraph.length > 0 && !paragraph.startsWith('![')) {
                 const firstChar = paragraph.charAt(0);
                 const rest = paragraph.slice(1);
                 textElement = (
@@ -41,25 +57,28 @@ function MagazineDetailPage() {
                 );
             }
 
-            // Insert illustration every 3 paragraphs
+            // Insert illustration occasionally
             if (idx > 0 && idx % 3 === 0) {
-                // Use articleId and idx to pseudo-randomly select an emoji so different articles get different sets
                 const pseudoRandomIndex = (articleId * 7 + idx * 13) % emojis.length;
                 const randomEmoji = emojis[pseudoRandomIndex];
-                
-                return (
-                    <React.Fragment key={idx}>
-                        <div className="illustration-box">
-                            {randomEmoji}
-                            <div className="illustration-caption">Imagine this!</div>
-                        </div>
-                        {textElement}
-                    </React.Fragment>
+                blocks.push(
+                    <div key={`ill-${idx}`} className="illustration-box">
+                        {randomEmoji}
+                        <div className="illustration-caption">Imagine this!</div>
+                    </div>
                 );
             }
 
-            return textElement;
+            blocks.push(textElement);
         });
+
+        // Split into pages (4 blocks per page)
+        const BLOCKS_PER_PAGE = 4;
+        const pages = [];
+        for (let i = 0; i < blocks.length; i += BLOCKS_PER_PAGE) {
+            pages.push(blocks.slice(i, i + BLOCKS_PER_PAGE));
+        }
+        return pages;
     };
 
     useEffect(() => {
@@ -104,58 +123,81 @@ function MagazineDetailPage() {
 
     return (
         <div className="magazine-detail-page">
-            {/* Article Reader View */}
-            {selectedArticle && (
+            {/* Article Reader View (Book UI) */}
+            {selectedArticle && (() => {
+                const pages = getPaginatedContent(selectedArticle.content, selectedArticle.id);
+                return (
                 <div className="article-reader-overlay" onClick={() => setSelectedArticle(null)}>
-                    <div className="article-reader" onClick={(e) => e.stopPropagation()}>
-                        <div className="article-reader-header">
-                            <button
-                                className="article-reader-close"
-                                onClick={() => setSelectedArticle(null)}
+                    <div className="book-reader-container" onClick={(e) => e.stopPropagation()}>
+                        <button className="book-close" onClick={() => setSelectedArticle(null)}>&times;</button>
+                        
+                        <div className="book-layout">
+                            {/* Previous Button */}
+                            <button 
+                                className="book-nav-btn prev" 
+                                disabled={currentPage === 0}
+                                onClick={() => setCurrentPage(prev => Math.max(0, prev - 2))}
                             >
-                                &times;
+                                &#8249;
                             </button>
-                            <div className="article-reader-meta">
-                                {selectedArticle.content_type && (
-                                    <span className="article-reader-type">
-                                        {selectedArticle.content_type === 'ARTICLE' && '📰'}
-                                        {selectedArticle.content_type === 'STORY' && '📖'}
-                                        {selectedArticle.content_type === 'ACTIVITY' && '🎨'}
-                                        {selectedArticle.content_type === 'COMIC' && '💭'}
-                                        {' '}{selectedArticle.content_type}
-                                    </span>
+                            
+                            {/* Book Spine (Visual) */}
+                            <div className="book-spine-center"></div>
+
+                            {/* Left Page */}
+                            <div className="book-page left-page">
+                                {currentPage === 0 && (
+                                    <div className="book-cover-page">
+                                        <div className="article-reader-meta">
+                                            {selectedArticle.content_type && (
+                                                <span className="article-reader-type">
+                                                    {selectedArticle.content_type === 'ARTICLE' && '📰'}
+                                                    {selectedArticle.content_type === 'STORY' && '📖'}
+                                                    {selectedArticle.content_type === 'ACTIVITY' && '🎨'}
+                                                    {selectedArticle.content_type === 'COMIC' && '💭'}
+                                                    {' '}{selectedArticle.content_type}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <h1 className="article-reader-title">{selectedArticle.title}</h1>
+                                        {selectedArticle.author && <p className="article-reader-author">By {selectedArticle.author}</p>}
+                                        <button 
+                                            className="read-aloud-btn"
+                                            onClick={() => setIsReadingAloud(!isReadingAloud)}
+                                        >
+                                            {isReadingAloud ? '⏸️ Pause Reading' : '🔊 Read Aloud'}
+                                        </button>
+                                    </div>
                                 )}
-                                {selectedArticle.reading_time_minutes && (
-                                    <span className="article-reader-time">
-                                        ⏱️ {selectedArticle.reading_time_minutes} min read
-                                    </span>
+                                <div className="book-page-content">
+                                    {pages[currentPage]}
+                                </div>
+                                <div className="page-number">{currentPage + 1}</div>
+                            </div>
+                            
+                            {/* Right Page */}
+                            <div className="book-page right-page">
+                                <div className="book-page-content">
+                                    {pages[currentPage + 1]}
+                                </div>
+                                {currentPage + 1 < pages.length && (
+                                    <div className="page-number">{currentPage + 2}</div>
                                 )}
                             </div>
-                            <h1 className="article-reader-title">{selectedArticle.title}</h1>
-                            {selectedArticle.author && (
-                                <p className="article-reader-author">By {selectedArticle.author}</p>
-                            )}
+
+                            {/* Next Button */}
                             <button 
-                                className="read-aloud-btn"
-                                onClick={() => setIsReadingAloud(!isReadingAloud)}
+                                className="book-nav-btn next" 
+                                disabled={currentPage + 2 >= pages.length}
+                                onClick={() => setCurrentPage(prev => prev + 2)}
                             >
-                                {isReadingAloud ? '⏸️ Pause Reading' : '🔊 Read Aloud'}
-                            </button>
-                        </div>
-                        <div className="article-reader-body enriched">
-                            {renderEnrichedContent(selectedArticle.content, selectedArticle.id)}
-                        </div>
-                        <div className="article-reader-footer">
-                            <button
-                                className="btn btn-primary"
-                                onClick={() => setSelectedArticle(null)}
-                            >
-                                Back to Magazine
+                                &#8250;
                             </button>
                         </div>
                     </div>
                 </div>
-            )}
+                );
+            })()}
 
             {/* Magazine Header */}
             <div className="magazine-header" style={{ backgroundImage: `url(${magazine.cover_image_url})` }}>
@@ -210,7 +252,10 @@ function MagazineDetailPage() {
                                     </p>
                                     <button
                                         className="btn btn-secondary"
-                                        onClick={() => setSelectedArticle(article)}
+                                        onClick={() => {
+                                            setSelectedArticle(article);
+                                            setCurrentPage(0);
+                                        }}
                                     >
                                         Read Article →
                                     </button>

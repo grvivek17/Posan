@@ -388,22 +388,22 @@ class MagazineFetcher:
         if self.ai_generator:
             try:
                 prompt = f"""Rewrite this content for kids aged {age_group} in a fun, educational way.
-Make it engaging, easy to understand, and include fun facts.
-Keep it between 200-400 words.
+Make it a comprehensive, engaging article (around 800-1000 words) with multiple distinct sections.
+This content will fill 3-4 pages of a magazine.
 
 Original Title: {raw_article['title']}
 Original Content: {raw_article['summary']}
 Topic: {topic}
 
 Write it as a kid-friendly magazine article with:
-- An exciting introduction
-- Fun facts highlighted with emojis
-- Simple explanations of complex ideas
+- An exciting introduction that hooks the reader
+- Fun facts highlighted with emojis scattered throughout
+- Detailed, simple explanations of complex ideas
 - A "Did You Know?" section
 - A fun activity or question at the end
 
 Article:"""
-                content = self.ai_generator._generate_text(prompt, max_tokens=600, use_fallback=False)
+                content = self.ai_generator._generate_text(prompt, max_tokens=1500, use_fallback=False)
                 if content and len(content) > 50:
                     image_md = f"![{raw_article['title']}]({raw_article['image_url']})\n\n" if raw_article.get("image_url") else ""
                     return {

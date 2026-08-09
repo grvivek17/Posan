@@ -421,3 +421,186 @@
     font-family: 'Inter', sans-serif;
     font-size: 1.1rem;
 }
+
+/* Flipbook UI Styles */
+.book-reader-container {
+    background: #f4ecd8; /* Paper color */
+    border-radius: 12px;
+    max-width: 1000px;
+    width: 95%;
+    height: 85vh;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 0 50px rgba(0,0,0,0.1);
+    animation: slideUpReader 0.35s ease;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.book-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #e0d5ba;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 100;
+    color: #4b5563;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.book-close:hover {
+    background: #d1c4a5;
+    color: #1f2937;
+}
+
+.book-layout {
+    display: flex;
+    flex: 1;
+    position: relative;
+    padding: 2rem 3rem;
+}
+
+.book-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.1);
+    border: none;
+    width: 40px;
+    height: 60px;
+    font-size: 2rem;
+    color: #333;
+    cursor: pointer;
+    border-radius: 8px;
+    z-index: 50;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.book-nav-btn:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.book-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.book-nav-btn.prev {
+    left: 10px;
+}
+
+.book-nav-btn.next {
+    right: 10px;
+}
+
+.book-spine-center {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 40px;
+    transform: translateX(-50%);
+    background: linear-gradient(to right, 
+        rgba(255,255,255,0) 0%, 
+        rgba(0,0,0,0.03) 40%, 
+        rgba(0,0,0,0.08) 50%, 
+        rgba(0,0,0,0.03) 60%, 
+        rgba(255,255,255,0) 100%);
+    z-index: 10;
+    pointer-events: none;
+}
+
+.book-page {
+    flex: 1;
+    padding: 1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: 50%;
+}
+
+.book-page.left-page {
+    border-right: 1px solid rgba(0,0,0,0.05);
+}
+
+.book-cover-page {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.book-page-content {
+    flex: 1;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', 'Nunito', sans-serif;
+    line-height: 1.8;
+    font-size: 1.05rem;
+    color: #374151;
+    overflow-y: auto;
+}
+
+.book-page-content p {
+    margin-bottom: 1rem;
+}
+
+.page-number {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #9ca3af;
+    margin-top: 1rem;
+    font-weight: bold;
+}
+
+.book-image-container {
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+.book-image {
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 768px) {
+    .book-layout {
+        flex-direction: column;
+        padding: 3rem 1rem 1rem;
+        overflow-y: auto;
+    }
+    
+    .book-page {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px dashed rgba(0,0,0,0.1);
+        padding: 1rem;
+    }
+    
+    .book-spine-center {
+        display: none;
+    }
+    
+    .book-nav-btn {
+        top: auto;
+        bottom: 10px;
+        height: 40px;
+        transform: none;
+    }
+    
+    .book-nav-btn.prev {
+        left: 20px;
+    }
+    
+    .book-nav-btn.next {
+        right: 20px;
+    }
+}
