@@ -428,7 +428,8 @@
     border-radius: 12px;
     max-width: 1000px;
     width: 95%;
-    height: 85vh;
+    height: 75vh;
+    min-height: 500px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 0 50px rgba(0,0,0,0.1);
     animation: slideUpReader 0.35s ease;
     display: flex;
@@ -464,8 +465,9 @@
 .book-layout {
     display: flex;
     flex: 1;
-    position: relative;
-    padding: 2rem 3rem;
+    position: static; /* so absolute children anchor to .book-reader-container */
+    padding: 2rem 4rem;
+    overflow: hidden; /* Desktop shouldn't scroll the whole layout, only pages */
 }
 
 .book-nav-btn {
@@ -574,7 +576,7 @@
 @media (max-width: 768px) {
     .book-layout {
         flex-direction: column;
-        padding: 3rem 1rem 1rem;
+        padding: 3rem 1rem 4rem; /* Extra padding at bottom for buttons */
         overflow-y: auto;
     }
     
@@ -583,6 +585,7 @@
         border-right: none;
         border-bottom: 1px dashed rgba(0,0,0,0.1);
         padding: 1rem;
+        overflow-y: visible; /* Let the parent handle scrolling on mobile */
     }
     
     .book-spine-center {
@@ -594,6 +597,8 @@
         bottom: 10px;
         height: 40px;
         transform: none;
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
     
     .book-nav-btn.prev {
