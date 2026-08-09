@@ -233,9 +233,10 @@ class MagazineFetcher:
             "Accept-Language": "en-US,en;q=0.5",
         })
 
-    def get_current_month_theme(self) -> Dict[str, Any]:
+    def get_current_month_theme(self, target_date=None) -> Dict[str, Any]:
         """Get the theme and topics for the current month."""
-        month = datetime.now().month
+        now = target_date or datetime.now()
+        month = now.month
         return MONTHLY_THEMES.get(month, MONTHLY_THEMES[1])
 
     def fetch_rss_articles(self, feed_url: str, max_articles: int = 5) -> List[Dict[str, str]]:
@@ -446,15 +447,15 @@ _Source: Curated for Poshan Magazine - {month_name} Edition_
 """
         return article
 
-    def generate_monthly_magazines(self) -> List[Dict[str, Any]]:
+    def generate_monthly_magazines(self, target_date=None) -> List[Dict[str, Any]]:
         """
         Generate a full set of monthly magazines with articles.
         Returns a list of magazine dicts ready to be inserted into the database.
         """
-        now = datetime.now()
+        now = target_date or datetime.now()
         month_name = now.strftime("%B")
         year = now.year
-        theme_info = self.get_current_month_theme()
+        theme_info = self.get_current_month_theme(target_date)
         theme = theme_info["theme"]
         topics = theme_info["topics"]
 
