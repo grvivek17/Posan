@@ -9,6 +9,7 @@ function RunningBanner() {
     const bannerItems = [
         { icon: '🎂', text: 'Happy Birthday Sanvika! (07 Aug)', highlight: true },
         { icon: '✨', text: 'Wishing you a year filled with magic, laughter & learning! 🎈' },
+        { icon: '📅', text: 'Check out our new', linkText: 'Reminder App', link: 'http://140.245.215.103:8080/' },
         { icon: '🎉', text: 'POSAN Celebration Special!', highlight: true },
         { icon: '⭐', text: 'Explore magazines, fun puzzles & exciting games today! 🎮' },
         { icon: '🥳', text: 'Happy Birthday Sanvika! 07 Aug 💖' },
@@ -29,7 +30,9 @@ function RunningBanner() {
                         {bannerItems.map((item, index) => (
                             <span key={`b1-${index}`} className={`banner-item ${item.highlight ? 'highlight' : ''}`}>
                                 <span className="item-icon">{item.icon}</span>
-                                <span className="item-text">{item.text}</span>
+                                <span className="item-text">
+                                    {item.text}{item.link && <> <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: '#FFD700', textDecoration: 'underline', fontWeight: 'bold' }}>{item.linkText}</a></>}
+                                </span>
                                 <span className="item-separator">★</span>
                             </span>
                         ))}
@@ -39,7 +42,9 @@ function RunningBanner() {
                         {bannerItems.map((item, index) => (
                             <span key={`b2-${index}`} className={`banner-item ${item.highlight ? 'highlight' : ''}`}>
                                 <span className="item-icon">{item.icon}</span>
-                                <span className="item-text">{item.text}</span>
+                                <span className="item-text">
+                                    {item.text}{item.link && <> <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: '#FFD700', textDecoration: 'underline', fontWeight: 'bold' }}>{item.linkText}</a></>}
+                                </span>
                                 <span className="item-separator">★</span>
                             </span>
                         ))}
