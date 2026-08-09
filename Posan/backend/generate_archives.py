@@ -9,7 +9,7 @@ from app.core.database import SessionLocal
 from app.models.content import Article, Magazine
 from app.models.user import AgeGroup
 from app.services.magazine_fetcher import MagazineFetcher
-from app.services.ai_content_generator import AIContentGenerator
+from app.services.ai_content import ContentGenerator
 
 def generate_archives():
     try:
@@ -17,7 +17,7 @@ def generate_archives():
         print("Connected to DB.")
         
         # We need AI Content Generator since user requested AI generated articles
-        ai_generator = AIContentGenerator()
+        ai_generator = ContentGenerator()
         fetcher = MagazineFetcher(ai_generator=ai_generator)
         
         # Generate archives for Jan to July 2026.
