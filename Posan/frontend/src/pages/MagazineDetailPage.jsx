@@ -14,6 +14,22 @@ function MagazineDetailPage() {
     const [selectedArticle, setSelectedArticle] = useState(null);
     const [isReadingAloud, setIsReadingAloud] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
+    const [flipState, setFlipState] = useState('');
+
+    const turnPage = (direction) => {
+        if (flipState) return;
+        setFlipState(direction === 'next' ? 'flipping-next' : 'flipping-prev');
+        
+        // Mid-point of animation: change the content
+        setTimeout(() => {
+            setCurrentPage(prev => direction === 'next' ? prev + 2 : prev - 2);
+        }, 300); 
+        
+        // End of animation: reset state
+        setTimeout(() => {
+            setFlipState('');
+        }, 600);
+    };
 
     const getPaginatedContent = (content, articleId) => {
         const paragraphs = content.split('\n').filter(p => p.trim());
@@ -135,61 +151,63 @@ function MagazineDetailPage() {
                             {/* Previous Button */}
                             <button 
                                 className="book-nav-btn prev" 
-                                disabled={currentPage === 0}
-                                onClick={() => setCurrentPage(prev => Math.max(0, prev - 2))}
+                                disabled={currentPage === 0 || flipState !== ''}
+                                onClick={() => turnPage('prev')}
                             >
                                 &#8249;
                             </button>
-                            
-                            {/* Book Spine (Visual) */}
-                            <div className="book-spine-center"></div>
 
-                            {/* Left Page */}
-                            <div className="book-page left-page">
-                                {currentPage === 0 && (
-                                    <div className="book-cover-page">
-                                        <div className="article-reader-meta">
-                                            {selectedArticle.content_type && (
-                                                <span className="article-reader-type">
-                                                    {selectedArticle.content_type === 'ARTICLE' && '📰'}
-                                                    {selectedArticle.content_type === 'STORY' && '📖'}
-                                                    {selectedArticle.content_type === 'ACTIVITY' && '🎨'}
-                                                    {selectedArticle.content_type === 'COMIC' && '💭'}
-                                                    {' '}{selectedArticle.content_type}
-                                                </span>
-                                            )}
+                            <div className={`book-pages-wrapper ${flipState}`}>
+                                {/* Book Spine (Visual) */}
+                                <div className="book-spine-center"></div>
+
+                                {/* Left Page */}
+                                <div className="book-page left-page">
+                                    {currentPage === 0 && (
+                                        <div className="book-cover-page">
+                                            <div className="article-reader-meta">
+                                                {selectedArticle.content_type && (
+                                                    <span className="article-reader-type">
+                                                        {selectedArticle.content_type === 'ARTICLE' && '📰'}
+                                                        {selectedArticle.content_type === 'STORY' && '📖'}
+                                                        {selectedArticle.content_type === 'ACTIVITY' && '🎨'}
+                                                        {selectedArticle.content_type === 'COMIC' && '💭'}
+                                                        {' '}{selectedArticle.content_type}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <h1 className="article-reader-title">{selectedArticle.title}</h1>
+                                            {selectedArticle.author && <p className="article-reader-author">By {selectedArticle.author}</p>}
+                                            <button 
+                                                className="read-aloud-btn"
+                                                onClick={() => setIsReadingAloud(!isReadingAloud)}
+                                            >
+                                                {isReadingAloud ? '⏸️ Pause Reading' : '🔊 Read Aloud'}
+                                            </button>
                                         </div>
-                                        <h1 className="article-reader-title">{selectedArticle.title}</h1>
-                                        {selectedArticle.author && <p className="article-reader-author">By {selectedArticle.author}</p>}
-                                        <button 
-                                            className="read-aloud-btn"
-                                            onClick={() => setIsReadingAloud(!isReadingAloud)}
-                                        >
-                                            {isReadingAloud ? '⏸️ Pause Reading' : '🔊 Read Aloud'}
-                                        </button>
+                                    )}
+                                    <div className="book-page-content">
+                                        {pages[currentPage]}
                                     </div>
-                                )}
-                                <div className="book-page-content">
-                                    {pages[currentPage]}
+                                    <div className="page-number">{currentPage + 1}</div>
                                 </div>
-                                <div className="page-number">{currentPage + 1}</div>
-                            </div>
-                            
-                            {/* Right Page */}
-                            <div className="book-page right-page">
-                                <div className="book-page-content">
-                                    {pages[currentPage + 1]}
+                                
+                                {/* Right Page */}
+                                <div className="book-page right-page">
+                                    <div className="book-page-content">
+                                        {pages[currentPage + 1]}
+                                    </div>
+                                    {currentPage + 1 < pages.length && (
+                                        <div className="page-number">{currentPage + 2}</div>
+                                    )}
                                 </div>
-                                {currentPage + 1 < pages.length && (
-                                    <div className="page-number">{currentPage + 2}</div>
-                                )}
                             </div>
 
                             {/* Next Button */}
                             <button 
                                 className="book-nav-btn next" 
-                                disabled={currentPage + 2 >= pages.length}
-                                onClick={() => setCurrentPage(prev => prev + 2)}
+                                disabled={currentPage + 2 >= pages.length || flipState !== ''}
+                                onClick={() => turnPage('next')}
                             >
                                 &#8250;
                             </button>
