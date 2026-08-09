@@ -38,6 +38,7 @@ import AdminPromotionalEmailPage from './pages/AdminPromotionalEmailPage';
 import PodcastsPage from './pages/PodcastsPage';
 import GamesPage from './pages/GamesPage';
 // Components
+import RunningBanner from './components/common/RunningBanner';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
 import ScrollToTop from './components/common/ScrollToTop';
@@ -56,6 +57,7 @@ function App() {
         <Router>
             <ScrollToTop />
             <div className="app">
+                <RunningBanner />
                 <Header isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
                 <main className="main-content">
                     <Routes>
