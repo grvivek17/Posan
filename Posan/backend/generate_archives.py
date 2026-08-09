@@ -6,7 +6,7 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from app.core.database import SessionLocal
-from app.models.content import Article, Magazine
+from app.models.content import Article, Magazine, ContentType
 from app.models.user import AgeGroup
 from app.services.magazine_fetcher import MagazineFetcher
 from app.services.ai_content import ContentGenerator
@@ -39,6 +39,8 @@ def generate_archives():
                     art_data["magazine_id"] = db_mag.id
                     art_data["age_group"] = AgeGroup(art_data["age_group"])
                     art_data["order_in_magazine"] = art_idx
+                    if "content_type" in art_data:
+                        art_data["content_type"] = ContentType(art_data["content_type"])
                     db_art = Article(**art_data)
                     db.add(db_art)
                     
