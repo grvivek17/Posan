@@ -48,7 +48,7 @@ class ContentGenerator:
             print(f"   - {name}: {model}")
     
     
-    def _generate_text(self, prompt: str, max_tokens: int = 500) -> str:
+    def _generate_text(self, prompt: str, max_tokens: int = 500, use_fallback: bool = True) -> str | None:
         """Generate text using Hugging Face Inference API with chat completion."""
         print(f"\n{'='*60}")
         print(f"AI GENERATION REQUEST")
@@ -80,10 +80,15 @@ class ContentGenerator:
                 print(f"[FAIL] Model {model} failed: {e}")
                 continue
         
-        # If all models fail, return fallback content
-        print("[WARN] All models failed, using fallback content")
-        print(f"{'='*60}\n")
-        return self._get_fallback_content(prompt)
+        # If all models fail, return fallback content or None
+        if use_fallback:
+            print("[WARN] All models failed, using fallback content")
+            print(f"{'='*60}\n")
+            return self._get_fallback_content(prompt)
+        else:
+            print("[WARN] All models failed, use_fallback is False, returning None")
+            print(f"{'='*60}\n")
+            return None
     
     def _extract_topic_from_prompt(self, prompt: str) -> str:
         """Extract the topic from an AI prompt string."""

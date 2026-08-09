@@ -254,6 +254,18 @@ class MagazineFetcher:
                     soup = BeautifulSoup(summary, "html.parser")
                     summary = soup.get_text(separator=" ").strip()
 
+                # Extract Image
+                image_url = ""
+                if 'media_content' in entry and len(entry.media_content) > 0:
+                    image_url = entry.media_content[0].get('url', '')
+                elif 'media_thumbnail' in entry and len(entry.media_thumbnail) > 0:
+                    image_url = entry.media_thumbnail[0].get('url', '')
+                elif 'links' in entry:
+                    for l in entry.links:
+                        if l.get('type', '').startswith('image/') or l.get('rel') == 'enclosure':
+                            image_url = l.get('href', '')
+                            break
+                            
                 if title and summary:
                     articles.append({
                         "title": title,
@@ -261,6 +273,7 @@ class MagazineFetcher:
                         "link": link,
                         "source": feed_url,
                         "published": published,
+                        "image_url": image_url,
                     })
         except Exception as e:
             print(f"[WARN] Failed to fetch RSS feed {feed_url}: {e}")
@@ -284,12 +297,19 @@ class MagazineFetcher:
                 title = title_el.get_text(strip=True) if title_el else ""
                 summary = summary_el.get_text(strip=True) if summary_el else ""
 
+                image_url = ""
+                img_el = tag.find("img")
+                if img_el and img_el.get("src"):
+                    from urllib.parse import urljoin
+                    image_url = urljoin(url, img_el.get("src"))
+
                 if title and len(title) > 5:
                     articles.append({
                         "title": title[:200],
                         "summary": summary[:500] if summary else "",
                         "link": url,
                         "source": url,
+                        "image_url": image_url,
                     })
 
             # Strategy 2: Look for list items with links (common in kid sites)
@@ -300,12 +320,19 @@ class MagazineFetcher:
                     if a_tag:
                         title = a_tag.get_text(strip=True)
                         summary = p_tag.get_text(strip=True) if p_tag else ""
+                        image_url = ""
+                        img_el = li.find("img")
+                        if img_el and img_el.get("src"):
+                            from urllib.parse import urljoin
+                            image_url = urljoin(url, img_el.get("src"))
+
                         if title and len(title) > 5:
                             articles.append({
                                 "title": title[:200],
                                 "summary": summary[:500],
                                 "link": url,
                                 "source": url,
+                                "image_url": image_url,
                             })
 
             # Strategy 3: Fallback - just grab h2/h3 + next p
@@ -314,12 +341,14 @@ class MagazineFetcher:
                     title = heading.get_text(strip=True)
                     next_p = heading.find_next("p")
                     summary = next_p.get_text(strip=True) if next_p else ""
+                    image_url = ""
                     if title and len(title) > 5:
                         articles.append({
                             "title": title[:200],
                             "summary": summary[:500],
                             "link": url,
                             "source": url,
+                            "image_url": image_url,
                         })
         except Exception as e:
             print(f"[WARN] Failed to fetch web content from {url}: {e}")
@@ -374,11 +403,12 @@ Write it as a kid-friendly magazine article with:
 - A fun activity or question at the end
 
 Article:"""
-                content = self.ai_generator._generate_text(prompt, max_tokens=600)
+                content = self.ai_generator._generate_text(prompt, max_tokens=600, use_fallback=False)
                 if content and len(content) > 50:
+                    image_md = f"![{raw_article['title']}]({raw_article['image_url']})\n\n" if raw_article.get("image_url") else ""
                     return {
                         "title": raw_article["title"],
-                        "content": content,
+                        "content": image_md + content,
                         "source_url": raw_article.get("link", ""),
                     }
             except Exception as e:
@@ -386,9 +416,10 @@ Article:"""
 
         # Fallback: use the raw summary with some formatting
         content = self._format_raw_as_article(raw_article, age_group, topic)
+        image_md = f"![{raw_article['title']}]({raw_article['image_url']})\n\n" if raw_article.get("image_url") else ""
         return {
             "title": raw_article["title"],
-            "content": content,
+            "content": image_md + content,
             "source_url": raw_article.get("link", ""),
         }
 
