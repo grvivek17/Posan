@@ -9,11 +9,15 @@ function RunningBanner() {
     const bannerItems = [
         { icon: '🎂', text: 'Happy Birthday Sanvika! (07 Aug)', highlight: true },
         { icon: '✨', text: 'Wishing you a year filled with magic, laughter & learning! 🎈' },
+        { icon: '🥳', text: 'Happy Birthday Sanvika! 07 Aug 💖' },
+        { icon: '🎁', text: 'Keep shining bright Little Star! 🌟' },
+        { icon: '🎂', text: 'Happy Birthday Poshika! (26 Aug)', highlight: true },
+        { icon: '🌸', text: 'Wishing Poshika a wonderful birthday full of joy & surprises! 🎀' },
+        { icon: '🥳', text: 'Happy Birthday Poshika! 26 Aug 💖' },
+        { icon: '🌟', text: 'You are amazing Poshika — keep blooming & shining! 🌺' },
         { icon: '📅', text: 'Check out our new', linkText: 'Reminder App', link: 'http://140.245.215.103:8080/' },
         { icon: '🎉', text: 'POSAN Celebration Special!', highlight: true },
         { icon: '⭐', text: 'Explore magazines, fun puzzles & exciting games today! 🎮' },
-        { icon: '🥳', text: 'Happy Birthday Sanvika! 07 Aug 💖' },
-        { icon: '🎁', text: 'Keep shining bright Little Star! 🌟' },
     ];
 
     return (
