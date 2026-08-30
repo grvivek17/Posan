@@ -4,6 +4,7 @@ import WordSearchPuzzle from '../components/puzzles/WordSearchPuzzle';
 import CrosswordPuzzle from '../components/puzzles/CrosswordPuzzle';
 import JigsawPuzzle from '../components/puzzles/JigsawPuzzle';
 import SudokuPuzzle from '../components/puzzles/SudokuPuzzle';
+import SolarSystemPuzzle from '../components/puzzles/SolarSystemPuzzle';
 import './PuzzleZone.css';
 
 const PuzzleZone = () => {
@@ -25,10 +26,16 @@ const PuzzleZone = () => {
         { id: 'word-search', name: 'Word Search', icon: '🔍', component: WordSearchPuzzle },
         { id: 'crossword', name: 'Crossword', icon: '📝', component: CrosswordPuzzle },
         { id: 'jigsaw', name: 'Jigsaw', icon: '🧩', component: JigsawPuzzle },
-        { id: 'sudoku', name: 'Sudoku', icon: '🔢', component: SudokuPuzzle }
+        { id: 'sudoku', name: 'Sudoku', icon: '🔢', component: SudokuPuzzle },
+        { id: 'solar', name: 'Solar System', icon: '🪐', component: SolarSystemPuzzle }
     ];
 
     const generateAIPuzzle = useCallback(async () => {
+        if (activePuzzle === 'solar') {
+            setAiPuzzleData(null);
+            return;
+        }
+        
         setGenerating(true);
         setAiPuzzleData(null); // Clear old puzzle immediately so user sees fresh state
         try {
