@@ -306,3 +306,62 @@
     font-size: 1.2rem;
   }
 }
+
+/* === Solar System Special Card === */
+.game-card[style*="0d1b3e"] {
+  border: 2px solid rgba(100, 150, 255, 0.25);
+  box-shadow:
+    0 8px 24px rgba(0,0,0,0.4),
+    0 0 40px rgba(100,120,255,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.game-card[style*="0d1b3e"]::before {
+  background: 
+    radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 65% 15%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 55%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 25% 85%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 30%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+}
+
+.game-card[style*="0d1b3e"]:hover {
+  box-shadow:
+    0 16px 40px rgba(0,0,0,0.5),
+    0 0 60px rgba(100,120,255,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  border-color: rgba(150,180,255,0.4);
+}
+
+.game-card[style*="0d1b3e"] .game-card-name {
+  background: linear-gradient(135deg, #FFD700, #FFA500, #FF6B35);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.game-card[style*="0d1b3e"] .game-card-icon {
+  animation: spaceSpin 6s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px rgba(150,180,255,0.5));
+}
+
+@keyframes spaceSpin {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-4px) rotate(10deg); }
+  75% { transform: translateY(-8px) rotate(-10deg); }
+}
+
+.game-card[style*="0d1b3e"] .game-card-desc {
+  color: rgba(180, 210, 255, 0.85);
+}
+
+.game-card[style*="0d1b3e"] .game-card-play {
+  background: linear-gradient(135deg, rgba(74,144,217,0.35), rgba(123,108,246,0.35));
+  border: 1px solid rgba(150,180,255,0.3);
+}
+
+.game-card[style*="0d1b3e"]:hover .game-card-play {
+  background: linear-gradient(135deg, rgba(74,144,217,0.55), rgba(123,108,246,0.55));
+}

@@ -10,9 +10,19 @@ import GardenBuilder from '../components/games/GardenBuilder';
 import AnimalCare from '../components/games/AnimalCare';
 import ColoringCanvas from '../components/games/ColoringCanvas';
 import TicTacToe from '../components/games/TicTacToe';
+import SolarSystem from '../components/games/SolarSystem';
 import './GamesPage.css';
 
 const RELAXING_GAMES = [
+  {
+    id: 'solar',
+    name: 'Solar System',
+    icon: '🪐',
+    description: 'Explore the planets with real images and amazing space facts!',
+    color: '#1a1a4e',
+    gradient: 'linear-gradient(135deg, #0d1b3e 0%, #1a0533 50%, #0a2a4a 100%)',
+    component: SolarSystem,
+  },
   {
     id: 'bubbles',
     name: 'Bubble Pop',
