@@ -27,7 +27,7 @@ const PLANETS = [
   {
     id: 'mercury',
     name: 'Mercury',
-    emoji: '🪨',
+    emoji: '☿',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Mercury_in_true_color.jpg/480px-Mercury_in_true_color.jpg',
     color: '#B5B5B5',
     glowColor: 'rgba(181,181,181,0.5)',
@@ -49,7 +49,7 @@ const PLANETS = [
   {
     id: 'venus',
     name: 'Venus',
-    emoji: '🌟',
+    emoji: '♀',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Venus-real_color.jpg/480px-Venus-real_color.jpg',
     color: '#E8C975',
     glowColor: 'rgba(232,201,117,0.5)',
@@ -93,7 +93,7 @@ const PLANETS = [
   {
     id: 'mars',
     name: 'Mars',
-    emoji: '🔴',
+    emoji: '♂',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/480px-OSIRIS_Mars_true_color.jpg',
     color: '#C1440E',
     glowColor: 'rgba(193,68,14,0.5)',
@@ -115,7 +115,7 @@ const PLANETS = [
   {
     id: 'jupiter',
     name: 'Jupiter',
-    emoji: '🌀',
+    emoji: '♃',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg/480px-Jupiter_and_its_shrunken_Great_Red_Spot.jpg',
     color: '#C88B3A',
     glowColor: 'rgba(200,139,58,0.5)',
@@ -137,7 +137,7 @@ const PLANETS = [
   {
     id: 'saturn',
     name: 'Saturn',
-    emoji: '💫',
+    emoji: '♄',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Saturn_during_Equinox.jpg/480px-Saturn_during_Equinox.jpg',
     color: '#E4D191',
     glowColor: 'rgba(228,209,145,0.5)',
@@ -160,7 +160,7 @@ const PLANETS = [
   {
     id: 'uranus',
     name: 'Uranus',
-    emoji: '🔵',
+    emoji: '♅',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Uranus2.jpg/480px-Uranus2.jpg',
     color: '#7DE8E8',
     glowColor: 'rgba(125,232,232,0.5)',
@@ -182,7 +182,7 @@ const PLANETS = [
   {
     id: 'neptune',
     name: 'Neptune',
-    emoji: '🌊',
+    emoji: '♆',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg/480px-Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg',
     color: '#4B70DD',
     glowColor: 'rgba(75,112,221,0.5)',
