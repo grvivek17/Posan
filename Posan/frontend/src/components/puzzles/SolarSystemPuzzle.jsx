@@ -1,6 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { puzzleAudio } from '../../utils/puzzleAudio';
-import PuzzleWinModal from './PuzzleWinModal';
+// Mocks for missing files
+const puzzleAudio = {
+  playSelect: () => {},
+  playWinFanfare: () => {},
+  playMatch: () => {},
+  playError: () => {},
+  playHint: () => {}
+};
+
+const PuzzleWinModal = ({ isOpen, onClose, title, message, points, onPlayAgain }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="puzzle-win-modal-overlay" style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999}}>
+      <div className="puzzle-win-modal" style={{backgroundColor: '#1a1a4e', padding: '30px', borderRadius: '20px', textAlign: 'center', color: 'white', border: '2px solid #FFD700', maxWidth: '400px'}}>
+        <h2>{title || 'You Won! 🎉'}</h2>
+        <p>{message || 'Great job completing the puzzle!'}</p>
+        {points > 0 && <p style={{fontSize: '1.2rem', color: '#FFD700'}}>+{points} Points!</p>}
+        <div style={{display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px'}}>
+          <button onClick={onPlayAgain} style={{padding: '10px 20px', borderRadius: '10px', backgroundColor: '#4facfe', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold'}}>Play Again</button>
+          <button onClick={onClose} style={{padding: '10px 20px', borderRadius: '10px', backgroundColor: 'transparent', color: 'white', border: '1px solid white', cursor: 'pointer'}}>Close</button>
+        </div>
+      </div>
+    </div>
+  );
+};
 import './SolarSystemPuzzle.css';
 
 // Rich child-friendly planet data
