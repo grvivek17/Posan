@@ -178,7 +178,29 @@ Answer: D
 Explanation: Learning about {topic or 'new things'} is always an adventure because there is so much to discover!"""
         
         elif "word" in prompt_lower:
-            return "LEARN\nDISCOVER\nEXPLORE\nWONDER\nCURIOUS"
+            import random
+            topic_words = {
+                "animals": ["LION", "TIGER", "ELEPHANT", "GIRAFFE", "ZEBRA", "MONKEY", "PANDA", "DOLPHIN", "EAGLE", "RABBIT", "HORSE", "SNAKE", "BEAR", "WOLF", "FOX"],
+                "space": ["PLANET", "ROCKET", "COMET", "GALAXY", "METEOR", "SATURN", "JUPITER", "STAR", "ORBIT", "MOON", "NEBULA", "ASTEROID", "COSMOS", "GRAVITY", "SOLAR"],
+                "ocean": ["WHALE", "SHARK", "CORAL", "WAVES", "SHELL", "FISH", "CRAB", "OCTOPUS", "DOLPHIN", "SEAWEED", "REEF", "TIDE", "SQUID", "JELLYFISH", "TURTLE"],
+                "dinosaurs": ["RAPTOR", "TREX", "FOSSIL", "CLAW", "SCALES", "HORNS", "WINGS", "FERN", "MARSH", "PREDATOR", "VELOCIRAPTOR", "JURASSIC", "AMBER", "BONES", "LIZARD"],
+                "sports": ["SOCCER", "TENNIS", "SPRINT", "BASKET", "HOCKEY", "RUGBY", "CRICKET", "SWIM", "JUMP", "THROW", "KICK", "SCORE", "TEAM", "MATCH", "GOAL"],
+                "food": ["PIZZA", "BURGER", "PASTA", "SALAD", "MANGO", "GRAPE", "LEMON", "BREAD", "CHEESE", "HONEY", "CARROT", "POTATO", "ORANGE", "BANANA", "APPLE"],
+                "science": ["ATOM", "GRAVITY", "ENERGY", "LIGHT", "FORCE", "MAGNET", "LIQUID", "SOLID", "GAS", "REACT", "CELL", "ORBIT", "PROTON", "LASER", "WAVE"],
+                "history": ["KING", "QUEEN", "CASTLE", "SWORD", "KNIGHT", "EMPIRE", "BATTLE", "CROWN", "SHIELD", "VIKING", "PHARAOH", "PYRAMID", "ROMAN", "SCROLL", "THRONE"],
+                "nature": ["FOREST", "RIVER", "MOUNTAIN", "VALLEY", "FLOWER", "TREE", "LEAF", "WIND", "RAIN", "STONE", "BIRD", "BEE", "CLOUD", "GRASS", "HILL"],
+                "vehicles": ["ROCKET", "TRAIN", "PLANE", "SHIP", "TRUCK", "BICYCLE", "JEEP", "YACHT", "CABLE", "BLIMP", "SCOOTER", "FERRY", "TRAM", "BUGGY", "GLIDER"],
+            }
+            matched_words = None
+            for key, words in topic_words.items():
+                if key in prompt_lower:
+                    matched_words = list(words)
+                    break
+            if not matched_words:
+                all_words = [w for words in topic_words.values() for w in words]
+                matched_words = all_words
+            random.shuffle(matched_words)
+            return "\n".join(matched_words[:random.randint(8, 10)])
         
         elif "riddle" in prompt_lower:
             return f"""Riddle: I am something you can always learn more about. The more you study me, the more interesting I become. I am related to {topic or 'knowledge'}. What am I?
