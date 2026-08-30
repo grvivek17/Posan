@@ -350,7 +350,7 @@ const SolarSystem = () => {
                 onClick={() => handlePlanetClick(p)}
               >
                 <div className="ss-mini-img-wrap">
-                  {(p.id === 'sun' || p.id === 'earth') && !imageError[p.id] ? (
+                  {!imageError[p.id] ? (
                     <img src={p.image} alt={p.name} className="ss-mini-img" onError={() => handleImageError(p.id)} />
                   ) : (
                     <span>{p.emoji}</span>
