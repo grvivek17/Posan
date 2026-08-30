@@ -83,7 +83,7 @@ const minimax = (board, depth, isMaximizing, aiSymbol, humanSymbol) => {
     if (result.winner === humanSymbol) return depth - 10;
     if (result.winner === 'Draw') return 0;
   }
-  if (depth >= 5) return 0; // limit depth for responsiveness
+  if (depth >= 9) return 0; // hard cap
 
   const emptyIndices = board.map((val, idx) => (val === null ? idx : null)).filter(v => v !== null);
 
@@ -195,6 +195,7 @@ const TicTacToe = () => {
   const [gameState, setGameState] = useState(null); // null, { winner: 'X'|'O'|'Draw', line: [] }
   const [scores, setScores] = useState({ x: 0, o: 0, ties: 0 });
   const [isAiThinking, setIsAiThinking] = useState(false);
+  const isAiThinkingRef = useRef(false); // ref-guard to prevent double-firing
 
   const theme = THEMES[themeKey];
   const totalCells = gridSize * gridSize;
@@ -214,18 +215,26 @@ const TicTacToe = () => {
 
   // AI turn trigger
   useEffect(() => {
-    if (gameMode === 'ai' && !isXNext && !gameState && !isAiThinking) {
+    if (gameMode === 'ai' && !isXNext && !gameState) {
+      if (isAiThinkingRef.current) return; // already scheduled
+      isAiThinkingRef.current = true;
       setIsAiThinking(true);
       const timer = setTimeout(() => {
-        const aiMove = getAIMove(board, aiDifficulty, gridSize, 'O', 'X');
+        const aiMove = getAIMove([...board], aiDifficulty, gridSize, 'O', 'X');
         if (aiMove !== null) {
           makeMove(aiMove, 'O');
         }
+        isAiThinkingRef.current = false;
         setIsAiThinking(false);
-      }, 50);
-      return () => clearTimeout(timer);
+      }, 300); // small human-like delay
+      return () => {
+        clearTimeout(timer);
+        isAiThinkingRef.current = false;
+        setIsAiThinking(false);
+      };
     }
-  }, [isXNext, gameMode, gameState, board, aiDifficulty, gridSize, isAiThinking]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isXNext, gameMode, gameState]);
 
   const makeMove = (index, symbol) => {
     if (board[index] || gameState) return;
